@@ -14,7 +14,7 @@
   "dependencies": {
     "discord.js": "latest",
     "mysql2": "latest",
-    "node-fetch": "latest"
+    "node-fetch": "2.x"
   },
   "repository": {
     "type": "git",
