@@ -29,6 +29,7 @@ client.on('ready', async () => {
       .setDescription('Set the role to add for verification.')
       .addRoleOption(option =>
         option.setName('role')
+        .setDescription('The verified role')
         .setRequired(true))
       .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
       
