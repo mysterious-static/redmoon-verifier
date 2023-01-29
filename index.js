@@ -63,7 +63,7 @@ if (message.startsWith('!rmiam')) {
   server = server.charAt(0).toUpperCase() + server.slice(1).toLowerCase();
   
   if (first_name.length > 0 && last_name.length > 0 && server.length > 0) {
-    if servers.includes(server) {
+    if (servers.includes(server)) {
       var verification_string = crypto.randomBytes(16).toString("hex");
       var existing_code = await connection.promise().query('select * from verification_codes where userid = ' + message.member.id);
       if(existing_code[0].length == 0) {
