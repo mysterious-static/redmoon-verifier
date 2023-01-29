@@ -91,7 +91,8 @@ if (message.content.startsWith('!rmiam')) {
               roles_string += verified_role.toString();
               const embeddedMessage = new EmbedBuilder()
                 .setColor(0xFFD700)
-                .setAuthor({name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id, iconURL: api_character.Character.Portrait})
+                .setAuthor({name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id})
+                .setThumbnail(api_character.Character.Portrait)
                 .setDescription('Character saved.\n\nIn four hours, you may claim your character using Lodestone verification via the `!rmverify` command, should you wish to.')
                 .addFields(
                   {name: 'Nickname', value: 'Your Discord nickname was changed to **' + first_name + ' ' + last_name + '**.'},
