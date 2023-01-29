@@ -55,7 +55,7 @@ client.on('interactionCreate', async(interaction) => {
   }
 });
 
-client.on('message', async function (message) {
+client.on('messageCreate', async function (message) {
 if (message.startsWith('!rmiam')) {
   // TODO check if verification role is set.
   var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
