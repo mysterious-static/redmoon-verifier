@@ -74,9 +74,9 @@ if (message.content.startsWith('!rmiam')) {
       var existing_code = await connection.promise().query('select * from verification_codes where userid = ' + message.member.id);
       if(existing_code[0].length == 0) {
         await connection.promise().query('insert into verification_codes (userid, fname, lname, server, code) values (?, ?, ?, ?, ?)', [message.member.id, first_name, last_name, server, verification_string]);
-        message.reply({content: 'Please enter the following code into the Bio section of your Lodestone page: `' + verification_string + '`. When you\'re done, please come back here and type `!rmverify` to verify yourself.', ephemeral: true});
+        message.author.send('Please enter the following code into the Character Profile section of your Lodestone page: `' + verification_string + '`. When you\'re done, please come back here and type `!rmverify` to verify yourself.');
       } else {
-        message.reply({content: 'You\'ve already got an active verification session under ' + existing_code[0][0].fname + ' ' + existing_code[0][0].lname + ' @ ' + existing_code[0][0].server + '. Please finish that session by using `!rmverify` or `!rmcancel` before starting a new verification session.', ephemeral: true});
+        message.author.send('You\'ve already got an active verification session under ' + existing_code[0][0].fname + ' ' + existing_code[0][0].lname + ' @ ' + existing_code[0][0].server + '. Please finish that session by using `!rmverify` or `!rmcancel` before starting a new verification session.');
       }
     } else {
       message.reply({content: 'I couldn\'t detect a valid server to search your character on. Please make sure you\'ve entered a real server and then try again.', ephemeral: true});
@@ -111,7 +111,7 @@ if (message.content.startsWith('!rmiam')) {
         await connection.promise().query('delete from verification_codes where userid = ?', [userid]);
         message.reply({content: 'Successfully verified!', ephemeral: true});
       } else {
-        message.reply({content: 'I couldn\'t verify your character. Please make sure you entered the verification string (' + character[0][0].code + ') correctly and try again. Or, use `!rmcancel` to start over.', ephemeral: true} );
+        message.author.send('I couldn\'t verify your character. Please make sure you entered the verification string (`' + character[0][0].code + '`) correctly and try again. Or, use `!rmcancel` to start over. You may have to wait up to 4 hours due to Lodestone limitations.');
       }
     } else {
       message.reply({content: 'I couldn\'t find a character by the name you entered. Please use `!rmcancel` and start over.', ephemeral: true});
