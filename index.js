@@ -19,6 +19,9 @@ var bio = '';
 
 var servers = ["Adamantoise","Aegis","Alexander","Anima","Asura","Atomos","Bahamut","Balmung","Behemoth","Belias","Brynhildr","Cactuar","Carbuncle","Cerberus","Chocobo","Coeurl","Diabolos","Durandal","Excalibur","Exodus","Faerie","Famfrit","Fenrir","Garuda","Gilgamesh","Goblin","Gungnir","Hades","Hyperion","Ifrit","Ixion","Jenova","Kujata","Lamia","Leviathan","Lich","Louisoix","Malboro","Mandragora","Masamune","Mateus","Midgardsormr","Moogle","Odin","Omega","Pandaemonium","Phoenix","Ragnarok","Ramuh","Ridill","Sargatanas","Shinryu","Shiva","Siren","Tiamat","Titan","Tonberry","Typhon","Ultima","Ultros","Unicorn","Valefor","Yojimbo","Zalera","Zeromus","Zodiark","Spriggan","Twintania","Bismarck","Ravana","Sephirot","Sophia","Zurvan","Halicarnassus","Maduin","Marilith","Seraph","Alpha","Phantom","Raiden","Sagittarius"]
 
+connection.connect();
+client.login(process.env.app_token);
+
 //slash commands for setup
 client.on('ready', async () => {
     //if (!client.application?.commands.cache) {
