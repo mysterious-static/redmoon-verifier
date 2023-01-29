@@ -31,7 +31,9 @@ client.on('ready', async () => {
         option.setName('role')
         .setRequired(true))
       .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
-    await client.application.commands.set([data.toJSON()]);
+      .toJSON();
+      console.log(data);
+    await client.application.commands.set(data);
     //}
 });
 
