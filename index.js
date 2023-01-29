@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const {GatewayIntentBits, Partials, PermissionsBitField, PermissionFlagsBits} = require('discord.js');
 const client = new Discord.Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages], partials: [Partials.Message, Partials.Channel, Partials.Reaction], });
 var mysql = require('mysql2');
-var rp = require('request-promise');
+import fetch from 'node-fetch';
 import crypto from "crypto";
 var connection = mysql.createConnection({
     host: process.env.db_host,
@@ -84,12 +84,12 @@ if (message.startsWith('!rmiam')) {
   var bio = '';
   var character = await connection.promise().query('select * from verification_codes where userid = ?', [userid]);
   if(character[0].length > 0){
-    rp('https://xivapi.com/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server + '&private_key=' + xivapi_private_key).then(function(result)) {
-      var character_id = result.Results[0].ID;
-      rp('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key).then(function(character) {
-        bio = character.Bio;
-      });
-    });
+    var response = await fetch('https://xivapi.com/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server + '&private_key=' + xivapi_private_key);
+    const result = await response.json();
+    var character_id = result.Results[0].ID;
+    response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
+    character = await response.json();
+    bio = character.Bio;
     if (bio.includes(character[0][0].code)) {
       message.member.setNickname(character[0][0].fname + ' ' + character[0][0].lname);
       var server_role = await member.guild.roles.cache.find(role => role.name === character[0][0].server);
