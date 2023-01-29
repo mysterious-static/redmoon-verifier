@@ -93,6 +93,7 @@ if (message.content.startsWith('!rmiam')) {
     var response = await fetch('https://xivapi.com/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server + '&private_key=' + xivapi_private_key);
     const result = await response.json();
     var character_id = result.Results[0].ID;
+    if(character_id) {
     response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
     character = await response.json();
     bio = character.Bio;
@@ -108,8 +109,11 @@ if (message.content.startsWith('!rmiam')) {
       await connection.promise().query('insert into successful_verifications (name, server, member) values (?, ?, ?)', [character[0][0].fname + ' ' + character[0][0].lname, character[0][0].server, message.member.id]);
       await connection.promise().query('delete from verification_codes where userid = ?', [userid]);
       message.reply({content: 'Successfully verified!', ephemeral: true});
-    } else {
+      } else {
       message.reply({content: 'I couldn\'t verify your character. Please make sure you entered the verification string (' + verifyString + ') correctly and try again. Or, use `!rmcancel` to start over.', ephemeral: true} );
+      }
+    } else {
+      message.reply({content: 'I couldn\'t find a character by the name you entered. Please use `!rmcancel` and start over.', ephemeral: true});
     }
   } else {
     message.reply({content: 'You don\'t seem to have a pending verification. Start with `!rmiam Firstname Lastname Server`.', ephemeral: true});
