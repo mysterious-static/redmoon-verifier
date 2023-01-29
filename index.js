@@ -60,10 +60,10 @@ await message.fetch();
 if (message.content.startsWith('!rmiam')) {
   if (message.guild.ownerId != message.author.id) {
     var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
-    var first_name = lookup_string.substr(0, lookup_string.indexOf(' '));
-    var last_name_and_server = lookup_string.substr(lookup_string.indexOf(' ') + 1);
-    var last_name = last_name_and_server.substr(0, last_name_and_server.indexOf(' '));
-    var server = last_name_and_server.substr(last_name_and_server.indexOf(' ') + 1);
+    var server = lookup_string.substr(0, lookup_string.indexOf(' '));
+    var first_and_last_name = lookup_string.substr(lookup_string.indexOf(' ') + 1);
+    var first_name = first_and_last_name.substr(0, first_and_last_name.indexOf(' '));
+    var last_name = first_and_last_name.substr(first_and_last_name.indexOf(' ') + 1);
     first_name = first_name.charAt(0).toUpperCase() + first_name.slice(1).toLowerCase();
     last_name = last_name.charAt(0).toUpperCase() + last_name.slice(1).toLowerCase();
     server = server.charAt(0).toUpperCase() + server.slice(1).toLowerCase();
@@ -89,6 +89,8 @@ if (message.content.startsWith('!rmiam')) {
               var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
               await message.member.roles.add(verified_role);
               roles_string += verified_role.toString();
+              //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
+              await connection.promise().query('delete from member_registrations where member_id = ?; insert into member_registrations (member_id, lodestone_id, guild_id) values (?, ?, ?)', [message.member.id, message.member.id, character_id, message.member.guild.id]);
               const embeddedMessage = new EmbedBuilder()
                 .setColor(0xFFD700)
                 .setAuthor({name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id})
