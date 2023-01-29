@@ -58,7 +58,7 @@ client.on('interactionCreate', async(interaction) => {
 client.on('messageCreate', async function (message) {
 await message.fetch();
 if (message.content.startsWith('!rmiam')) {
-  if (!message.guild.ownerId != message.author.id) {
+  if (message.guild.ownerId != message.author.id) {
   // TODO check if verification role is set.
   var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
   var first_name = lookup_string.substr(0, lookup_string.indexOf(' '));
