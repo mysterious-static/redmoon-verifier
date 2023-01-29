@@ -96,6 +96,7 @@ if (message.content.startsWith('!rmiam')) {
     if(character_id) {
       response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
       api_character = await response.json();
+      console.log(api_character);
       bio = api_character.Bio;
       if (bio.includes(character[0][0].code)) {
         message.member.setNickname(character[0][0].fname + ' ' + character[0][0].lname);
