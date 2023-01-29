@@ -32,7 +32,7 @@ client.on('ready', async () => {
         .setRequired(true))
       .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
       
-      console.log(command);
+      console.log(command.toJSON());
     //await client.application.commands.set([data]);
     //}
 });
