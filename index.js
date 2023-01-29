@@ -49,7 +49,7 @@ client.on('interactionCreate', async(interaction) => {
         } else {
           await connection.promise().query('insert into servers_roles (guildid, roleid) values (?, ?)', [interaction.guild.id, verifiedrole.id]);
         }
-        message.reply({content: 'Successfully set the \'verified\' role!', ephemeral: true});
+        interaction.reply({content: 'Successfully set the \'verified\' role!', ephemeral: true});
       }
     }
   }
