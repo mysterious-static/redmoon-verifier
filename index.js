@@ -57,7 +57,7 @@ client.on('interactionCreate', async(interaction) => {
 
 client.on('messageCreate', async function (message) {
 await message.fetch();
-if (message.content.startsWith('!rmiam')) {
+if (message.content.startsWith('!rm ')) {
   if (message.guild.ownerId != message.author.id) {
     var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
     var server = lookup_string.substr(0, lookup_string.indexOf(' '));
