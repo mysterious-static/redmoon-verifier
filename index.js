@@ -108,7 +108,7 @@ if (message.content.startsWith('!rmiam')) {
         if(server_role) {
           await message.member.roles.add(server_role);
         }
-        verifiedrole = connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
+        verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
         var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
         await message.member.roles.add(verified_role);
         await connection.promise().query('insert into successful_verifications (name, server, member) values (?, ?, ?)', [character[0][0].fname + ' ' + character[0][0].lname, character[0][0].server, message.member.id]);
