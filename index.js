@@ -25,15 +25,15 @@ client.login(process.env.app_token);
 //slash commands for setup
 client.on('ready', async () => {
     //if (!client.application?.commands.cache) {
-    var data = new SlashCommandBuilder().setName('verifiedrole')
+    var command = new SlashCommandBuilder().setName('verifiedrole')
       .setDescription('Set the role to add for verification.')
       .addRoleOption(option =>
         option.setName('role')
         .setRequired(true))
       .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-      .toJSON();
-      console.log(data);
-    await client.application.commands.set(data);
+      .data.toJSON();
+      console.log(command);
+    await client.application.commands.set([data]);
     //}
 });
 
