@@ -3,7 +3,7 @@ const {GatewayIntentBits, Partials, PermissionsBitField, PermissionFlagsBits} = 
 const client = new Discord.Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages], partials: [Partials.Message, Partials.Channel, Partials.Reaction], });
 var mysql = require('mysql2');
 var fetch = require('node-fetch');
-import crypto from "node:crypto";
+var crypto = require('node:crypto');
 var connection = mysql.createConnection({
     host: process.env.db_host,
     user: process.env.db_user,
