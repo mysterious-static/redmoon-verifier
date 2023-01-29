@@ -111,7 +111,7 @@ if (message.content.startsWith('!rmiam')) {
         await connection.promise().query('delete from verification_codes where userid = ?', [userid]);
         message.reply({content: 'Successfully verified!', ephemeral: true});
       } else {
-        message.reply({content: 'I couldn\'t verify your character. Please make sure you entered the verification string (' + verifyString + ') correctly and try again. Or, use `!rmcancel` to start over.', ephemeral: true} );
+        message.reply({content: 'I couldn\'t verify your character. Please make sure you entered the verification string (' + character[0][0].code + ') correctly and try again. Or, use `!rmcancel` to start over.', ephemeral: true} );
       }
     } else {
       message.reply({content: 'I couldn\'t find a character by the name you entered. Please use `!rmcancel` and start over.', ephemeral: true});
