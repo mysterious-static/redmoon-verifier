@@ -72,7 +72,7 @@ if (message.content.startsWith('!rmiam')) {
       if (servers.includes(server)) {
           var existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
           if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
-            var response = await fetch('https://xivapi.com/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server + '&private_key=' + xivapi_private_key);
+            var response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
             const result = await response.json();
             var character_id = result.Results[0].ID;
             if(character_id) {
