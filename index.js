@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const {SlashCommandBuilder, GatewayIntentBits, Partials, PermissionsBitField, PermissionFlagsBits} = require('discord.js');
+const {EmbedBuilder, SlashCommandBuilder, GatewayIntentBits, Partials, PermissionsBitField, PermissionFlagsBits} = require('discord.js');
 const client = new Discord.Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages], partials: [Partials.Message, Partials.Channel, Partials.Reaction], });
 var mysql = require('mysql2');
 var fetch = require('node-fetch');
