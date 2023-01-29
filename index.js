@@ -34,7 +34,7 @@ client.on('ready', async () => {
       .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
       
       console.log(command.toJSON());
-    await client.application.commands.set([command.toJSON]);
+    await client.application.commands.set([command.toJSON()]);
     //}
 });
 
