@@ -78,8 +78,8 @@ if (message.content.startsWith('!rmiam')) {
             if(character_id) {
               response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
               api_character = await response.json();
-              await message.member.setNickname(character[0][0].fname + ' ' + character[0][0].lname);
-              var server_role = await message.member.guild.roles.cache.find(role => role.name === character[0][0].server);
+              await message.member.setNickname(first_name + ' ' + last_name);
+              var server_role = await message.member.guild.roles.cache.find(role => role.name === server);
               var roles_string = '';
               if(server_role) {
                 await message.member.roles.add(server_role);
