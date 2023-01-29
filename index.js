@@ -75,7 +75,7 @@ if (message.content.startsWith('!rmiam')) {
       var existing_code = await connection.promise().query('select * from verification_codes where userid = ' + message.member.id);
       if(existing_code[0].length == 0) {
         await connection.promise().query('insert into verification_codes (userid, fname, lname, server, code) values (?, ?, ?, ?, ?)', [message.member.id, first_name, last_name, server, verification_string]);
-        message.author.send('Please enter the following code into the Character Profile section of your Lodestone page: `' + verification_string + '`. When you\'re done, please type `!rmverify` in the server verification channel to verify yourself.');
+        message.author.send('Please enter the following code into the Character Profile section of your Lodestone page: `' + verification_string + '`. ONLY when you\'re done with this step, please type `!rmverify` in the server verification channel to verify yourself.');
       } else {
         message.reply({content: 'You\'ve already got an active verification session under ' + existing_code[0][0].fname + ' ' + existing_code[0][0].lname + ' @ ' + existing_code[0][0].server + '. Please finish that session by using `!rmverify` or `!rmcancel` before starting a new verification session.', ephemeral: true});
       }
