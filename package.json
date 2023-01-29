@@ -1,0 +1,24 @@
+{
+  "name": "redmoon-verifier",
+  "version": "1.0.0",
+  "description": "redmoon-verifier",
+  "author": "Alli <me@ajl.io> (https://ajl.io)",
+  "homepage": "https://github.com/aletson/redmoon-verifier",
+  "engines": {
+    "node": "16.x"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "latest",
+    "mysql2": "latest",
+    "request-promise", "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aletson/redmoon-verifier"
+  },
+  "license": "MIT"
+}
