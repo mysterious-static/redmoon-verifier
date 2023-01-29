@@ -45,7 +45,7 @@ client.on('interactionCreate', async(interaction) => {
         var verifiedrole = interaction.options.getRole('role');
         var roleexists = await connection.promise().query('select * from servers_roles where guildid = ?', [interaction.guild.id]);
         if (roleexists[0].length > 0) {
-          await connection.promise().query('update servers_roles where guildid = ? set roleid = ?', [interaction.guild.id, verifiedrole.id]);
+          await connection.promise().query('update servers_roles set roleid = ? where guildid = ?', [verifiedrole.id, interaction.guild.id]);
         } else {
           await connection.promise().query('insert into servers_roles (guildid, roleid) values (?, ?)', [interaction.guild.id, verifiedrole.id]);
         }
