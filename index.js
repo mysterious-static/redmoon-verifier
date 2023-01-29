@@ -58,6 +58,7 @@ client.on('interactionCreate', async(interaction) => {
 client.on('messageCreate', async function (message) {
 await message.fetch();
 if (message.content.startsWith('!rmiam')) {
+  if (!message.guild.ownerId != message.user.id) {
   // TODO check if verification role is set.
   var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
   var first_name = lookup_string.substr(0, lookup_string.indexOf(' '));
@@ -83,6 +84,9 @@ if (message.content.startsWith('!rmiam')) {
     }
   } else {
     message.reply({content: 'I couldn\'t detect a first name, last name, *and* server. Please make sure you\'ve entered all of these and then try again.', ephemeral: true});
+  }
+  } else {
+    message.reply('Sorry, you\'re a server owner. I can\'t set anything for the owner.');
   }
   
 } else if(message.content.startsWith('!rmverify')) {
