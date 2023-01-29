@@ -57,7 +57,7 @@ client.on('interactionCreate', async(interaction) => {
 
 client.on('messageCreate', async function (message) {
 await message.fetch();
-if (message.startsWith('!rmiam')) {
+if (message.content.startsWith('!rmiam')) {
   // TODO check if verification role is set.
   var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
   var first_name = lookup_string.substr(0, lookup_string.indexOf(' '));
@@ -85,7 +85,7 @@ if (message.startsWith('!rmiam')) {
     message.reply({content: 'I couldn\'t detect a first name, last name, *and* server. Please make sure you\'ve entered all of these and then try again.', ephemeral: true});
   }
   
-} else if(message.startsWith('!rmverify')) {
+} else if(message.content.startsWith('!rmverify')) {
   var userid = message.member.id;
   var bio = '';
   var character = await connection.promise().query('select * from verification_codes where userid = ?', [userid]);
@@ -114,7 +114,7 @@ if (message.startsWith('!rmiam')) {
   } else {
     message.reply({content: 'You don\'t seem to have a pending verification. Start with `!rmiam Firstname Lastname Server`.', ephemeral: true});
   }
-} else if (message.startsWith('!rmcancel')) {
+} else if (message.content.startsWith('!rmcancel')) {
   await connection.promise().query('delete from verification_codes where userid = ?', [message.member.id]);
   message.reply({content: 'I cancelled your pending verification. You can start a new one by using `!rmiam Firstname Lastname Server`.', ephemeral: true});
 }
