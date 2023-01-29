@@ -99,13 +99,13 @@ if (message.content.startsWith('!rmiam')) {
       console.log(api_character);
       bio = api_character.Character.Bio;
       if (bio.includes(character[0][0].code)) {
-        message.member.setNickname(character[0][0].fname + ' ' + character[0][0].lname);
-        var server_role = await member.guild.roles.cache.find(role => role.name === character[0][0].server);
+        await message.member.setNickname(character[0][0].fname + ' ' + character[0][0].lname);
+        var server_role = await message.member.guild.roles.cache.find(role => role.name === character[0][0].server);
         if(server_role) {
           await message.member.roles.add(server_role);
         }
         verifiedrole = connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
-        var verified_role = await member.guild.roles.cache.get(verifiedrole[0][0].roleid);
+        var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
         await message.member.roles.add(verified_role);
         await connection.promise().query('insert into successful_verifications (name, server, member) values (?, ?, ?)', [character[0][0].fname + ' ' + character[0][0].lname, character[0][0].server, message.member.id]);
         await connection.promise().query('delete from verification_codes where userid = ?', [userid]);
