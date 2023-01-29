@@ -30,7 +30,7 @@ client.on('ready', async () => {
       .addRoleOption(option =>
         option.setName('role')
         .setRequired(true))
-      .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+      .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
       .toJSON();
       console.log(data);
     await client.application.commands.set(data);
