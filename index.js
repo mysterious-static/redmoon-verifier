@@ -108,7 +108,7 @@ if (message.startsWith('!rmiam')) {
   } else {
     message.reply({content: 'You don\'t seem to have a pending verification. Start with `!rmiam Firstname Lastname Server`.', ephemeral: true});
   }
-} else if message.startsWith('!rmcancel') {
+} else if (message.startsWith('!rmcancel')) {
   await connection.promise().query('delete from verification_codes where userid = ?', [message.member.id]);
   message.reply({content: 'I cancelled your pending verification. You can start a new one by using `!rmiam Firstname Lastname Server`.', ephemeral: true});
 }
