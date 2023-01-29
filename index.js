@@ -59,38 +59,74 @@ client.on('messageCreate', async function (message) {
 await message.fetch();
 if (message.content.startsWith('!rmiam')) {
   if (message.guild.ownerId != message.author.id) {
-  // TODO check if verification role is set.
-  var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
-  var first_name = lookup_string.substr(0, lookup_string.indexOf(' '));
-  var last_name_and_server = lookup_string.substr(lookup_string.indexOf(' ') + 1);
-  var last_name = last_name_and_server.substr(0, last_name_and_server.indexOf(' '));
-  var server = last_name_and_server.substr(last_name_and_server.indexOf(' ') + 1);
-  first_name = first_name.charAt(0).toUpperCase() + first_name.slice(1).toLowerCase();
-  last_name = last_name.charAt(0).toUpperCase() + last_name.slice(1).toLowerCase();
-  server = server.charAt(0).toUpperCase() + server.slice(1).toLowerCase();
-  
-  if (first_name.length > 0 && last_name.length > 0 && server.length > 0) {
-    if (servers.includes(server)) {
-      var verification_string = crypto.randomBytes(16).toString("hex");
-      var existing_code = await connection.promise().query('select * from verification_codes where userid = ' + message.member.id);
-      if(existing_code[0].length == 0) {
-        await connection.promise().query('insert into verification_codes (userid, fname, lname, server, code) values (?, ?, ?, ?, ?)', [message.member.id, first_name, last_name, server, verification_string]);
-        message.author.send('Please enter the following code into the Character Profile section of your Lodestone page: `' + verification_string + '`. ONLY when you\'re done with this step, please type `!rmverify` in the server verification channel to verify yourself.');
+    var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
+    var first_name = lookup_string.substr(0, lookup_string.indexOf(' '));
+    var last_name_and_server = lookup_string.substr(lookup_string.indexOf(' ') + 1);
+    var last_name = last_name_and_server.substr(0, last_name_and_server.indexOf(' '));
+    var server = last_name_and_server.substr(last_name_and_server.indexOf(' ') + 1);
+    first_name = first_name.charAt(0).toUpperCase() + first_name.slice(1).toLowerCase();
+    last_name = last_name.charAt(0).toUpperCase() + last_name.slice(1).toLowerCase();
+    server = server.charAt(0).toUpperCase() + server.slice(1).toLowerCase();
+    
+    if (first_name.length > 0 && last_name.length > 0 && server.length > 0) {
+      if (servers.includes(server)) {
+          var existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
+          if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
+            var response = await fetch('https://xivapi.com/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server + '&private_key=' + xivapi_private_key);
+            const result = await response.json();
+            var character_id = result.Results[0].ID;
+            if(character_id) {
+              response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
+              api_character = await response.json();
+              await message.member.setNickname(character[0][0].fname + ' ' + character[0][0].lname);
+              var server_role = await message.member.guild.roles.cache.find(role => role.name === character[0][0].server);
+              var roles_string = '';
+              if(server_role) {
+                await message.member.roles.add(server_role);
+                var roles_string = server_role.toString() + ','
+              }
+              verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
+              var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
+              await message.member.roles.add(verified_role);
+              roles_string += verified_role.toString();
+              const embeddedMessage = new EmbedBuilder()
+                .setColor(0xFFD700)
+                .setAuthor({name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id, iconURL: api_character.Character.Portrait})
+                .setDescription('Character saved.\n\nIn four hours, you may claim your character using Lodestone verification via the `!rmverify` command, should you wish to.')
+                .addFields(
+                  {name: 'Nickname', value: 'Your Discord nickname was changed to **' + first_name + ' ' + last_name + '**.'},
+                  {name: 'Roles Added', value: roles_string }
+                )
+                .setTimestamp()
+                .setFooter({text: 'Welcome to Red Moon!'});
+                message.reply({embeds: [embeddedMessage]});
+            } else {
+            message.reply('I couldn\'t find this character on the Lodestone. Please try again, and ensure you entered your character name and server correctly.');
+            }
+          } else {
+            message.reply('You\'ve attempted to register a character that another Discord account has already registered. Please try again, or contact Emma if this is your new discord account.');
+          }
       } else {
-        message.reply({content: 'You\'ve already got an active verification session under ' + existing_code[0][0].fname + ' ' + existing_code[0][0].lname + ' @ ' + existing_code[0][0].server + '. Please finish that session by using `!rmverify` or `!rmcancel` before starting a new verification session.', ephemeral: true});
+        message.reply({content: 'I couldn\'t detect a valid server to search your character on. Please make sure you\'ve entered a real server and then try again.', ephemeral: true});
       }
     } else {
-      message.reply({content: 'I couldn\'t detect a valid server to search your character on. Please make sure you\'ve entered a real server and then try again.', ephemeral: true});
+      message.reply({content: 'I couldn\'t detect a first name, last name, *and* server. Please make sure you\'ve entered all of these and then try again.', ephemeral: true});
     }
-  } else {
-    message.reply({content: 'I couldn\'t detect a first name, last name, *and* server. Please make sure you\'ve entered all of these and then try again.', ephemeral: true});
-  }
   } else {
     message.reply('Sorry, you\'re a server owner. I can\'t set anything for the owner.');
   }
   
 } else if(message.content.startsWith('!rmverify')) {
-  var userid = message.member.id;
+  var verification_string = crypto.randomBytes(16).toString("hex");
+  var existing_code = await connection.promise().query('select * from verification_codes where userid = ' + message.author.id);
+  if(existing_code[0].length == 0) {
+    await connection.promise().query('insert into verification_codes (userid, fname, lname, server, code) values (?, ?, ?, ?, ?)', [message.author.id, first_name, last_name, server, verification_string]);
+    message.author.send('Please enter the following code into the Character Profile section of your Lodestone page: `' + verification_string + '`. ONLY when you\'re done with this step, please type `!rmverify` in the server verification channel to verify yourself.');
+  } else {
+    message.reply({content: 'You\'ve already got an active verification session under ' + existing_code[0][0].fname + ' ' + existing_code[0][0].lname + ' @ ' + existing_code[0][0].server + '. Please finish that session by using `!rmverify` or `!rmcancel` before starting a new verification session.', ephemeral: true});
+  }
+} else if (message.content.startsWith('!rmcomplete')){
+  var userid = message.author.id;
   var bio = '';
   var character = await connection.promise().query('select * from verification_codes where userid = ?', [userid]);
   if(character[0].length > 0){
@@ -103,15 +139,7 @@ if (message.content.startsWith('!rmiam')) {
       console.log(api_character);
       bio = api_character.Character.Bio;
       if (bio.includes(character[0][0].code)) {
-        await message.member.setNickname(character[0][0].fname + ' ' + character[0][0].lname);
-        var server_role = await message.member.guild.roles.cache.find(role => role.name === character[0][0].server);
-        if(server_role) {
-          await message.member.roles.add(server_role);
-        }
-        verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
-        var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
-        await message.member.roles.add(verified_role);
-        await connection.promise().query('insert into successful_verifications (name, server, member) values (?, ?, ?)', [character[0][0].fname + ' ' + character[0][0].lname, character[0][0].server, message.member.id]);
+        await connection.promise().query('insert into successful_verifications (name, server, member) values (?, ?, ?)', [character[0][0].fname + ' ' + character[0][0].lname, character[0][0].server, message.author.id]);
         await connection.promise().query('delete from verification_codes where userid = ?', [userid]);
         message.reply({content: 'Successfully verified!', ephemeral: true});
       } else {
@@ -124,7 +152,7 @@ if (message.content.startsWith('!rmiam')) {
     message.reply({content: 'You don\'t seem to have a pending verification. Start with `!rmiam Firstname Lastname Server`.', ephemeral: true});
   }
 } else if (message.content.startsWith('!rmcancel')) {
-  await connection.promise().query('delete from verification_codes where userid = ?', [message.member.id]);
+  await connection.promise().query('delete from verification_codes where userid = ?', [message.author.id]);
   message.reply({content: 'I cancelled your pending verification. You can start a new one by using `!rmiam Firstname Lastname Server`.', ephemeral: true});
 }
 });
