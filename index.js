@@ -29,7 +29,7 @@ client.on('ready', async () => {
         .setRequired(true))
       .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
     console.log(data);
-    //await client.application.commands.set(data);
+    await client.application.commands.set(data);
     //}
 });
 
