@@ -46,8 +46,8 @@ client.on('ready', async () => {
         .setRequired(true))
     .addStringOption(option =>
       option.setName('message')
-        .setDescription('The message you\'d like to sticky (leave blank to unset)')
-    )
+        .setDescription('The message you\'d like to sticky')
+        .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
   var unsticky = new SlashCommandBuilder().setName('unsticky')
@@ -86,8 +86,6 @@ client.on('interactionCreate', async (interaction) => {
         if (exists[0].length > 0) {
           if (interaction.options.getString('message')) {
             await connection.promise().query('update stickymessages set message = ?, speed = ?, last_message_id = ? where channel_id = ?', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
-          } else {
-            await connection.promise().query('delete from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
           }
         } else {
           await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
@@ -103,6 +101,7 @@ client.on('interactionCreate', async (interaction) => {
           await channel.messages.fetch(exists[0][0].last_message_id).then(message => message.delete);
           await connection.promise().query('delete from stickymessages where channel_id = ?', [channel.id]);
           await interaction.reply({ content: 'Unstickied!', ephemeral: true });
+          stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache - we could just remove the array element in future
         } else {
           await interaction.reply({ content: 'No sticky set in this channel.', ephemeral: true });
         }
