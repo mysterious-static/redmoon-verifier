@@ -82,7 +82,7 @@ client.on('interactionCreate', async (interaction) => {
             await connection.promise().query('delete from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
           }
         } else {
-          await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
+          await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
         }
         stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
       }
