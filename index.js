@@ -56,7 +56,7 @@ client.on('ready', async () => {
       option.setName('channel')
         .setDescription('The channel to remove sticky from')
         .setRequired(true))
-    .setDefaultMemberPermissions(PermissionFlagBits.Administrator);
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
   await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
