@@ -200,9 +200,9 @@ client.on('messageCreate', async function (message) {
   //Process Stickies After All Interactions.
   var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
   if (isStickyChannel) {
-    console.log(isStickyChannel);
     var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
     console.log(messageCount);
+    console.log(messageCount.length);
     if (messageCount.length >= isStickyChannel.speed) {
       await message.channel.messages.fetch(isStickyChannel.last_message.id).then(message => message.delete());
       var sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message
