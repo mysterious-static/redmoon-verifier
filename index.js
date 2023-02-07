@@ -203,8 +203,8 @@ client.on('messageCreate', async function (message) {
     if (isStickyChannel) {
       var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
       console.log(messageCount);
-      console.log(messageCount.length);
-      if (messageCount.length >= isStickyChannel.speed) {
+      console.log(messageCount.size);
+      if (messageCount.size >= isStickyChannel.speed) {
         await message.channel.messages.fetch(isStickyChannel.last_message.id).then(message => message.delete());
         var sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message
         await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
