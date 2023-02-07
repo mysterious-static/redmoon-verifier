@@ -180,9 +180,9 @@ client.on('messageCreate', async function (message) {
     var existing_code = await connection.promise().query('select * from verification_codes where userid = ' + message.author.id);
     if (existing_code[0].length == 0) {
       await connection.promise().query('insert into verification_codes (userid, fname, lname, server, code) values (?, ?, ?, ?, ?)', [message.author.id, first_name, last_name, server, verification_string]);
-      message.author.send('Please enter the following code into the Character Profile section of your Lodestone page: `' + verification_string + '`. ONLY when you\'re done with this step, please type `!rmverify` in the server verification channel to verify yourself.');
+      message.author.send('Please enter the following code into the Character Profile section of your Lodestone page: `' + verification_string + '`. ONLY when you\'re done with this step, please type `!rmcomplete` in the server verification channel to verify yourself.');
     } else {
-      message.reply({ content: 'You\'ve already got an active verification session under ' + existing_code[0][0].fname + ' ' + existing_code[0][0].lname + ' @ ' + existing_code[0][0].server + '. Please finish that session by using `!rmverify` or `!rmcancel` before starting a new verification session.', ephemeral: true });
+      message.reply({ content: 'You\'ve already got an active verification session under ' + existing_code[0][0].fname + ' ' + existing_code[0][0].lname + ' @ ' + existing_code[0][0].server + '. Please finish that session by using `!rmcomplete` or `!rmcancel` before starting a new verification session.', ephemeral: true });
     }
   } else if (message.content.startsWith('!rmcomplete')) {
     var userid = message.author.id;
@@ -205,14 +205,14 @@ client.on('messageCreate', async function (message) {
           message.author.send('I couldn\'t verify your character. Please make sure you entered the verification string (`' + character[0][0].code + '`) correctly and try again. Or, use `!rmcancel` to start over. You may have to wait up to 4 hours due to Lodestone limitations.');
         }
       } else {
-        message.reply({ content: 'I couldn\'t find a character by the name you entered. Please use `!rmcancel` and start over.', ephemeral: true });
+        message.author.send({ content: 'I couldn\'t find a character by the name you entered. Please use `!rmcancel` and start over.' });
       }
     } else {
-      message.reply({ content: 'You don\'t seem to have a pending verification. Start with `!rmiam Firstname Lastname Server`.', ephemeral: true });
+      message.author.send({ content: 'You don\'t seem to have a pending verification. Start by typing `!rmverify`.' });
     }
   } else if (message.content.startsWith('!rmcancel')) {
     await connection.promise().query('delete from verification_codes where userid = ?', [message.author.id]);
-    message.reply({ content: 'I cancelled your pending verification. You can start a new one by using `!rmiam Firstname Lastname Server`.', ephemeral: true });
+    message.author.send({ content: 'I cancelled your pending verification. You can start a new one by using `!rmverify`.' });
   }
 
 
