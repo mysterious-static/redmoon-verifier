@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { EmbedBuilder, SlashCommandBuilder, GatewayIntentBits, Partials, PermissionsBitField, PermissionFlagsBits } = require('discord.js');
-const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages], partials: [Partials.Message, Partials.Channel, Partials.Reaction], });
+const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions], partials: [Partials.Message, Partials.Channel, Partials.Reaction], });
 var mysql = require('mysql2');
 var fetch = require('node-fetch');
 var crypto = require('node:crypto');
@@ -58,54 +58,81 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON()]);
+  var hof = new SlashCommandBuilder().setName('hof')
+    .setDescription('Set up Hall of Fame functionality.')
+    .addStringOption(option =>
+      option.setName('emoji_id')
+        .setDescription('The numeric ID of the emoji')
+        .setRequired(true))
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('The channel to set as the Hall of Fame')
+        .setRequired(true))
+    .addIntegerOption(option =>
+      option.setName('threshold')
+        .setDescription('The number of reactions necessary to add a post to the hall of fame.')
+        .setRequired(true))
+    .addBooleanOption(option =>
+      option.setName('admin_override')
+        .setDescription('If a react from a server administrator automatically adds a post to the hall of fame.')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
     if (interaction.commandName === 'verifiedrole') {
-      if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        var verifiedrole = interaction.options.getRole('role');
-        var roleexists = await connection.promise().query('select * from servers_roles where guildid = ?', [interaction.guild.id]);
-        if (roleexists[0].length > 0) {
-          await connection.promise().query('update servers_roles set roleid = ? where guildid = ?', [verifiedrole.id, interaction.guild.id]);
-        } else {
-          await connection.promise().query('insert into servers_roles (guildid, roleid) values (?, ?)', [interaction.guild.id, verifiedrole.id]);
-        }
-        interaction.reply({ content: 'Successfully set the \'verified\' role!', ephemeral: true });
+      var verifiedrole = interaction.options.getRole('role');
+      var roleexists = await connection.promise().query('select * from servers_roles where guildid = ?', [interaction.guild.id]);
+      if (roleexists[0].length > 0) {
+        await connection.promise().query('update servers_roles set roleid = ? where guildid = ?', [verifiedrole.id, interaction.guild.id]);
+      } else {
+        await connection.promise().query('insert into servers_roles (guildid, roleid) values (?, ?)', [interaction.guild.id, verifiedrole.id]);
       }
+      interaction.reply({ content: 'Successfully set the \'verified\' role!', ephemeral: true });
     } else if (interaction.commandName === 'stickymessage') {
-      if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
+      var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
+      if (interaction.options.getString('message')) {
+        // Post message
+        var sentMessage = await interaction.options.getChannel('channel').send({ content: interaction.options.getString('message') });
+        // Store message id
+      }
+      if (exists[0].length > 0) {
         if (interaction.options.getString('message')) {
-          // Post message
-          var sentMessage = await interaction.options.getChannel('channel').send({ content: interaction.options.getString('message') });
-          // Store message id
+          await connection.promise().query('update stickymessages set message = ?, speed = ?, last_message_id = ? where channel_id = ?', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
         }
-        if (exists[0].length > 0) {
-          if (interaction.options.getString('message')) {
-            await connection.promise().query('update stickymessages set message = ?, speed = ?, last_message_id = ? where channel_id = ?', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
-          }
-        } else {
-          await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
-        }
-        stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
-        interaction.reply({ content: 'Sticky set!', ephemeral: true });
+      } else {
+        await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
       }
+      stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
+      interaction.reply({ content: 'Sticky set!', ephemeral: true });
     } else if (interaction.commandName === 'unsticky') {
-      if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-        var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
-        if (exists[0].length > 0) {
-          var channel = interaction.options.getChannel('channel')
-          await channel.messages.fetch(exists[0][0].last_message_id).then(message => message.delete);
-          await connection.promise().query('delete from stickymessages where channel_id = ?', [channel.id]);
-          await interaction.reply({ content: 'Unstickied!', ephemeral: true });
-          stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache - we could just remove the array element in future
-        } else {
-          await interaction.reply({ content: 'No sticky set in this channel.', ephemeral: true });
-        }
+      var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
+      if (exists[0].length > 0) {
+        var channel = interaction.options.getChannel('channel')
+        await channel.messages.fetch(exists[0][0].last_message_id).then(message => message.delete);
+        await connection.promise().query('delete from stickymessages where channel_id = ?', [channel.id]);
+        await interaction.reply({ content: 'Unstickied!', ephemeral: true });
+        stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache - we could just remove the array element in future
+      } else {
+        await interaction.reply({ content: 'No sticky set in this channel.', ephemeral: true });
       }
+    } else if (interaction.commandName === 'hof') {
+      var channel = interaction.options.getChannel('channel');
+      var emoji_id = interaction.options.getString('emoji_id');
+      var threshold = interaction.options.getInteger('threshold');
+      var admin_override = interaction.options.getBoolean('admin_override');
+      var isHof = await connection.promise().query('select * from hof where guild_id = ?', interaction.guild.id);
+      var queryData = [channel.id, emoji_id, threshold, admin_override, interaction.guild.id];
+      if (isHof[0].length > 0) {
+        await connection.promise().query('update hof set channel = ?, emoji_id = ?, threshold = ?, admin_override = ? where guild_id = ?', queryData);
+      } else {
+        await connection.promise().query('insert into hof (channel, emoji_id, threshold, admin_override, guild_id) values (?, ?, ?, ?, ?)', queryData);
+      }
+      await interaction.reply({ content: 'Hall of Fame successfully set!', ephemeral: true });
     }
   }
 });
@@ -216,7 +243,7 @@ client.on('messageCreate', async function (message) {
   }
 
 
-  //Process Stickies After All Interactions.
+  //Process stickies AFTER all message stuff.
   if (stickymessages[0]) {
     var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
     if (isStickyChannel) {
@@ -231,5 +258,46 @@ client.on('messageCreate', async function (message) {
     }
   } else {
     stickymessages = await connection.promise().query('select * from stickymessages');
+  }
+});
+
+client.on('messageReactionAdd', async function (reaction, user) {
+  if (reaction.partial) {
+    await reaction.fetch();
+  }
+  //todo cache reactions
+  var message = await reaction.message.fetch();
+  var hofData = await connection.promise().query('select * from hof where guild_id = ?', message.guildId);
+  var member = await message.guild.members.cache.get(user.id);
+  if (hofData[0].length > 0 && reaction.emoji.id == hofData[0][0].emoji_id && (reaction.count >= hofData[0][0].threshold || (hofData[0][0].admin_override == true && member.permissions.has(PermissionsBitField.Flags.Administrator)))) {
+    var is_hof = await connection.promise().query('select * from hof_msg where message_id = ?', message.id);
+    if (is_hof[0].length <= 0) {
+      //create pin (message embed / rich formatting)
+      const embeddedMessage = new EmbedBuilder()
+        .setColor(0xFFD700)
+        .setAuthor({ name: message.member.displayName });
+      if (message.content.length > 0) {
+        embeddedMessage.setDescription(message.content);
+      }
+      console.log(message);
+      if (message.embeds && message.embeds[0] !== undefined && message.embeds[0].image) {
+        embeddedMessage.setImage(message.embeds[0].image.url);
+      }
+      if (message.attachments && message.attachments.first() !== undefined && message.attachments.first().contentType.startsWith('image')) {
+        console.log('has attachment');
+        embeddedMessage.setImage(message.attachments.first().url);
+      }
+      embeddedMessage.setFields({ name: 'Source', value: '[click!](' + message.url + ')' })
+        .setTimestamp();
+      var channel = await client.channels.cache.get(hofData[0][0].channel);
+      var hof_msg = await channel.send({ embeds: [embeddedMessage], content: reaction.count + ' ' + reaction.emoji.toString() + ' - ' + message.channel.toString() });
+      await connection.promise().query('insert into hof_msg (message_id, hof_msg_id) values (?, ?)', [message.id, hof_msg.id]);
+    } else {
+      var channel = await client.channels.cache.get(hofData[0][0].channel);
+      hof_msg = await channel.fetch(is_hof[0].hof_msg_id);
+      hof_msg.edit({ content: reaction.count + ' ' + reaction.emoji.toString() + ' - ' + message.channel.toString() });
+    }
+
+
   }
 });
