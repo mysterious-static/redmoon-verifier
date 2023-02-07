@@ -85,6 +85,7 @@ client.on('interactionCreate', async (interaction) => {
           await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
         }
         stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
+        interaction.reply({content: 'Sticky set!', ephemeral: true});
       }
     }
   }
@@ -197,10 +198,12 @@ client.on('messageCreate', async function (message) {
 
 
   //Process Stickies After All Interactions.
-  var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id)
+  var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
   if (isStickyChannel) {
-    var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id })
-    if (messageCount.count >= isStickyChannel.speed) {
+    console.log(isStickyChannel);
+    var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
+    console.log(messageCount);
+    if (messageCount.length >= isStickyChannel.speed) {
       await message.channel.messages.fetch(isStickyChannel.last_message.id).then(message => message.delete());
       var sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message
       await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
