@@ -50,7 +50,15 @@ client.on('ready', async () => {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON()]);
+  var unsticky = new SlashCommandBuilder().setName('unsticky')
+    .setDescription('Remove sticky message functionality from a channel.')
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('The channel to remove sticky from')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagBits.Administrator);
+
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -86,6 +94,18 @@ client.on('interactionCreate', async (interaction) => {
         }
         stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
         interaction.reply({ content: 'Sticky set!', ephemeral: true });
+      }
+    } else if (interaction.commandName === 'unsticky') {
+      if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+        var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
+        if (exists[0].length > 0) {
+          var channel = interaction.options.getChannel('channel')
+          await channel.messages.find(exists[0][0].last_message_id).then(message => message.delete);
+          await connection.promise().query('delete from stickymessages where channel_id = ?', [channel.id]);
+          await interaction.reply({ content: 'Unstickied!', ephemeral: true });
+        } else {
+          await interaction.reply({ content: 'No sticky set in this channel.', ephemeral: true });
+        }
       }
     }
   }
