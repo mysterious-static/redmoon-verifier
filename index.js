@@ -295,7 +295,7 @@ client.on('messageReactionAdd', async function (reaction, user) {
     } else {
       var channel = await client.channels.cache.get(hofData[0][0].channel);
       console.log(channel);
-      await channel.messages.fetch(is_hof[0].hof_msg_id).then(hof_msg => hof_msg.edit({ content: reaction.count + ' ' + reaction.emoji.toString() + ' - ' + message.channel.toString() }));
+      await channel.messages.fetch(is_hof[0][0].hof_msg_id).then(hof_msg => hof_msg.edit({ content: reaction.count + ' ' + reaction.emoji.toString() + ' - ' + message.channel.toString() }));
     }
 
 
