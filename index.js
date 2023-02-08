@@ -42,7 +42,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .addIntegerOption(option =>
       option.setName('speed')
-        .setDescription('The number of messages to go by before the message refreshes')
+        .setDescription('The number of messages to go by before the message refreshes, max 50')
         .setRequired(true))
     .addStringOption(option =>
       option.setName('message')
@@ -95,20 +95,22 @@ client.on('interactionCreate', async (interaction) => {
       interaction.reply({ content: 'Successfully set the \'verified\' role!', ephemeral: true });
     } else if (interaction.commandName === 'stickymessage') {
       var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
-      if (interaction.options.getString('message')) {
-        // Post message
-        var sentMessage = await interaction.options.getChannel('channel').send({ content: interaction.options.getString('message') });
-        // Store message id
-      }
-      if (exists[0].length > 0) {
+      if (interaction.options.getInteger('speed') <= 50) {
         if (interaction.options.getString('message')) {
-          await connection.promise().query('update stickymessages set message = ?, speed = ?, last_message_id = ? where channel_id = ?', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
+          var sentMessage = await interaction.options.getChannel('channel').send({ content: interaction.options.getString('message') });
         }
+        if (exists[0].length > 0) {
+          if (interaction.options.getString('message')) {
+            await connection.promise().query('update stickymessages set message = ?, speed = ?, last_message_id = ? where channel_id = ?', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
+          }
+        } else {
+          await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
+        }
+        stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
+        interaction.reply({ content: 'Sticky set!', ephemeral: true });
       } else {
-        await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
+        interaction.reply({ content: 'Speed can\'t be greater than 50. Sorry!', ephemeral: true });
       }
-      stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
-      interaction.reply({ content: 'Sticky set!', ephemeral: true });
     } else if (interaction.commandName === 'unsticky') {
       var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
       if (exists[0].length > 0) {
