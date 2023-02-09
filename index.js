@@ -140,8 +140,7 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 client.on('messageCreate', async function (message) {
-  const botPermissions = await message.channel.permissionsFor(guild.members.me);
-  if (botPermissions.has(PermissionsFlagsBits.ViewChannel)) {
+  try {
     await message.fetch();
     if (message.content.startsWith('!rm ')) {
       if (message.guild.ownerId != message.author.id) {
@@ -262,12 +261,13 @@ client.on('messageCreate', async function (message) {
     } else {
       stickymessages = await connection.promise().query('select * from stickymessages');
     }
+  } catch (e) {
+    console.error(e);
   }
 });
 
 client.on('messageReactionAdd', async function (reaction, user) {
-  const botPermissions = await reaction.channel.permissionsFor(guild.members.me);
-  if (botPermissions.has(PermissionsFlagsBits.ViewChannel)) {
+  try {
     if (reaction.partial) {
       await reaction.fetch();
     }
@@ -305,5 +305,7 @@ client.on('messageReactionAdd', async function (reaction, user) {
       }
 
     }
+  } catch (e) {
+    console.error(e);
   }
 });
