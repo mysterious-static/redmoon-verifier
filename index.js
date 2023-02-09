@@ -78,7 +78,49 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON()]);
+  var event = new SlashCommandBuilder().setName('event')
+    .setDescription('Set up an event.')
+    .addStringOption(option =>
+      option.setName('name')
+        .setDescription('The name of the event.')
+        .setRequired(true))
+    .addStringOption(option =>
+      option.setName('description')
+        .setDescription('A short description of the event.')
+        .setRequired(true))
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('What channel the event should be published in.')
+        .setRequired(true))
+    .addBooleanOption(option =>
+      option.setName('recurring')
+        .setDescription('Whether this event should repeat on a day or days of the week. If False, the "date" option must be set.')
+        .setRequired(true))
+    .addBooleanOption(option =>
+      option.setName('mentionroles')
+        .setDescription('Whether this event should mention roles.'))
+    .addStringOption(option =>
+      option.setName('starttime')
+        .setDescription('The start time, formatted as 12-hour clock. e.g., "9:00 PM". US Eastern time.')
+        .setRequired(true))
+    .addIntegerOption(option =>
+      option.setName('duration')
+        .setDescription('The duration, in minutes, of the event. Cannot be more than 12 hours, or 720 minutes.')
+        .setRequired(true))
+    .addIntegerOption(option =>
+      option.setName('rsvptime')
+        .setDescription('The number of minutes before the event takes place that the RSVP message should be posted.')
+        .setRequired(true))
+    .addIntegerOption(option =>
+      option.setName('remindertime')
+        .setDescription('The number of minutes before the event takes place that users should be reminded, or blank for no reminder.'))
+    .addStringOption(option =>
+      option.setName('date')
+        .setDescription('The date on which the non-recurring event should occur. Please enter as YYYY-MM-DD, e.g. 2023-01-30.'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
+
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -135,6 +177,65 @@ client.on('interactionCreate', async (interaction) => {
         await connection.promise().query('insert into hof (channel, emoji_id, threshold, admin_override, guild_id) values (?, ?, ?, ?, ?)', queryData);
       }
       await interaction.reply({ content: 'Hall of Fame successfully set!', ephemeral: true });
+    } else if (interaction.commandName === 'event') {
+      var name = interaction.options.getString('name');
+      var description = interaction.options.getString('description');
+      var channel = interaction.options.getChannel('channel');
+      var recurring = interaction.options.getBoolean('recurring');
+      var mentionroles = interaction.options.getBoolean('mentionroles');
+      var starttime = interaction.options.getString('starttime');
+      var duration = interaction.options.getInteger('duration');
+      var rsvptime = interaction.options.getInteger('rsvptime');
+      if(interaction.options.getString('date')) {
+        var date = interaction.options.getString('date');
+      }
+      if (interaction.options.getInteger('remindertime')) {
+        var remindertime = interaction.options.getInteger('remindertime');
+      }
+      if (duration <= 720) {
+        // TODO: Commit event to DB HERE!!!!!
+        if (recurring) {
+          var weeklyKeyValues = [
+            { label: 'Sunday', value: '0' },
+            { label: 'Monday', value: '1' },
+            { label: 'Tuesday', value: '2' },
+            { label: 'Wednesday', value: '3' },
+            { label: 'Thursday', value: '4' },
+            { label: 'Friday', value: '5' },
+            { label: 'Saturday', value: '6' }
+          ]
+          const weeklySelectComponent = new StringSelectMenuBuilder().setOptions(weeklyKeyValues).setCustomId('WeeklyRecurrenceMultiselector').setMinValues(1).setMaxValues(7);
+          var weeklySelectRow = new ActionRowBuilder().addComponents(weeklySelectComponent);
+          var message = await interaction.reply({ content: 'Next, please provide the days of the week the event recurs on.', components: [weeklySelectRow], ephemeral: true});
+          var weekrecurrence = [];
+        } else if (mentionroles) {
+          const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleMentionMultiselector').setMinValues(1).setMaxValues(5);
+          var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
+          var message = await interaction.reply({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow], ephemeral: true });
+        } else {
+          // Commit one-time date to DB.
+        }
+      }
+      var collector = message.createMessageComponentCollector({ time: 120000 });
+      var duration;
+      var rolementions;
+      collector.on('collect', async (interaction_second) => {
+        if (interaction_second.customId == 'WeeklyRecurrenceMultiselector') {
+          // Commit events_weeklyrecurrences to DB.
+          if (mentionroles) {
+            const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleMentionMultiselector').setMinValues(1).setMaxValues(5);
+            var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
+            await interaction_second.update({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow] });
+          }
+        } else if (interaction_second.customId == 'RoleMentionMultiselector') {
+          // Commit events_rolementions to DB.
+          if (!recurrence) {
+            // Commit onetime date to DB.
+          }
+        }
+      });
+    } else {
+      interaction.reply({ content: 'Duration must be less than 12 hours.', ephemeral: true });
     }
   }
 });
@@ -245,7 +346,7 @@ client.on('messageCreate', async function (message) {
     }
 
 
-    //Process stickies AFTER all message stuff.
+    //Process stickies AFTER all message stuff. TODO: Cron this.
     if (stickymessages[0]) {
       var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
       if (isStickyChannel) {
