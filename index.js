@@ -140,7 +140,7 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 client.on('messageCreate', async function (message) {
-  const botPermission = await message.channel.permissionsFor(guild.members.me);
+  const botPermissions = await message.channel.permissionsFor(guild.members.me);
   if (botPermissions.has(PermissionsFlagsBits.ViewChannel)) {
     await message.fetch();
     if (message.content.startsWith('!rm ')) {
@@ -266,7 +266,7 @@ client.on('messageCreate', async function (message) {
 });
 
 client.on('messageReactionAdd', async function (reaction, user) {
-  const botPermission = await reaction.channel.permissionsFor(guild.members.me);
+  const botPermissions = await reaction.channel.permissionsFor(guild.members.me);
   if (botPermissions.has(PermissionsFlagsBits.ViewChannel)) {
     if (reaction.partial) {
       await reaction.fetch();
