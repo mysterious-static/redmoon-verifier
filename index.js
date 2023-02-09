@@ -252,10 +252,9 @@ client.on('messageCreate', async function (message) {
         var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
         console.log(messageCount.size);
         if (messageCount.size >= isStickyChannel.speed) {
-          await message.channel.messages.fetch(isStickyChannel.last_message_id).then(message => message.delete()).catch((error) => { console.error(error) }); // TODO check if message exists
+          message.channel.messages.fetch(isStickyChannel.last_message_id).then(message => message.delete()).catch((error) => { console.error(error) }); // TODO check if message exists
           var sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message
-          await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
-          stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
+          var stickymessages = connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?; select * from stickymessages;', [sentMessage.id, isStickyChannel.channel_id])[1];
         }
       }
     } else {
