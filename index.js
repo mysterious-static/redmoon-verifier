@@ -115,7 +115,7 @@ client.on('interactionCreate', async (interaction) => {
       var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
       if (exists[0].length > 0) {
         var channel = interaction.options.getChannel('channel')
-        await channel.messages.fetch(exists[0][0].last_message_id).then(message => message.delete);
+        await channel.messages.fetch(exists[0][0].last_message_id).then(message => message.delete()).catch((error) => { console.error(error) });
         await connection.promise().query('delete from stickymessages where channel_id = ?', [channel.id]);
         await interaction.reply({ content: 'Unstickied!', ephemeral: true });
         stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache - we could just remove the array element in future
