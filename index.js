@@ -217,8 +217,6 @@ client.on('interactionCreate', async (interaction) => {
         }
       }
       var collector = message.createMessageComponentCollector({ time: 120000 });
-      var duration;
-      var rolementions;
       collector.on('collect', async (interaction_second) => {
         if (interaction_second.customId == 'WeeklyRecurrenceMultiselector') {
           // Commit events_weeklyrecurrences to DB.
