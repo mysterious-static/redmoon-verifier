@@ -551,8 +551,8 @@ setInterval(async function () {
       var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji('✅').setStyle('Success');
       var buttonTentative = new ButtonBuilder().setCustomId('buttonTentative').setEmoji('❔').setStyle('Primary');
       var buttonDecline = new ButtonBuilder().setCustomId('buttonDecline').setEmoji('❌').setStyle('Danger');
-      var buttonDelete = new ButtonBuilder().setCustomId('buttonDelete').setEmoji('🗑️').setStyle('Secondary');
-      const buttonRow = new ActionRowBuilder().addComponents(buttonAccept, buttonTentative, buttonDecline, buttonDelete);
+      // var buttonDelete = new ButtonBuilder().setCustomId('buttonDelete').setEmoji('🗑️').setStyle('Secondary');
+      const buttonRow = new ActionRowBuilder().addComponents(buttonAccept, buttonTentative, buttonDecline);
       var message = await channel.send({ content: messageContent, embeds: [embeddedMessage], components: [buttonRow] });
       await connection.promise().query('insert into events_messages_info (event_id, day, rsvp_id) values (?, ?, ?)', [event.id, ymd, message.id]);
     }
