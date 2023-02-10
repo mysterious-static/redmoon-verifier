@@ -433,12 +433,12 @@ setInterval(async function () {
   console.log(events[0]);
   // Retrieve events from DB: include weeklyrecurrences where dayofweek == today.getDay(). include onetimedates. Join events_messages_info.
   for (const event of events[0]) {
-    var starttime = new Date(ymd + ' ' + event.starttime);
-    starttime = starttime.setMinutes(starttime.getMinutes());
-    var endtime = new Date().setMinutes(starttime.getMinutes() + event.duration); // Return unix millis
-    var rsvptime = new Date().setMinutes(starttime.getMinutes() - event.rsvptime); // Return unix millis
+    var earlystarttime = new Date(ymd + ' ' + event.starttime);
+    starttime = starttime.setMinutes(earlystarttime.getMinutes());
+    var endtime = new Date().setMinutes(earlystarttime.getMinutes() + event.duration); // Return unix millis
+    var rsvptime = new Date().setMinutes(earlystarttime.getMinutes() - event.rsvptime); // Return unix millis
     if (event.remindertime) {
-      var remindertime = new Date().setMinutes(starttime.getMinutes() - event.remindertime); // Return unix millis
+      var remindertime = new Date().setMinutes(earlystarttime.getMinutes() - event.remindertime); // Return unix millis
     } else {
       var remindertime = false;
     }
