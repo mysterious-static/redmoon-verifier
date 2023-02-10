@@ -94,7 +94,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .addBooleanOption(option =>
       option.setName('recurring')
-        .setDescription('Whether this event should repeat on a day or days of the week. If False, the "date" option must be set.')
+        .setDescription('Whether this event should repeat on a day/days of week. If False, the "date" option must be set.')
         .setRequired(true))
     .addBooleanOption(option =>
       option.setName('mentionroles')
@@ -109,11 +109,11 @@ client.on('ready', async () => {
         .setRequired(true))
     .addIntegerOption(option =>
       option.setName('rsvptime')
-        .setDescription('The number of minutes before the event takes place that the RSVP message should be posted.')
+        .setDescription('The number of minutes before the event that the RSVP message should be posted.')
         .setRequired(true))
     .addIntegerOption(option =>
       option.setName('remindertime')
-        .setDescription('The number of minutes before the event takes place that users should be reminded, or blank for no reminder.'))
+        .setDescription('The number of minutes before the event that users should be reminded, or blank for no reminder.'))
     .addStringOption(option =>
       option.setName('date')
         .setDescription('The date on which the non-recurring event should occur. Please enter as YYYY-MM-DD, e.g. 2023-01-30.'))
