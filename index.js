@@ -248,6 +248,73 @@ client.on('interactionCreate', async (interaction) => {
     } else {
       interaction.reply({ content: 'Duration must be less than 12 hours.', ephemeral: true });
     }
+  } else if (interaction.isButton()) {
+    var buttonMessage = interaction.message.fetch();
+    if (interaction.customId == 'buttonAccept' || interaction.customId == 'buttonTentative' || interaction.customId == 'buttonDecline') {
+      if (interaction.customId == 'buttonAccept') {
+        var newStatus = 'Accepted';
+      } else if (interaction.customId == 'buttonTentative') {
+        var newStatus = 'Tentative';
+      } else {
+        var newStatus = 'Declined';
+      }
+      // Get the event details, using buttonMessage.id == events_messages_info.rsvp_id.
+      var event = await connection.promise().query('select e.*, r.status from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ?', [interaction.user.id, buttonMessage.id]);
+      // Get event responses where user_id = interaction.user.id.
+      var thisEvent = event[0][0];
+      if (thisEvent.status) {
+        if (interaction.customId == 'buttonAccept' && event.status == 'Accepted' || interaction.customId == 'buttonTentative' && event.status == 'Tentative' || interaction.customId == 'buttonDecline' && event.status == 'Declined') {
+          await connection.promise().query('delete from events_responses where user_id = ? and event_id = ?', [interaction.user.id, thisEvent.id]);
+        } else {
+          await connection.promise().query('update events_responses set status = ? where user_id = ? and event_id = ?', [newStatus, interaction.user.id, thisEvent.id]);
+        }
+      } else {
+        await connection.promise().query('insert into events_responses (user_id, event_id, status) values (?, ?, ?)', [interaction.user.id, thisEvent.id, newStatus]);
+      }
+      var eventResponses = await connection.promise().query('select * from events_responses where event_id = ?', [thisEvent.id]);
+      var accepted = '';
+      var tentative = '';
+      var declined = '';
+      for (const thisResponse of eventResponses[0]) {
+        var member = await interaction.guild.members.fetch(thisResponse.id);
+        var nickname = member.nickname;
+        if (thisResponse.status == 'Accepted') {
+          accepted += nickname + '\n';
+        } else if (thisResponse.status == 'Tentative') {
+          tentative += nickname + '\n';
+        } else {
+          declined += nickname + '\n';
+        }
+      }
+      if (accepted == '') {
+        accepted = '*(none)*';
+      }
+      if (tentative == '') {
+        tentative = '*(none)*';
+      }
+      if (declined == '') {
+        declined = '*(none)*';
+      }
+      var earlystarttime = new Date(ymd + ' ' + event.starttime);
+      var starttime = new Date().setMinutes(earlystarttime.getMinutes());
+      var endtime = new Date().setMinutes(earlystarttime.getMinutes() + event.duration); // Return unix millis
+      var unixstarttime = Math.floor(starttime / 1000);
+      var unixendtime = Math.floor(endtime / 1000);
+      const embeddedMessage = new EmbedBuilder()
+        .setColor(0x770000)
+        .setTitle(event.name)
+        .setDescription(event.description)
+        .addFields(
+          { name: 'Time', value: '<t:' + unixstarttime + ':D> <t:' + unixstarttime + ':t> - <t:' + unixendtime + ':t>' },
+          { name: 'Accepted', value: accepted, inline: true },
+          { name: 'Tentative', value: tentative, inline: true },
+          { name: 'Declined', value: declined, inline: true },
+        );
+      await interaction.message.edit({ embeds: [embeddedMessage] });
+      await interaction.reply({ content: 'Your RSVP was recorded!', ephemeral: true });
+    } else if (interaction.customId == 'buttonDelete') {
+      // If interaction.user is administrator or their id matches the event author, delete.
+    }
   }
 });
 
