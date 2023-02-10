@@ -259,9 +259,11 @@ client.on('interactionCreate', async (interaction) => {
         var newStatus = 'Declined';
       }
       // Get the event details, using buttonMessage.id == events_messages_info.rsvp_id.
-      var event = await connection.promise().query('select e.*, r.status from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ?', [interaction.user.id, buttonMessage.id]);
+      console.log(buttonMessage.id);
+      console.log(interaction.user.id);
+      var event = await connection.promise().query('select e.*, r.status from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ? ', [interaction.user.id, buttonMessage.id]);
       // Get event responses where user_id = interaction.user.id.
-      var thisEvent = event[0][0];
+      var thisEvent = event[0];
       if (thisEvent.status) {
         if (interaction.customId == 'buttonAccept' && event.status == 'Accepted' || interaction.customId == 'buttonTentative' && event.status == 'Tentative' || interaction.customId == 'buttonDecline' && event.status == 'Declined') {
           await connection.promise().query('delete from events_responses where user_id = ? and event_id = ?', [interaction.user.id, thisEvent.id]);
