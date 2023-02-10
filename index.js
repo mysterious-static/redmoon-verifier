@@ -433,6 +433,7 @@ setInterval(async function () {
   // Retrieve events from DB: include weeklyrecurrences where dayofweek == today.getDay(). include onetimedates. Join events_messages_info.
   for (const event of events[0]) {
     var starttime = new Date(ymd + ' ' + event.starttime);
+    var endtime = new Date().setMinutes(starttime.getMinutes() + event.duration);
     var rsvptime = new Date().setMinutes(starttime.getMinutes() - event.rsvptime);
     if (event.remindertime) {
       var remindertime = new Date().setMinutes(starttime.getMinutes() - event.remindertime);
@@ -440,13 +441,38 @@ setInterval(async function () {
       var remindertime = false;
     }
     if (rsvptime < today && !event.rsvp_id) {
+      var channel = await client.channels.cache.get(event.channel_id);
       // Create RSVP message with the buttons, pinging roles (retrieve).
-      // Update events_messages_info - if event.message_info_id is set then update else insert.
+      var roles = await connection.promise().query('select * from events_rolementions where event_id = ?', [event.id]);
+      var messageContent = '';
+      for (const role of roles[0]) {
+        var roleMention = await client.roles.cache.get(role.id);
+        messageContent += roleMention.toString();
+      }
+      var unixstarttime = Math.floor(starttime.getTime() / 1000);
+      var unixendtime = Math.floor(endtime.getTime() / 1000);
+      const embeddedMessage = newEmbedBuilder()
+        .setcolor(0x770000)
+        .setTitle(event.name)
+        .setDescription(event.description)
+        .addFields(
+          { name: 'Time', value: '<t:' + unixstarttime + ':D> <t:' + unixstarttime + ':t> - <t:' + unixendtime + ':t>' },
+          { name: 'Accepted', value: '', inline: true },
+          { name: 'Tentative', value: '', inline: true },
+          { name: 'Declined', value: '', inline: true },
+        );
+      var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji('✅').setStyle('Success');
+      var buttonTentative = new ButtonBuilder().setCustomId('buttonTentative').setEmoji('❔').setStyle('Primary');
+      var buttonDecline = new ButtonBuilder().setCustomId('buttonDecline').setEmoji('❌').setStyle('Danger');
+      var buttonDelete = new ButtonBuilder().setCustomId('buttonDelete').setEmoji('🗑️').setStyle('Secondary');
+      const buttonRow = new ActionRowBuilder().addComponents(buttonAccept, buttonTentative, buttonDecline, buttonDelete);
+      var message = await channel.send({ content: messageContent, embeds: [embeddedMessage], components: [buttonRow] });
+      await connection.promise().query('insert into events_messages_info (event_id, day, rsvp_id) values (?, ?, ?)', [event.id, ymd, message.id]);
     }
     if (remindertime && remindertime < today && !event.reminder_id) {
       // Create reminder message, pinging users where status = accepted (retrieve). (or no reminder if no users accepted).
-      // Updates events_messages_info - if event.message_info_id is set then update else insert.
+      await connection.promise().query('update events_messages_info set reminder_id = ? where id = ?', [message.id, event.message_info_id]);
     }
-    // TODO: Clean up old events.
   }
+  // TODO: Clean up old events.
 }, 60000);
