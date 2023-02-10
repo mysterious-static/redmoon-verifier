@@ -282,6 +282,7 @@ client.on('interactionCreate', async (interaction) => {
       var tentative = '';
       var declined = '';
       for (const thisResponse of eventResponses[0]) {
+        console.log(thisResponse);
         var member = await interaction.guild.members.fetch(thisResponse.id);
         var nickname = member.nickname;
         if (thisResponse.status == 'Accepted') {
