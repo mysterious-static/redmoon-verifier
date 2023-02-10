@@ -249,7 +249,10 @@ client.on('interactionCreate', async (interaction) => {
       interaction.reply({ content: 'Duration must be less than 12 hours.', ephemeral: true });
     }
   } else if (interaction.isButton()) {
-    var buttonMessage = interaction.message.fetch();
+    var buttonMessage = interaction.message;
+    if (buttonMessage.partial) {
+      await buttonMessage.fetch();
+    }
     if (interaction.customId == 'buttonAccept' || interaction.customId == 'buttonTentative' || interaction.customId == 'buttonDecline') {
       if (interaction.customId == 'buttonAccept') {
         var newStatus = 'Accepted';
@@ -259,7 +262,7 @@ client.on('interactionCreate', async (interaction) => {
         var newStatus = 'Declined';
       }
       // Get the event details, using buttonMessage.id == events_messages_info.rsvp_id.
-      console.log(buttonMessage);
+      console.log(buttonMessage.id);
       console.log(interaction.user.id);
       var event = await connection.promise().query('select e.*, r.status from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ? ', [interaction.user.id, buttonMessage.id]);
       // Get event responses where user_id = interaction.user.id.
