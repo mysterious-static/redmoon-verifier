@@ -453,7 +453,7 @@ setInterval(async function () {
       var unixstarttime = Math.floor(starttime.getTime() / 1000);
       var unixendtime = Math.floor(endtime / 1000);
       const embeddedMessage = new EmbedBuilder()
-        .setcolor(0x770000)
+        .setColor(0x770000)
         .setTitle(event.name)
         .setDescription(event.description)
         .addFields(
