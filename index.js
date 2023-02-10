@@ -266,15 +266,15 @@ client.on('interactionCreate', async (interaction) => {
       console.log(interaction.user.id);
       var event = await connection.promise().query('select e.*, r.status from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ? ', [interaction.user.id, buttonMessage.id]);
       // Get event responses where user_id = interaction.user.id.
+
+      var thisEvent = event[0][0];
       var today = new Date();
       var ymd = today.toLocaleString("default", { year: "numeric" }) + '-' + today.toLocaleString("default", { month: "2-digit" }) + '-' + today.toLocaleString("default", { day: "2-digit" });
-      var earlystarttime = new Date(ymd + ' ' + event.starttime);
+      var earlystarttime = new Date(ymd + ' ' + thisEvent.starttime);
       var starttime = new Date().setMinutes(earlystarttime.getMinutes());
-      var endtime = new Date().setMinutes(earlystarttime.getMinutes() + event.duration); // Return unix millis
+      var endtime = new Date().setMinutes(earlystarttime.getMinutes() + thisEvent.duration); // Return unix millis
       var unixstarttime = Math.floor(starttime / 1000);
       var unixendtime = Math.floor(endtime / 1000);
-      var thisEvent = event[0][0];
-      console.log(thisEvent);
       if (thisEvent.status) {
         if (interaction.customId == 'buttonAccept' && event.status == 'Accepted' || interaction.customId == 'buttonTentative' && event.status == 'Tentative' || interaction.customId == 'buttonDecline' && event.status == 'Declined') {
           await connection.promise().query('delete from events_responses where user_id = ? and event_id = ? and date = ?', [interaction.user.id, thisEvent.id, ymd]);
@@ -312,8 +312,8 @@ client.on('interactionCreate', async (interaction) => {
 
       const embeddedMessage = new EmbedBuilder()
         .setColor(0x770000)
-        .setTitle(event.name)
-        .setDescription(event.description)
+        .setTitle(thisEvent.name)
+        .setDescription(thisEvent.description)
         .addFields(
           { name: 'Time', value: '<t:' + unixstarttime + ':D> <t:' + unixstarttime + ':t> - <t:' + unixendtime + ':t>' },
           { name: 'Accepted', value: accepted, inline: true },
