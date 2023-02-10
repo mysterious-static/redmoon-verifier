@@ -276,7 +276,7 @@ client.on('interactionCreate', async (interaction) => {
       var unixstarttime = Math.floor(starttime / 1000);
       var unixendtime = Math.floor(endtime / 1000);
       if (thisEvent.status) {
-        if ((interaction.customId == 'buttonAccept' && event.status == 'Accepted') || (interaction.customId == 'buttonTentative' && event.status == 'Tentative') || (interaction.customId == 'buttonDecline' && event.status == 'Declined')) {
+        if (newStatus == thisEvent.status) {
           console.log('delete');
           await connection.promise().query('delete from events_responses where user_id = ? and event_id = ? and date = ?', [interaction.user.id, thisEvent.id, ymd]);
         } else {
