@@ -272,8 +272,8 @@ client.on('interactionCreate', async (interaction) => {
       var today = new Date();
       var ymd = today.toLocaleString("default", { year: "numeric" }) + '-' + today.toLocaleString("default", { month: "2-digit" }) + '-' + today.toLocaleString("default", { day: "2-digit" });
       var earlystarttime = new Date(ymd + ' ' + thisEvent.starttime);
-      var starttime = new Date().setMinutes(earlystarttime.getMinutes());
-      var endtime = new Date().setMinutes(earlystarttime.getMinutes() + thisEvent.duration); // Return unix millis
+      var starttime = new Date(earlystarttime.getTime()).setMinutes(earlystarttime.getMinutes());
+      var endtime = new Date(earlystarttime.getTime()).setMinutes(earlystarttime.getMinutes() + thisEvent.duration); // Return unix millis
       var unixstarttime = Math.floor(starttime / 1000);
       var unixendtime = Math.floor(endtime / 1000);
       if (thisEvent.status) {
@@ -519,11 +519,11 @@ setInterval(async function () {
   // Retrieve events from DB: include weeklyrecurrences where dayofweek == today.getDay(). include onetimedates. Join events_messages_info.
   for (const event of events[0]) {
     var earlystarttime = new Date(ymd + ' ' + event.starttime);
-    var starttime = new Date().setMinutes(earlystarttime.getMinutes());
-    var endtime = new Date().setMinutes(earlystarttime.getMinutes() + event.duration); // Return unix millis
-    var rsvptime = new Date().setMinutes(earlystarttime.getMinutes() - event.rsvptime); // Return unix millis
+    var starttime = new Date(earlystarttime.getTime()).setMinutes(earlystarttime.getMinutes());
+    var endtime = new Date(earlystarttime.getTime()).setMinutes(earlystarttime.getMinutes() + event.duration); // Return unix millis
+    var rsvptime = new Date(earlystarttime.getTime()).setMinutes(earlystarttime.getMinutes() - event.rsvptime); // Return unix millis
     if (event.remindertime) {
-      var remindertime = new Date().setMinutes(earlystarttime.getMinutes() - event.remindertime); // Return unix millis
+      var remindertime = new Date(earlystarttime.getTime()).setMinutes(earlystarttime.getMinutes() - event.remindertime); // Return unix millis
     } else {
       var remindertime = false;
     }
