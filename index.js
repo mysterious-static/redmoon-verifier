@@ -529,11 +529,12 @@ setInterval(async function () {
     }
     if (rsvptime < today.getTime() && !event.rsvp_id) {
       var channel = await client.channels.cache.get(event.channel_id);
+      var guild = await client.guilds.cache.get(channel.guildId);
       // Create RSVP message with the buttons, pinging roles (retrieve).
       var roles = await connection.promise().query('select * from events_rolementions where event_id = ?', [event.id]);
       var messageContent = '';
       for (const role of roles[0]) {
-        var roleMention = await client.roles.cache.get(role.id);
+        var roleMention = await guild.roles.cache.get(role.id);
         messageContent += roleMention.toString();
       }
       var unixstarttime = Math.floor(starttime / 1000);
