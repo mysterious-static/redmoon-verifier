@@ -98,7 +98,8 @@ client.on('ready', async () => {
         .setRequired(true))
     .addBooleanOption(option =>
       option.setName('mentionroles')
-        .setDescription('Whether this event should mention roles.'))
+        .setDescription('Whether this event should mention roles.')
+        .setRequired(true))
     .addStringOption(option =>
       option.setName('starttime')
         .setDescription('The start time, formatted as 12-hour clock. e.g., "9:00 PM". US Eastern time.')
