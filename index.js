@@ -219,7 +219,7 @@ client.on('interactionCreate', async (interaction) => {
           var message = await interaction.reply({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow], ephemeral: true });
         } else {
           await connection.promise().query('insert into events_onetimedates (event_id, date) values (?, ?)', [event[0].insertId, date]);
-          interaction.update({ content: 'Event added!', components: [] });
+          await interaction.reply({ content: 'Event added!', ephemeral: true });
         }
       }
       var collector = message.createMessageComponentCollector({ time: 120000 });
