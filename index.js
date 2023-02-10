@@ -535,7 +535,8 @@ setInterval(async function () {
       var messageContent = '';
       for (const role of roles[0]) {
         var roleMention = await guild.roles.cache.get(role.id);
-        messageContent += roleMention.toString();
+        console.log(`${roleMention}`);
+        messageContent += `${roleMention} `;
       }
       var unixstarttime = Math.floor(starttime / 1000);
       var unixendtime = Math.floor(endtime / 1000);
