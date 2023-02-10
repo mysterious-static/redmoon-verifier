@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { EmbedBuilder, SlashCommandBuilder, GatewayIntentBits, Partials, PermissionsBitField, PermissionFlagsBits, StringSelectMenuBuilder, RoleSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder, GatewayIntentBits, Partials, PermissionsBitField, PermissionFlagsBits, StringSelectMenuBuilder, RoleSelectMenuBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions], partials: [Partials.Message, Partials.Channel, Partials.Reaction], });
 var mysql = require('mysql2');
 var fetch = require('node-fetch');
@@ -425,3 +425,28 @@ client.on('messageReactionAdd', async function (reaction, user) {
     console.error(e);
   }
 });
+
+setInterval(async function () {
+  var today = new Date();
+  var ymd = today.toLocaleString("default", { year: "numeric" }) + '-' + today.toLocaleString("default", { month: "2-digit" }) + '-' + today.toLocaleString("default", { day: "2-digit" })
+  var events = await connection.promise().query('select e.*, mi.id as message_info_id, mi.rsvp_id, mi.reminder_id from events e left outer join events_weeklyrecurrences wr on e.id = wr.event_id join events_onetimedates otd on e.id = otd.event_id left outer join events_messages_info mi on e.id = mi.event_id and mi.day = ? where (wr.day = ? or otd.date = ?) and ((e.remindertime is not null and mi.reminder_id is null) or mi.rsvp_id is null)', [ymd, today.getDay(), ymd]);
+  // Retrieve events from DB: include weeklyrecurrences where dayofweek == today.getDay(). include onetimedates. Join events_messages_info.
+  for (const event of events[0]) {
+    var starttime = new Date(ymd + ' ' + event.starttime);
+    var rsvptime = new Date().setMinutes(starttime.getMinutes() - event.rsvptime);
+    if (event.remindertime) {
+      var remindertime = new Date().setMinutes(starttime.getMinutes() - event.remindertime);
+    } else {
+      var remindertime = false;
+    }
+    if (rsvptime < today && !event.rsvp_id) {
+      // Create RSVP message with the buttons, pinging roles (retrieve).
+      // Update events_messages_info - if event.message_info_id is set then update else insert.
+    }
+    if (remindertime && remindertime < today && !event.reminder_id) {
+      // Create reminder message, pinging users where status = accepted (retrieve). (or no reminder if no users accepted).
+      // Updates events_messages_info - if event.message_info_id is set then update else insert.
+    }
+    // TODO: Clean up old events.
+  }
+}, 60000);
