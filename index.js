@@ -195,9 +195,9 @@ client.on('interactionCreate', async (interaction) => {
       }
       if (duration <= 720 || (!recurring && !date)) {
         if (remindertime) {
-          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, user_id, starttime, duration, rsvptime, remindertime) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, interaction.user.id, starttime, duration, rsvptime, remindertime]);
+          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, user_id, starttime, duration, rsvptime, remindertime) values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, interaction.user.id, starttime, duration, rsvptime, remindertime]);
         } else {
-          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, user_id, starttime, duration, rsvptime) values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, interaction.user.id, starttime, duration, rsvptime]);
+          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, user_id, starttime, duration, rsvptime) values (?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, interaction.user.id, starttime, duration, rsvptime]);
         }
         if (recurring) {
           var weeklyKeyValues = [
