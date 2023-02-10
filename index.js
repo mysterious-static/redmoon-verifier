@@ -218,7 +218,7 @@ client.on('interactionCreate', async (interaction) => {
           var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
           var message = await interaction.reply({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow], ephemeral: true });
         } else {
-          await connection.promise().query('insert into events_onetimedates (event_id, onetimedate) values (?, ?)', [event.insertId, date]);
+          await connection.promise().query('insert into events_onetimedates (event_id, date) values (?, ?)', [event[0].insertId, date]);
           interaction.update({ content: 'Event added!', components: [] });
         }
       }
@@ -226,7 +226,7 @@ client.on('interactionCreate', async (interaction) => {
       collector.on('collect', async (interaction_second) => {
         if (interaction_second.customId == 'WeeklyRecurrenceMultiselector') {
           for (const dow of interaction_second.values) {
-            await connection.promise().query('insert into events_weeklyrecurrences (event_id, dayofweek) values (?, ?)', [event.insertId, dow]);
+            await connection.promise().query('insert into events_weeklyrecurrences (event_id, dayofweek) values (?, ?)', [event[0].insertId, dow]);
           }
           if (mentionroles) {
             const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleMentionMultiselector').setMinValues(1).setMaxValues(5);
@@ -237,10 +237,10 @@ client.on('interactionCreate', async (interaction) => {
           }
         } else if (interaction_second.customId == 'RoleMentionMultiselector') {
           for (const role of interaction_second.values) {
-            await connection.promise().query('insert into events_rolementions (event_id, role_id) values (?, ?)', [event.insertId, role.id]);
+            await connection.promise().query('insert into events_rolementions (event_id, role_id) values (?, ?)', [event[0].insertId, role.id]);
           }
           if (!recurring) {
-            await connection.promise().query('insert into events_onetimedates (event_id, onetimedate) values (?, ?)', [event.insertId, date]);
+            await connection.promise().query('insert into events_onetimedates (event_id, onetimedate) values (?, ?)', [event[0].insertId, date]);
           }
           interaction_second.update({ content: 'Event added!', components: [] });
         }
