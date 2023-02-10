@@ -187,14 +187,18 @@ client.on('interactionCreate', async (interaction) => {
       var starttime = interaction.options.getString('starttime');
       var duration = interaction.options.getInteger('duration');
       var rsvptime = interaction.options.getInteger('rsvptime');
-      if(interaction.options.getString('date')) {
+      if (interaction.options.getString('date')) {
         var date = interaction.options.getString('date');
       }
       if (interaction.options.getInteger('remindertime')) {
         var remindertime = interaction.options.getInteger('remindertime');
       }
-      if (duration <= 720) {
-        // TODO: Commit event to DB HERE!!!!!
+      if (duration <= 720 || (!recurring && !date)) {
+        if (remindertime) {
+          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, starttime, duration, rsvptime, remindertime) values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, starttime, duration, rsvptime, remindertime]);
+        } else {
+          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, starttime, duration, rsvptime) values (?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, starttime, duration, rsvptime]);
+        }
         if (recurring) {
           var weeklyKeyValues = [
             { label: 'Sunday', value: '0' },
@@ -207,34 +211,38 @@ client.on('interactionCreate', async (interaction) => {
           ]
           const weeklySelectComponent = new StringSelectMenuBuilder().setOptions(weeklyKeyValues).setCustomId('WeeklyRecurrenceMultiselector').setMinValues(1).setMaxValues(7);
           var weeklySelectRow = new ActionRowBuilder().addComponents(weeklySelectComponent);
-          var message = await interaction.reply({ content: 'Next, please provide the days of the week the event recurs on.', components: [weeklySelectRow], ephemeral: true});
+          var message = await interaction.reply({ content: 'Next, please provide the days of the week the event recurs on.', components: [weeklySelectRow], ephemeral: true });
           var weekrecurrence = [];
         } else if (mentionroles) {
           const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleMentionMultiselector').setMinValues(1).setMaxValues(5);
           var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
           var message = await interaction.reply({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow], ephemeral: true });
         } else {
-          interaction.update({content: 'Event added!', components: []});
-          // Commit one-time date to DB.
+          await connection.promise().query('insert into events_onetimedates (event_id, onetimedate) values (?, ?)', [event[0][0].id, date]);
+          interaction.update({ content: 'Event added!', components: [] });
         }
       }
       var collector = message.createMessageComponentCollector({ time: 120000 });
       collector.on('collect', async (interaction_second) => {
         if (interaction_second.customId == 'WeeklyRecurrenceMultiselector') {
-          // Commit events_weeklyrecurrences to DB.
+          for (const dow of interaction_second.values) {
+            await connection.promise().query('insert into events_weeklyrecurrences (event_id, dayofweek) values (?, ?)', [event[0][0].id, dow]);
+          }
           if (mentionroles) {
             const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleMentionMultiselector').setMinValues(1).setMaxValues(5);
             var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
             await interaction_second.update({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow] });
           } else {
-            interaction_second.update({content: 'Event added!', components: []});
+            interaction_second.update({ content: 'Event added!', components: [] });
           }
         } else if (interaction_second.customId == 'RoleMentionMultiselector') {
-          // Commit events_rolementions to DB.
-          if (!recurring) {
-            // Commit onetime date to DB.
+          for (const role of interaction_second.values) {
+            await connection.promise().query('insert into events_rolementions (event_id, role_id) values (?, ?)', [event[0][0].id, role.id]);
           }
-          interaction_second.update({content: 'Event added!', components: []});
+          if (!recurring) {
+            await connection.promise().query('insert into events_onetimedates (event_id, onetimedate) values (?, ?)', [event[0][0].id, date]);
+          }
+          interaction_second.update({ content: 'Event added!', components: [] });
         }
       });
     } else {
