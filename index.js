@@ -277,11 +277,14 @@ client.on('interactionCreate', async (interaction) => {
       var unixendtime = Math.floor(endtime / 1000);
       if (thisEvent.status) {
         if (interaction.customId == 'buttonAccept' && event.status == 'Accepted' || interaction.customId == 'buttonTentative' && event.status == 'Tentative' || interaction.customId == 'buttonDecline' && event.status == 'Declined') {
+          console.log('delete');
           await connection.promise().query('delete from events_responses where user_id = ? and event_id = ? and date = ?', [interaction.user.id, thisEvent.id, ymd]);
         } else {
+          console.log('update');
           await connection.promise().query('update events_responses set status = ? where user_id = ? and event_id = ? and date = ?', [newStatus, interaction.user.id, thisEvent.id, ymd]);
         }
       } else {
+        console.log('insert');
         await connection.promise().query('insert into events_responses (user_id, event_id, status, date) values (?, ?, ?, ?)', [interaction.user.id, thisEvent.id, newStatus, ymd]);
       }
       var eventResponses = await connection.promise().query('select * from events_responses where event_id = ? and date = ?', [thisEvent.id, ymd]);
