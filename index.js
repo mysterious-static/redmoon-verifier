@@ -195,9 +195,9 @@ client.on('interactionCreate', async (interaction) => {
       }
       if (duration <= 720 || (!recurring && !date)) {
         if (remindertime) {
-          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, starttime, duration, rsvptime, remindertime) values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, starttime, duration, rsvptime, remindertime]);
+          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, user_id, starttime, duration, rsvptime, remindertime) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, interaction.user.id, starttime, duration, rsvptime, remindertime]);
         } else {
-          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, starttime, duration, rsvptime) values (?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, starttime, duration, rsvptime]);
+          var event = await connection.promise().query('insert into events (name, description, channel_id, server_id, user_id, starttime, duration, rsvptime) values (?, ?, ?, ?, ?, ?, ?, ?, ?)', [name, description, channel.id, interaction.guildId, interaction.user.id, starttime, duration, rsvptime]);
         }
         if (recurring) {
           var weeklyKeyValues = [
@@ -461,6 +461,7 @@ setInterval(async function () {
           { name: 'Tentative', value: '', inline: true },
           { name: 'Declined', value: '', inline: true },
         );
+      // Todo: Footer contains user name who created it.
       var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji('✅').setStyle('Success');
       var buttonTentative = new ButtonBuilder().setCustomId('buttonTentative').setEmoji('❔').setStyle('Primary');
       var buttonDecline = new ButtonBuilder().setCustomId('buttonDecline').setEmoji('❌').setStyle('Danger');
@@ -470,7 +471,15 @@ setInterval(async function () {
       await connection.promise().query('insert into events_messages_info (event_id, day, rsvp_id) values (?, ?, ?)', [event.id, ymd, message.id]);
     }
     if (remindertime && remindertime < today && !event.reminder_id) {
-      // Create reminder message, pinging users where status = accepted (retrieve). (or no reminder if no users accepted).
+      var channel = await client.channels.cache.get(event.channel_id);
+      var messageContent = '';
+      var mentions = await connection.promise().query('select * from events_responses where event_id = ? and status = ?', [event.id, 'Accepted']);
+      for (const mention of mentions) {
+        messageContent += '<@' + mention.user_id + '> ';
+      }
+      messageContent += 'The event: **' + event.name + '** will begin in ' + event.remindertime + ' minutes!';
+      var message = await channel.send({ content: messageContent });
+
       await connection.promise().query('update events_messages_info set reminder_id = ? where id = ?', [message.id, event.message_info_id]);
     }
   }
