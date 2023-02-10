@@ -266,18 +266,25 @@ client.on('interactionCreate', async (interaction) => {
       console.log(interaction.user.id);
       var event = await connection.promise().query('select e.*, r.status from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ? ', [interaction.user.id, buttonMessage.id]);
       // Get event responses where user_id = interaction.user.id.
+      var today = new Date();
+      var ymd = today.toLocaleString("default", { year: "numeric" }) + '-' + today.toLocaleString("default", { month: "2-digit" }) + '-' + today.toLocaleString("default", { day: "2-digit" });
+      var earlystarttime = new Date(ymd + ' ' + event.starttime);
+      var starttime = new Date().setMinutes(earlystarttime.getMinutes());
+      var endtime = new Date().setMinutes(earlystarttime.getMinutes() + event.duration); // Return unix millis
+      var unixstarttime = Math.floor(starttime / 1000);
+      var unixendtime = Math.floor(endtime / 1000);
       var thisEvent = event[0][0];
       console.log(thisEvent);
       if (thisEvent.status) {
         if (interaction.customId == 'buttonAccept' && event.status == 'Accepted' || interaction.customId == 'buttonTentative' && event.status == 'Tentative' || interaction.customId == 'buttonDecline' && event.status == 'Declined') {
-          await connection.promise().query('delete from events_responses where user_id = ? and event_id = ?', [interaction.user.id, thisEvent.id]);
+          await connection.promise().query('delete from events_responses where user_id = ? and event_id = ? and date = ?', [interaction.user.id, thisEvent.id, ymd]);
         } else {
-          await connection.promise().query('update events_responses set status = ? where user_id = ? and event_id = ?', [newStatus, interaction.user.id, thisEvent.id]);
+          await connection.promise().query('update events_responses set status = ? where user_id = ? and event_id = ? and date = ?', [newStatus, interaction.user.id, thisEvent.id, ymd]);
         }
       } else {
-        await connection.promise().query('insert into events_responses (user_id, event_id, status) values (?, ?, ?)', [interaction.user.id, thisEvent.id, newStatus]);
+        await connection.promise().query('insert into events_responses (user_id, event_id, status, date) values (?, ?, ?, ?)', [interaction.user.id, thisEvent.id, newStatus, ymd]);
       }
-      var eventResponses = await connection.promise().query('select * from events_responses where event_id = ?', [thisEvent.id]);
+      var eventResponses = await connection.promise().query('select * from events_responses where event_id = ? and date = ?', [thisEvent.id, ymd]);
       var accepted = '';
       var tentative = '';
       var declined = '';
@@ -302,11 +309,7 @@ client.on('interactionCreate', async (interaction) => {
       if (declined == '') {
         declined = '*(none)*';
       }
-      var earlystarttime = new Date(ymd + ' ' + event.starttime);
-      var starttime = new Date().setMinutes(earlystarttime.getMinutes());
-      var endtime = new Date().setMinutes(earlystarttime.getMinutes() + event.duration); // Return unix millis
-      var unixstarttime = Math.floor(starttime / 1000);
-      var unixendtime = Math.floor(endtime / 1000);
+
       const embeddedMessage = new EmbedBuilder()
         .setColor(0x770000)
         .setTitle(event.name)
