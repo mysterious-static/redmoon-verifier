@@ -534,7 +534,8 @@ setInterval(async function () {
       var roles = await connection.promise().query('select * from events_rolementions where event_id = ?', [event.id]);
       var messageContent = '';
       for (const role of roles[0]) {
-        var roleMention = await guild.roles.cache.get(role.id);
+        var roleMention = await guild.roles.fetch(role.id);
+        console.log(roleMention);
         console.log(`${roleMention}`);
         messageContent += `${roleMention} `;
       }
