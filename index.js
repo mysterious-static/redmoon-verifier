@@ -433,7 +433,8 @@ setInterval(async function () {
   console.log(events[0]);
   // Retrieve events from DB: include weeklyrecurrences where dayofweek == today.getDay(). include onetimedates. Join events_messages_info.
   for (const event of events[0]) {
-    var starttime = new Date(ymd + ' ' + event.starttime).getTimezoneOffset();
+    var starttime = new Date(ymd + ' ' + event.starttime);
+    starttime = starttime.setMinutes(starttime.getMinutes());
     var endtime = new Date().setMinutes(starttime.getMinutes() + event.duration); // Return unix millis
     var rsvptime = new Date().setMinutes(starttime.getMinutes() - event.rsvptime); // Return unix millis
     if (event.remindertime) {
@@ -450,7 +451,7 @@ setInterval(async function () {
         var roleMention = await client.roles.cache.get(role.id);
         messageContent += roleMention.toString();
       }
-      var unixstarttime = Math.floor(starttime.getTime() / 1000);
+      var unixstarttime = Math.floor(starttime / 1000);
       var unixendtime = Math.floor(endtime / 1000);
       const embeddedMessage = new EmbedBuilder()
         .setColor(0x770000)
