@@ -296,6 +296,9 @@ client.on('interactionCreate', async (interaction) => {
         var member = await interaction.guild.members.fetch(thisResponse.user_id);
         console.log(member);
         var nickname = member.nickname;
+        if (!nickname) {
+          var nickname = member.user.username;
+        }
         if (thisResponse.status == 'Accepted') {
           accepted += nickname + '\n';
         } else if (thisResponse.status == 'Tentative') {
