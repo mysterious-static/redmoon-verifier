@@ -214,6 +214,7 @@ client.on('interactionCreate', async (interaction) => {
           var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
           var message = await interaction.reply({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow], ephemeral: true });
         } else {
+          interaction.update({content: 'Event added!', components: []});
           // Commit one-time date to DB.
         }
       }
@@ -225,12 +226,15 @@ client.on('interactionCreate', async (interaction) => {
             const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleMentionMultiselector').setMinValues(1).setMaxValues(5);
             var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
             await interaction_second.update({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow] });
+          } else {
+            interaction_second.update({content: 'Event added!', components: []});
           }
         } else if (interaction_second.customId == 'RoleMentionMultiselector') {
           // Commit events_rolementions to DB.
           if (!recurring) {
             // Commit onetime date to DB.
           }
+          interaction_second.update({content: 'Event added!', components: []});
         }
       });
     } else {
