@@ -434,14 +434,14 @@ setInterval(async function () {
   // Retrieve events from DB: include weeklyrecurrences where dayofweek == today.getDay(). include onetimedates. Join events_messages_info.
   for (const event of events[0]) {
     var starttime = new Date(ymd + ' ' + event.starttime);
-    var endtime = new Date().setMinutes(starttime.getMinutes() + event.duration);
-    var rsvptime = new Date().setMinutes(starttime.getMinutes() - event.rsvptime);
+    var endtime = new Date().setMinutes(starttime.getMinutes() + event.duration); // Return unix millis
+    var rsvptime = new Date().setMinutes(starttime.getMinutes() - event.rsvptime); // Return unix millis
     if (event.remindertime) {
-      var remindertime = new Date().setMinutes(starttime.getMinutes() - event.remindertime);
+      var remindertime = new Date().setMinutes(starttime.getMinutes() - event.remindertime); // Return unix millis
     } else {
       var remindertime = false;
     }
-    if (rsvptime < today && !event.rsvp_id) {
+    if (rsvptime < today.getTime() && !event.rsvp_id) {
       var channel = await client.channels.cache.get(event.channel_id);
       // Create RSVP message with the buttons, pinging roles (retrieve).
       var roles = await connection.promise().query('select * from events_rolementions where event_id = ?', [event.id]);
@@ -451,7 +451,7 @@ setInterval(async function () {
         messageContent += roleMention.toString();
       }
       var unixstarttime = Math.floor(starttime.getTime() / 1000);
-      var unixendtime = Math.floor(endtime.getTime() / 1000);
+      var unixendtime = Math.floor(endtime / 1000);
       const embeddedMessage = new EmbedBuilder()
         .setcolor(0x770000)
         .setTitle(event.name)
@@ -471,7 +471,7 @@ setInterval(async function () {
       var message = await channel.send({ content: messageContent, embeds: [embeddedMessage], components: [buttonRow] });
       await connection.promise().query('insert into events_messages_info (event_id, day, rsvp_id) values (?, ?, ?)', [event.id, ymd, message.id]);
     }
-    if (remindertime && remindertime < today && !event.reminder_id) {
+    if (remindertime && remindertime < today.getTime() && !event.reminder_id) {
       var channel = await client.channels.cache.get(event.channel_id);
       var messageContent = '';
       var mentions = await connection.promise().query('select * from events_responses where event_id = ? and status = ?', [event.id, 'Accepted']);
