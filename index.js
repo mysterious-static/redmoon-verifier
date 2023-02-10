@@ -228,7 +228,7 @@ client.on('interactionCreate', async (interaction) => {
           }
         } else if (interaction_second.customId == 'RoleMentionMultiselector') {
           // Commit events_rolementions to DB.
-          if (!recurrence) {
+          if (!recurring) {
             // Commit onetime date to DB.
           }
         }
