@@ -458,9 +458,9 @@ setInterval(async function () {
         .setDescription(event.description)
         .addFields(
           { name: 'Time', value: '<t:' + unixstarttime + ':D> <t:' + unixstarttime + ':t> - <t:' + unixendtime + ':t>' },
-          { name: 'Accepted', value: '', inline: true },
-          { name: 'Tentative', value: '', inline: true },
-          { name: 'Declined', value: '', inline: true },
+          { name: 'Accepted', value: '*(none)*', inline: true },
+          { name: 'Tentative', value: '*(none)*', inline: true },
+          { name: 'Declined', value: '*(none)*', inline: true },
         );
       // Todo: Footer contains user name who created it.
       var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji('✅').setStyle('Success');
