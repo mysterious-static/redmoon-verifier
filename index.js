@@ -237,6 +237,7 @@ client.on('interactionCreate', async (interaction) => {
           }
         } else if (interaction_second.customId == 'RoleMentionMultiselector') {
           for (const role of interaction_second.values) {
+            console.log(role);
             await connection.promise().query('insert into events_rolementions (event_id, role_id) values (?, ?)', [event[0].insertId, role.id]);
           }
           if (!recurring) {
