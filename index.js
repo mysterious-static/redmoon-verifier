@@ -269,6 +269,7 @@ client.on('interactionCreate', async (interaction) => {
       // Get event responses where user_id = interaction.user.id.
 
       var thisEvent = event[0][0];
+      console.log(thisEvent);
       var today = new Date();
       var ymd = today.toLocaleString("default", { year: "numeric" }) + '-' + today.toLocaleString("default", { month: "2-digit" }) + '-' + today.toLocaleString("default", { day: "2-digit" });
       var earlystarttime = new Date(ymd + ' ' + thisEvent.starttime);
