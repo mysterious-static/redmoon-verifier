@@ -265,7 +265,7 @@ client.on('interactionCreate', async (interaction) => {
       // Get the event details, using buttonMessage.id == events_messages_info.rsvp_id.
       console.log(buttonMessage.id);
       console.log(interaction.user.id);
-      var event = await connection.promise().query('select e.*, r.status from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ? ', [interaction.user.id, buttonMessage.id]);
+      var event = await connection.promise().query('select e.*, r.status, mi.message_info_id from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ? ', [interaction.user.id, buttonMessage.id]);
       // Get event responses where user_id = interaction.user.id.
 
       var thisEvent = event[0][0];
@@ -279,16 +279,16 @@ client.on('interactionCreate', async (interaction) => {
       if (thisEvent.status) {
         if (newStatus == thisEvent.status) {
           console.log('delete');
-          await connection.promise().query('delete from events_responses where user_id = ? and event_id = ? and date = ?', [interaction.user.id, thisEvent.id, ymd]);
+          await connection.promise().query('delete from events_responses where user_id = ? and event_id = ? and message_info_id = ?', [interaction.user.id, thisEvent.id, thisEvent.message_info_id]);
         } else {
           console.log('update');
-          await connection.promise().query('update events_responses set status = ? where user_id = ? and event_id = ? and date = ?', [newStatus, interaction.user.id, thisEvent.id, ymd]);
+          await connection.promise().query('update events_responses set status = ? where user_id = ? and event_id = ? and message_info_id = ?', [newStatus, interaction.user.id, thisEvent.id, thisEvent.message_info_id]);
         }
       } else {
         console.log('insert');
-        await connection.promise().query('insert into events_responses (user_id, event_id, status, date) values (?, ?, ?, ?)', [interaction.user.id, thisEvent.id, newStatus, ymd]);
+        await connection.promise().query('insert into events_responses (user_id, event_id, status, message_info_id) values (?, ?, ?, ?)', [interaction.user.id, thisEvent.id, newStatus, thisEvent.message_info_id]);
       }
-      var eventResponses = await connection.promise().query('select * from events_responses where event_id = ? and date = ?', [thisEvent.id, ymd]);
+      var eventResponses = await connection.promise().query('select * from events_responses where event_id = ? and message_info_id = ?', [thisEvent.id, thisEvent.message_info_id]);
       var accepted = '';
       var tentative = '';
       var declined = '';
