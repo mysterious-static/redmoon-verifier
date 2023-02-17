@@ -265,7 +265,7 @@ client.on('interactionCreate', async (interaction) => {
       // Get the event details, using buttonMessage.id == events_messages_info.rsvp_id.
       console.log(buttonMessage.id);
       console.log(interaction.user.id);
-      var event = await connection.promise().query('select e.*, r.status, mi.id as message_info_id from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ? ', [interaction.user.id, buttonMessage.id]);
+      var event = await connection.promise().query('select e.*, r.status, mi.id as message_info_id from events e join events_messages_info mi on e.id = mi.event_id left join events_responses r on e.id = r.event_id and r.user_id = ? where mi.rsvp_id = ? ', [interaction.user.id, buttonMessage.id]);
       // Get event responses where user_id = interaction.user.id.
 
       var thisEvent = event[0][0];
