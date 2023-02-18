@@ -587,9 +587,9 @@ setInterval(async function () {
       console.log(accept);
       var decline = await client.emojis.cache.get('1076576737716080681');
       var tentative = await client.emojis.cache.get('1076577988839219220');
-      var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji(accept).setStyle('Secondary');
-      var buttonTentative = new ButtonBuilder().setCustomId('buttonTentative').setEmoji(tentative).setStyle('Secondary');
-      var buttonDecline = new ButtonBuilder().setCustomId('buttonDecline').setEmoji(decline).setStyle('Secondary');
+      var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji(accept.id).setStyle('Secondary');
+      var buttonTentative = new ButtonBuilder().setCustomId('buttonTentative').setEmoji(tentative.id).setStyle('Secondary');
+      var buttonDecline = new ButtonBuilder().setCustomId('buttonDecline').setEmoji(decline.id).setStyle('Secondary');
       // var buttonDelete = new ButtonBuilder().setCustomId('buttonDelete').setEmoji('🗑️').setStyle('Secondary');
       const buttonRow = new ActionRowBuilder().addComponents(buttonAccept, buttonTentative, buttonDecline);
       var message = await channel.send({ content: messageContent, embeds: [embeddedMessage], components: [buttonRow] });
