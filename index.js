@@ -120,6 +120,10 @@ client.on('ready', async () => {
         .setDescription('The date on which the non-recurring event should occur. Please enter as YYYY-MM-DD, e.g. 2023-01-30.'))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
+  var deleteevent = new SlashCommandBuilder().setName('deleteevent')
+    .setDescription('Delete an event.')
+    .setDefaultMemberPermissions(PermissionsFlagsBits.Administrator);
+
 
   await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
@@ -221,7 +225,7 @@ client.on('interactionCreate', async (interaction) => {
           await connection.promise().query('insert into events_onetimedates (event_id, date) values (?, ?)', [event[0].insertId, date]);
           await interaction.reply({ content: 'Event added!', ephemeral: true });
         }
-      }
+      } // else duration must be less than twelve hours
       var collector = message.createMessageComponentCollector({ time: 120000 });
       collector.on('collect', async (interaction_second) => {
         if (interaction_second.customId == 'WeeklyRecurrenceMultiselector') {
@@ -246,9 +250,29 @@ client.on('interactionCreate', async (interaction) => {
           interaction_second.update({ content: 'Event added!', components: [] });
         }
       });
-    } else {
-      interaction.reply({ content: 'Duration must be less than 12 hours.', ephemeral: true });
+    } else if (interaction.commandName == 'deleteevent') {
+      var events = await connection.promise().query('select e.*, otd.date from events e left outer join events_onetimedates otd on e.id = otd.event_id where e.server_id = ?', [interaction.guildId]);
+      var eventsKeyValues = [];
+      for (const event of events[0]) {
+        var thisEventChannel = await client.channels.cache.get(event.channel_id);
+        if (event.date) {
+          eventsKeyValues.push({ label: `${event.name} (in ${thisEventChannel.name}, on ${event.date})`, value: event.id.toString() });
+        } else {
+          eventsKeyValues.push({ label: `${event.name} (in ${thisEventChannel.name}, recurring)`, value: event.id.toString() });
+        }
+      }
+      const eventSelectComponent = new StringSelectMenuBuilder().setCustomId('EventMentionSelector').setMinValues(1).setMaxValues(1);
+      var eventSelectRow = new ActionRowBuilder().addComponents(eventSelectComponent);
+      var message = await interaction.reply({ content: 'Please select the event to delete.', components: [eventSelectRow], ephemeral: true });
+      var collector = message.createMessageComponentCollector({ time: 120000 });
+      collector.on('collect', async (interaction_second) => {
+        if (interaction_second.customId == 'EventMentionSelector') {
+          await connection.promise().query('delete from events where id = ?', [interaction.values[0]]);
+          interaction.second.update({ content: 'Event deleted.', components: [] });
+        }
+      });
     }
+
   } else if (interaction.isButton()) {
     var buttonMessage = interaction.message;
     if (buttonMessage.partial) {
