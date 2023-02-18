@@ -581,9 +581,12 @@ setInterval(async function () {
           { name: 'Declined', value: '*(none)*', inline: true },
         );
       // Todo: Footer contains user name who created it.
-      var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji('✅').setStyle('Success');
-      var buttonTentative = new ButtonBuilder().setCustomId('buttonTentative').setEmoji('❔').setStyle('Primary');
-      var buttonDecline = new ButtonBuilder().setCustomId('buttonDecline').setEmoji('❌').setStyle('Danger');
+      var accept = client.emojis.cache.get('1076576999813959680');
+      var decline = client.emojis.cache.get('1076576737716080681');
+      var tentative = client.emojis.cache.get('1076577988839219220');
+      var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji(accept).setStyle('Secondary');
+      var buttonTentative = new ButtonBuilder().setCustomId('buttonTentative').setEmoji(tentative).setStyle('Secondary');
+      var buttonDecline = new ButtonBuilder().setCustomId('buttonDecline').setEmoji(decline).setStyle('Secondary');
       // var buttonDelete = new ButtonBuilder().setCustomId('buttonDelete').setEmoji('🗑️').setStyle('Secondary');
       const buttonRow = new ActionRowBuilder().addComponents(buttonAccept, buttonTentative, buttonDecline);
       var message = await channel.send({ content: messageContent, embeds: [embeddedMessage], components: [buttonRow] });
