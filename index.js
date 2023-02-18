@@ -253,24 +253,28 @@ client.on('interactionCreate', async (interaction) => {
     } else if (interaction.commandName == 'deleteevent') {
       var events = await connection.promise().query('select e.*, otd.date from events e left outer join events_onetimedates otd on e.id = otd.event_id where e.server_id = ?', [interaction.guildId]);
       var eventsKeyValues = [];
-      for (const event of events[0]) {
-        var thisEventChannel = await client.channels.cache.get(event.channel_id);
-        if (event.date) {
-          eventsKeyValues.push({ label: `${event.name} (in ${thisEventChannel.name}, on ${event.date})`, value: event.id.toString() });
-        } else {
-          eventsKeyValues.push({ label: `${event.name} (in ${thisEventChannel.name}, recurring)`, value: event.id.toString() });
+      if (events[0].length > 0) {
+        for (const event of events[0]) {
+          var thisEventChannel = await client.channels.cache.get(event.channel_id);
+          if (event.date) {
+            eventsKeyValues.push({ label: `${event.name} (in ${thisEventChannel.name}, on ${event.date})`, value: event.id.toString() });
+          } else {
+            eventsKeyValues.push({ label: `${event.name} (in ${thisEventChannel.name}, recurring)`, value: event.id.toString() });
+          }
         }
+        const eventSelectComponent = new StringSelectMenuBuilder().setCustomId('EventMentionSelector').setMinValues(1).setMaxValues(1);
+        var eventSelectRow = new ActionRowBuilder().addComponents(eventSelectComponent);
+        var message = await interaction.reply({ content: 'Please select the event to delete.', components: [eventSelectRow], ephemeral: true });
+        var collector = message.createMessageComponentCollector({ time: 120000 });
+        collector.on('collect', async (interaction_second) => {
+          if (interaction_second.customId == 'EventMentionSelector') {
+            await connection.promise().query('delete from events where id = ?', [interaction.values[0]]);
+            interaction.second.update({ content: 'Event deleted.', components: [] });
+          }
+        });
+      } else {
+        interaction.reply({ content: 'I can\'t find any events in this server...', ephemeral: true });
       }
-      const eventSelectComponent = new StringSelectMenuBuilder().setCustomId('EventMentionSelector').setMinValues(1).setMaxValues(1);
-      var eventSelectRow = new ActionRowBuilder().addComponents(eventSelectComponent);
-      var message = await interaction.reply({ content: 'Please select the event to delete.', components: [eventSelectRow], ephemeral: true });
-      var collector = message.createMessageComponentCollector({ time: 120000 });
-      collector.on('collect', async (interaction_second) => {
-        if (interaction_second.customId == 'EventMentionSelector') {
-          await connection.promise().query('delete from events where id = ?', [interaction.values[0]]);
-          interaction.second.update({ content: 'Event deleted.', components: [] });
-        }
-      });
     }
 
   } else if (interaction.isButton()) {
