@@ -125,7 +125,7 @@ client.on('ready', async () => {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON()]);
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
