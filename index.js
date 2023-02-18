@@ -242,7 +242,6 @@ client.on('interactionCreate', async (interaction) => {
             }
           } else if (interaction_second.customId == 'RoleMentionMultiselector') {
             for (const role of interaction_second.values) {
-              console.log(role);
               await connection.promise().query('insert into events_rolementions (event_id, role_id) values (?, ?)', [event[0].insertId, role]);
             }
             if (!recurring) {
@@ -293,13 +292,10 @@ client.on('interactionCreate', async (interaction) => {
         var newStatus = 'Declined';
       }
       // Get the event details, using buttonMessage.id == events_messages_info.rsvp_id.
-      console.log(buttonMessage.id);
-      console.log(interaction.user.id);
       var event = await connection.promise().query('select e.*, r.status, mi.id as message_info_id from events e join events_messages_info mi on e.id = mi.event_id left outer join events_responses r on mi.id = r.message_info_id and r.user_id = ? where mi.rsvp_id = ?', [interaction.user.id, buttonMessage.id]);
       // Get event responses where user_id = interaction.user.id.
 
       var thisEvent = event[0][0];
-      console.log(thisEvent);
       var today = new Date();
       var ymd = today.toLocaleString("default", { year: "numeric" }) + '-' + today.toLocaleString("default", { month: "2-digit" }) + '-' + today.toLocaleString("default", { day: "2-digit" });
       var earlystarttime = new Date(ymd + ' ' + thisEvent.starttime);
@@ -326,7 +322,6 @@ client.on('interactionCreate', async (interaction) => {
       for (const thisResponse of eventResponses[0]) {
         console.log(thisResponse);
         var member = await interaction.guild.members.fetch(thisResponse.user_id);
-        console.log(member);
         var nickname = member.nickname;
         if (!nickname) {
           var nickname = member.user.username;
@@ -452,7 +447,6 @@ client.on('messageCreate', async function (message) {
         if (character_id) {
           response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
           api_character = await response.json();
-          console.log(api_character);
           bio = api_character.Character.Bio;
           if (bio.includes(character[0][0].code)) {
             await connection.promise().query('insert into successful_verifications (name, server, member) values (?, ?, ?)', [character[0][0].fname + ' ' + character[0][0].lname, character[0][0].server, message.author.id]);
@@ -546,7 +540,6 @@ setInterval(async function () {
   var today = new Date();
   var ymd = today.toLocaleString("default", { year: "numeric" }) + '-' + today.toLocaleString("default", { month: "2-digit" }) + '-' + today.toLocaleString("default", { day: "2-digit" })
   var events = await connection.promise().query('select e.*, mi.id as message_info_id, mi.rsvp_id, mi.reminder_id from events e left outer join events_weeklyrecurrences wr on e.id = wr.event_id left outer join events_onetimedates otd on e.id = otd.event_id left outer join events_messages_info mi on e.id = mi.event_id and mi.day = ? where (wr.dayofweek = ? or otd.date = ?) and ((e.remindertime is not null and mi.reminder_id is null) or mi.rsvp_id is null)', [ymd, today.getDay(), ymd]);
-  console.log(events[0]);
   // Retrieve events from DB: include weeklyrecurrences where dayofweek == today.getDay(). include onetimedates. Join events_messages_info.
   for (const event of events[0]) {
     var earlystarttime = new Date(ymd + ' ' + event.starttime);
@@ -566,7 +559,6 @@ setInterval(async function () {
       var messageContent = '';
       for (const role of roles[0]) {
         var roleMention = await guild.roles.fetch(role.role_id);
-        console.log(roleMention);
         console.log(`${roleMention}`);
         messageContent += `${roleMention} `;
       }
@@ -584,7 +576,6 @@ setInterval(async function () {
         );
       // Todo: Footer contains user name who created it.
       var accept = await client.emojis.cache.get('1076576999813959680');
-      console.log(accept);
       var decline = await client.emojis.cache.get('1076576737716080681');
       var tentative = await client.emojis.cache.get('1076577988839219220');
       var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji(accept.id).setStyle('Secondary');
