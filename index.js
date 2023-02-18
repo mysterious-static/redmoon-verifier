@@ -584,6 +584,7 @@ setInterval(async function () {
         );
       // Todo: Footer contains user name who created it.
       var accept = await client.emojis.cache.get('1076576999813959680');
+      console.log(accept);
       var decline = await client.emojis.cache.get('1076576737716080681');
       var tentative = await client.emojis.cache.get('1076577988839219220');
       var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji(accept).setStyle('Secondary');
