@@ -226,30 +226,32 @@ client.on('interactionCreate', async (interaction) => {
           await interaction.reply({ content: 'Event added!', ephemeral: true });
         }
       } // else duration must be less than twelve hours
-      var collector = message.createMessageComponentCollector({ time: 120000 });
-      collector.on('collect', async (interaction_second) => {
-        if (interaction_second.customId == 'WeeklyRecurrenceMultiselector') {
-          for (const dow of interaction_second.values) {
-            await connection.promise().query('insert into events_weeklyrecurrences (event_id, dayofweek) values (?, ?)', [event[0].insertId, dow]);
-          }
-          if (mentionroles) {
-            const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleMentionMultiselector').setMinValues(1).setMaxValues(5);
-            var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
-            await interaction_second.update({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow] });
-          } else {
+      if (!mentionroles || recurring) {
+        var collector = message.createMessageComponentCollector({ time: 120000 });
+        collector.on('collect', async (interaction_second) => {
+          if (interaction_second.customId == 'WeeklyRecurrenceMultiselector') {
+            for (const dow of interaction_second.values) {
+              await connection.promise().query('insert into events_weeklyrecurrences (event_id, dayofweek) values (?, ?)', [event[0].insertId, dow]);
+            }
+            if (mentionroles) {
+              const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleMentionMultiselector').setMinValues(1).setMaxValues(5);
+              var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
+              await interaction_second.update({ content: 'Next, please provide the roles to mention when the event RSVP goes up.', components: [roleSelectRow] });
+            } else {
+              interaction_second.update({ content: 'Event added!', components: [] });
+            }
+          } else if (interaction_second.customId == 'RoleMentionMultiselector') {
+            for (const role of interaction_second.values) {
+              console.log(role);
+              await connection.promise().query('insert into events_rolementions (event_id, role_id) values (?, ?)', [event[0].insertId, role]);
+            }
+            if (!recurring) {
+              await connection.promise().query('insert into events_onetimedates (event_id, onetimedate) values (?, ?)', [event[0].insertId, date]);
+            }
             interaction_second.update({ content: 'Event added!', components: [] });
           }
-        } else if (interaction_second.customId == 'RoleMentionMultiselector') {
-          for (const role of interaction_second.values) {
-            console.log(role);
-            await connection.promise().query('insert into events_rolementions (event_id, role_id) values (?, ?)', [event[0].insertId, role]);
-          }
-          if (!recurring) {
-            await connection.promise().query('insert into events_onetimedates (event_id, onetimedate) values (?, ?)', [event[0].insertId, date]);
-          }
-          interaction_second.update({ content: 'Event added!', components: [] });
-        }
-      });
+        });
+      }
     } else if (interaction.commandName == 'deleteevent') {
       var events = await connection.promise().query('select e.*, otd.date from events e left outer join events_onetimedates otd on e.id = otd.event_id where e.server_id = ?', [interaction.guildId]);
       var eventsKeyValues = [];
@@ -581,9 +583,9 @@ setInterval(async function () {
           { name: 'Declined', value: '*(none)*', inline: true },
         );
       // Todo: Footer contains user name who created it.
-      var accept = client.emojis.cache.get('1076576999813959680');
-      var decline = client.emojis.cache.get('1076576737716080681');
-      var tentative = client.emojis.cache.get('1076577988839219220');
+      var accept = await client.emojis.cache.get('1076576999813959680');
+      var decline = await client.emojis.cache.get('1076576737716080681');
+      var tentative = await client.emojis.cache.get('1076577988839219220');
       var buttonAccept = new ButtonBuilder().setCustomId('buttonAccept').setEmoji(accept).setStyle('Secondary');
       var buttonTentative = new ButtonBuilder().setCustomId('buttonTentative').setEmoji(tentative).setStyle('Secondary');
       var buttonDecline = new ButtonBuilder().setCustomId('buttonDecline').setEmoji(decline).setStyle('Secondary');
