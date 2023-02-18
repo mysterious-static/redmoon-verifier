@@ -122,7 +122,7 @@ client.on('ready', async () => {
 
   var deleteevent = new SlashCommandBuilder().setName('deleteevent')
     .setDescription('Delete an event.')
-    .setDefaultMemberPermissions(PermissionsFlagsBits.Administrator);
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 
   await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON()]);
