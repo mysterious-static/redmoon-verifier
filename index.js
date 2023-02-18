@@ -262,7 +262,7 @@ client.on('interactionCreate', async (interaction) => {
             eventsKeyValues.push({ label: `${event.name} (in ${thisEventChannel.name}, recurring)`, value: event.id.toString() });
           }
         }
-        const eventSelectComponent = new StringSelectMenuBuilder().setCustomId('EventMentionSelector').setMinValues(1).setMaxValues(1);
+        const eventSelectComponent = new StringSelectMenuBuilder().setOptions(eventsKeyValues).setCustomId('EventMentionSelector').setMinValues(1).setMaxValues(1);
         var eventSelectRow = new ActionRowBuilder().addComponents(eventSelectComponent);
         var message = await interaction.reply({ content: 'Please select the event to delete.', components: [eventSelectRow], ephemeral: true });
         var collector = message.createMessageComponentCollector({ time: 120000 });
