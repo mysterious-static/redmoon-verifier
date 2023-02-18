@@ -271,7 +271,7 @@ client.on('interactionCreate', async (interaction) => {
         collector.on('collect', async (interaction_second) => {
           if (interaction_second.customId == 'EventMentionSelector') {
             await connection.promise().query('delete from events where id = ?', [interaction_second.values[0]]);
-            interaction.second.update({ content: 'Event deleted.', components: [] });
+            interaction_second.update({ content: 'Event deleted.', components: [] });
           }
         });
       } else {
