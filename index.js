@@ -268,8 +268,8 @@ client.on('interactionCreate', async (interaction) => {
         var collector = message.createMessageComponentCollector({ time: 120000 });
         collector.on('collect', async (interaction_second) => {
           if (interaction_second.customId == 'EventMentionSelector') {
-            console.log(interaction.values);
-            //await connection.promise().query('delete from events where id = ?', [interaction.values[0]]);
+            console.log(interaction_second.values);
+            //await connection.promise().query('delete from events where id = ?', [interaction_second.values[0]]);
             //interaction.second.update({ content: 'Event deleted.', components: [] });
           }
         });
