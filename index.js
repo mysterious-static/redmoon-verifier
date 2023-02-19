@@ -144,7 +144,7 @@ client.on('interactionCreate', async (interaction) => {
       var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
       if (interaction.options.getInteger('speed') <= 50) {
         if (interaction.options.getString('message')) {
-          console.log(interaction.options.getString('message'));
+          console.log(interaction.options.getString('message').replaceAll('\\n', '\n'));
           var sentMessage = await interaction.options.getChannel('channel').send({ content: interaction.options.getString('message') });
         }
         if (exists[0].length > 0) {
