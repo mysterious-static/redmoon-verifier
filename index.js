@@ -46,7 +46,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .addStringOption(option =>
       option.setName('message')
-        .setDescription('The message you\'d like to sticky')
+        .setDescription('The message you\'d like to sticky. For new lines, use "\\n".')
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
