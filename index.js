@@ -144,15 +144,15 @@ client.on('interactionCreate', async (interaction) => {
       var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
       if (interaction.options.getInteger('speed') <= 50) {
         if (interaction.options.getString('message')) {
-          console.log(interaction.options.getString('message').replaceAll('\\n', '\n'));
-          var sentMessage = await interaction.options.getChannel('channel').send({ content: interaction.options.getString('message') });
+          var messageText = interaction.options.getString('message').replaceAll('\\n', '\n')
+          var sentMessage = await interaction.options.getChannel('channel').send({ content: messageText });
         }
         if (exists[0].length > 0) {
           if (interaction.options.getString('message')) {
-            await connection.promise().query('update stickymessages set message = ?, speed = ?, last_message_id = ? where channel_id = ?', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
+            await connection.promise().query('update stickymessages set message = ?, speed = ?, last_message_id = ? where channel_id = ?', [messageText, interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
           }
         } else {
-          await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [interaction.options.getString('message'), interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
+          await connection.promise().query('insert into stickymessages (message, speed, last_message_id, channel_id) values (?, ?, ?, ?)', [messageText, interaction.options.getInteger('speed'), sentMessage.id, interaction.options.getChannel('channel').id]);
         }
         stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
         interaction.reply({ content: 'Sticky set!', ephemeral: true });
