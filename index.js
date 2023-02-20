@@ -718,16 +718,18 @@ setInterval(async function () {
       }
       // order by server id
       console.log(birthdays_by_server);
-      for (const [server_id, thisBirthday] of Object.entries(birthdays_by_server)) {
+      for (const [server_id, thisBirthdaySet] of Object.entries(birthdays_by_server)) {
         // get server setting per server to check channel
         var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
         console.log(birthday_channel[0]);
         if (birthday_channel[0].length > 0) {
-          var channel = await client.channels.cache.get(birthday_channel[0][0].channel);
-          var guild = await client.guilds.cache.get(server_id);
-          if (guild.members.cache.get(thisBirthday.user)) {
-            await channel.send('<@' + thisBirthday.user + '> has a birthday today!');
-            await connection.promise().query('update birthdays set year_posted = ? where user = ? and server_id = ?', [date.getFullYear(), thisBirthday.user, server_id]);
+          for (const thisBirthday of thisBirthdaySet) {
+            var channel = await client.channels.cache.get(birthday_channel[0][0].channel);
+            var guild = await client.guilds.cache.get(server_id);
+            if (guild.members.cache.get(thisBirthday.user)) {
+              await channel.send('<@' + thisBirthday.user + '> has a birthday today!');
+              await connection.promise().query('update birthdays set year_posted = ? where user = ? and server_id = ?', [date.getFullYear(), thisBirthday.user, server_id]);
+            }
           }
         }
       }
