@@ -664,7 +664,9 @@ setInterval(async function () {
   var date = new Date();
   var summaries = await connection.promise().query('select * from birthdays_summaries where month = ? and year = ?', [date.getMonth() + 1, date.getFullYear()]);
   if (summaries[0].length == 0) {
+    console.log('Summary Check')
     var birthdays = await connection.promise().query('select user, day(date) as day, server_id from birthdays where month(date) = ? and day(date) = ? order by server_id', [date.getMonth() + 1, date.getDate()]);
+    console.log(birthdays[0]);
     if (birthdays[0].length > 0) {
       var birthdays_by_server = [];
       for (const birthday of birthdays[0]) {
