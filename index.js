@@ -664,7 +664,6 @@ setInterval(async function () {
   var date = new Date();
   var summaries = await connection.promise().query('select * from birthdays_summaries where month = ? and year = ?', [date.getMonth() + 1, date.getFullYear()]);
   if (summaries[0].length == 0) {
-    console.log('Summary Check')
     var birthdays = await connection.promise().query('select user, day(date) as day, server_id from birthdays where month(date) = ? and day(date) = ? order by server_id', [date.getMonth() + 1, date.getDate()]);
     console.log(birthdays[0]);
     if (birthdays[0].length > 0) {
@@ -676,28 +675,20 @@ setInterval(async function () {
           birthdays_by_server[birthday.server_id].push({ user: birthday.user, day: birthday.day });
         }
       }
-      console.log('birthdays by server:');
-      console.log(Object.entries(birthdays_by_server));
       var channelMessages = [];
       for (const [server_id, thisBirthdaySet] of Object.entries(birthdays_by_server)) {
         // Get server setting per server to check channel
-        console.log('server id: ' + server_id);
-        console.log('this birthday set: ' + thisBirthdaySet);
         var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
         if (birthday_channel[0].length > 0) {
           for (const thisBirthday of thisBirthdaySet) {
-            console.log(thisBirthday);
             if (channelMessages[birthday_channel[0][0].channel]) {
               channelMessages[birthday_channel[0][0].channel] += '<@' + thisBirthday.user + '>\n';
             } else {
               channelMessages[birthday_channel[0][0].channel] = '**This Month\'s Birthdays:**\n\n<@' + thisBirthday.user + '> - ' + thisBirthday.day + '\n';
             }
           }
-        } else {
-          console.log('it said no set channel');
         }
       }
-      console.log(channelMessages);
       for (const [channel_id, thisMessage] of Object.entries(channelMessages)) {
         var channel = await client.channels.cache.get(channel_id);
         channel.send(thisMessage);
@@ -708,7 +699,6 @@ setInterval(async function () {
   console.log('Today\'s birthdays processing');
   var todays_birthdays = await connection.promise().query('select user, server_id from birthdays where month(date) = ? and day(date) = ? and year_posted < ?', [date.getMonth() + 1, date.getDate(), date.getFullYear()]);
   if (todays_birthdays[0].length > 0) {
-    console.log(todays_birthdays[0]);
     birthdays_by_server = [];
     for (const birthday of todays_birthdays[0]) {
       if (!birthdays_by_server[birthday.server_id]) {
@@ -717,7 +707,6 @@ setInterval(async function () {
         birthdays_by_server[birthday.server_id].push({ user: birthday.user });
       }
       // order by server id
-      console.log(birthdays_by_server);
       for (const [server_id, thisBirthdaySet] of Object.entries(birthdays_by_server)) {
         // get server setting per server to check channel
         var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
