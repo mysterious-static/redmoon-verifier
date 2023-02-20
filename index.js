@@ -676,11 +676,12 @@ setInterval(async function () {
           birthdays_by_server[birthday.server_id].push({ user: birthday.user, day: birthday.day });
         }
       }
-      console.log(birthdays_by_server);
+      console.log('birthdays by server:' + birthdays_by_server);
       var channelMessages = [];
       for (const [server_id, thisBirthdaySet] of birthdays_by_server.entries()) {
         // Get server setting per server to check channel
-        console.log(thisBirthdaySet);
+        console.log('server id: ' + server_id);
+        console.log('this birthday set: ' + thisBirthdaySet);
         var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
         if (birthday_channel[0].length > 0) {
           for (const thisBirthday of thisBirthdaySet) {
