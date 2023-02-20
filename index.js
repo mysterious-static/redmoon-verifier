@@ -677,7 +677,7 @@ setInterval(async function () {
         }
       }
       console.log('birthdays by server:');
-      console.log(birthdays_by_server);
+      console.log(birthdays_by_server.entries());
       var channelMessages = [];
       for (const [server_id, thisBirthdaySet] of birthdays_by_server.entries()) {
         // Get server setting per server to check channel
