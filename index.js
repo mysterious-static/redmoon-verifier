@@ -680,15 +680,19 @@ setInterval(async function () {
       var channelMessages = [];
       for (const [server_id, thisBirthdaySet] of birthdays_by_server.entries()) {
         // Get server setting per server to check channel
+        console.log(thisBirthdaySet);
         var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
         if (birthday_channel[0].length > 0) {
           for (const thisBirthday of thisBirthdaySet) {
+            console.log(thisBirthday);
             if (channelMessages[birthday_channel[0][0].channel]) {
               channelMessages[birthday_channel[0][0].channel] += '<@' + thisBirthday.user + '>\n';
             } else {
               channelMessages[birthday_channel[0][0].channel] = '**This Month\'s Birthdays:**\n\n<@' + thisBirthday.user + '>\n';
             }
           }
+        } else {
+          console.log('it said no set channel');
         }
       }
       console.log(channelMessages);
