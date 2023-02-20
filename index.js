@@ -678,14 +678,16 @@ setInterval(async function () {
       }
       console.log(birthdays_by_server);
       var channelMessages = [];
-      for (const [server_id, thisBirthday] of birthdays_by_server.entries()) {
+      for (const [server_id, thisBirthdaySet] of birthdays_by_server.entries()) {
         // Get server setting per server to check channel
         var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
         if (birthday_channel[0].length > 0) {
-          if (channelMessages[birthday_channel[0][0].channel]) {
-            channelMessages[birthday_channel[0][0].channel] += '<@' + thisBirthday.user + '>\n';
-          } else {
-            channelMessages[birthday_channel[0][0].channel] = '**This Month\'s Birthdays:**\n\n<@' + thisBirthday.user + '>\n';
+          for (const thisBirthday of thisBirthdaySet) {
+            if (channelMessages[birthday_channel[0][0].channel]) {
+              channelMessages[birthday_channel[0][0].channel] += '<@' + thisBirthday.user + '>\n';
+            } else {
+              channelMessages[birthday_channel[0][0].channel] = '**This Month\'s Birthdays:**\n\n<@' + thisBirthday.user + '>\n';
+            }
           }
         }
       }
@@ -713,6 +715,7 @@ setInterval(async function () {
       for (const [server_id, thisBirthday] of birthdays_by_server.entries()) {
         // get server setting per server to check channel
         var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
+        console.log(birthday_channel[0]);
         if (birthday_channel[0].length > 0) {
           var channel = await client.channels.cache.get(birthday_channel[0][0].channel);
           var guild = await client.guilds.cache.get(server_id);
