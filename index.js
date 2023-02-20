@@ -690,7 +690,7 @@ setInterval(async function () {
             if (channelMessages[birthday_channel[0][0].channel]) {
               channelMessages[birthday_channel[0][0].channel] += '<@' + thisBirthday.user + '>\n';
             } else {
-              channelMessages[birthday_channel[0][0].channel] = '**This Month\'s Birthdays:**\n\n<@' + thisBirthday.user + '>\n';
+              channelMessages[birthday_channel[0][0].channel] = '**This Month\'s Birthdays:**\n\n<@' + thisBirthday.user + '> - ' + thisBirthday.day + '\n';
             }
           }
         } else {
@@ -725,7 +725,7 @@ setInterval(async function () {
         if (birthday_channel[0].length > 0) {
           var channel = await client.channels.cache.get(birthday_channel[0][0].channel);
           var guild = await client.guilds.cache.get(server_id);
-          if (guild.member.fetch(user)) {
+          if (guild.members.fetch(user)) {
             await channel.send('<@' + thisBirthday.user + '> has a birthday today!');
             await connection.promise().query('update birthdays set year_posted = ? where user = ? and server_id = ?', [date.getFullYear(), user, server_id]);
           }
