@@ -670,12 +670,10 @@ setInterval(async function () {
     if (birthdays[0].length > 0) {
       var birthdays_by_server = [];
       for (const birthday of birthdays[0]) {
-        if (birthday.day == date.getDate()) {
-          if (!birthdays_by_server[birthday.server_id]) {
-            birthdays_by_server[birthday.server_id] = [{ user: birthday.user, day: birthday.day }];
-          } else {
-            birthdays_by_server[birthday.server_id].push({ user: birthday.user, day: birthday.day });
-          }
+        if (!birthdays_by_server[birthday.server_id]) {
+          birthdays_by_server[birthday.server_id] = [{ user: birthday.user, day: birthday.day }];
+        } else {
+          birthdays_by_server[birthday.server_id].push({ user: birthday.user, day: birthday.day });
         }
       }
       var channelMessages = [];
