@@ -727,7 +727,7 @@ setInterval(async function () {
           var guild = await client.guilds.cache.get(server_id);
           if (guild.members.fetch(thisBirthday.user)) {
             await channel.send('<@' + thisBirthday.user + '> has a birthday today!');
-            await connection.promise().query('update birthdays set year_posted = ? where user = ? and server_id = ?', [date.getFullYear(), user, server_id]);
+            await connection.promise().query('update birthdays set year_posted = ? where user = ? and server_id = ?', [date.getFullYear(), thisBirthday.user, server_id]);
           }
         }
       }
