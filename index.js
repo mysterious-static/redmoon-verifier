@@ -572,12 +572,10 @@ client.on('messageReactionAdd', async function (reaction, user) {
         if (message.content.length > 0) {
           embeddedMessage.setDescription(message.content);
         }
-        console.log(message);
         if (message.embeds && message.embeds[0] !== undefined && message.embeds[0].image) {
           embeddedMessage.setImage(message.embeds[0].image.url);
         }
         if (message.attachments && message.attachments.first() !== undefined && message.attachments.first().contentType.startsWith('image')) {
-          console.log('has attachment');
           embeddedMessage.setImage(message.attachments.first().url);
         }
         embeddedMessage.setFields({ name: 'Source', value: '[click!](' + message.url + ')' })
@@ -587,7 +585,6 @@ client.on('messageReactionAdd', async function (reaction, user) {
         await connection.promise().query('insert into hof_msg (message_id, hof_msg_id) values (?, ?)', [message.id, hof_msg.id]);
       } else {
         var channel = await client.channels.cache.get(hofData[0][0].channel);
-        console.log(channel);
         await channel.messages.fetch(is_hof[0][0].hof_msg_id).then(hof_msg => hof_msg.edit({ content: reaction.count + ' ' + reaction.emoji.toString() + ' - ' + message.channel.toString() }));
       }
 
@@ -620,7 +617,6 @@ setInterval(async function () {
       var messageContent = '';
       for (const role of roles[0]) {
         var roleMention = await guild.roles.fetch(role.role_id);
-        console.log(`${roleMention}`);
         messageContent += `${roleMention} `;
       }
       var unixstarttime = Math.floor(starttime / 1000);
@@ -665,7 +661,6 @@ setInterval(async function () {
   var summaries = await connection.promise().query('select * from birthdays_summaries where month = ? and year = ?', [date.getMonth() + 1, date.getFullYear()]);
   if (summaries[0].length == 0) {
     var birthdays = await connection.promise().query('select user, day(date) as day, server_id from birthdays where month(date) = ? and day(date) = ? order by server_id', [date.getMonth() + 1, date.getDate()]);
-    console.log(birthdays[0]);
     if (birthdays[0].length > 0) {
       var birthdays_by_server = [];
       for (const birthday of birthdays[0]) {
@@ -696,7 +691,6 @@ setInterval(async function () {
       await connection.promise().query('insert into birthdays_summaries (month, year) values (?, ?)', [date.getMonth() + 1, date.getFullYear()]);
     }
   }
-  console.log('Today\'s birthdays processing');
   var todays_birthdays = await connection.promise().query('select user, server_id from birthdays where month(date) = ? and day(date) = ? and year_posted < ?', [date.getMonth() + 1, date.getDate(), date.getFullYear()]);
   if (todays_birthdays[0].length > 0) {
     birthdays_by_server = [];
@@ -710,7 +704,6 @@ setInterval(async function () {
       for (const [server_id, thisBirthdaySet] of Object.entries(birthdays_by_server)) {
         // get server setting per server to check channel
         var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
-        console.log(birthday_channel[0]);
         if (birthday_channel[0].length > 0) {
           for (const thisBirthday of thisBirthdaySet) {
             var channel = await client.channels.cache.get(birthday_channel[0][0].channel);
