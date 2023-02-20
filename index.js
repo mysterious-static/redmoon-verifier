@@ -676,7 +676,8 @@ setInterval(async function () {
           birthdays_by_server[birthday.server_id].push({ user: birthday.user, day: birthday.day });
         }
       }
-      console.log('birthdays by server:' + birthdays_by_server);
+      console.log('birthdays by server:');
+      console.log(birthdays_by_server);
       var channelMessages = [];
       for (const [server_id, thisBirthdaySet] of birthdays_by_server.entries()) {
         // Get server setting per server to check channel
@@ -704,7 +705,7 @@ setInterval(async function () {
       await connection.promise().query('insert into birthdays_summaries (month, year) values (?, ?)', [date.getMonth() + 1, date.getFullYear()]);
     }
   }
-
+  console.log('Today\'s birthdays processing');
   var todays_birthdays = await connection.promise().query('select user, server_id from birthdays where month(date) = ? and day(date) = ? and year_posted < ?', [date.getMonth() + 1, date.getDate(), date.getFullYear()]);
   if (todays_birthdays[0].length > 0) {
     console.log(todays_birthdays[0]);
