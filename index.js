@@ -712,7 +712,7 @@ setInterval(async function () {
     birthdays_by_server = [];
     for (const birthday of todays_birthdays[0]) {
       if (!birthdays_by_server[birthday.server_id]) {
-        birthdays_by_server[birthday.server_id = [{ user: birthday.user }]];
+        birthdays_by_server[birthday.server_id] = [{ user: birthday.user }];
       } else {
         birthdays_by_server[birthday.server_id].push({ user: birthday.user });
       }
