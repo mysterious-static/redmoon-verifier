@@ -697,7 +697,8 @@ setInterval(async function () {
   }
 
   var todays_birthdays = await connection.promise().query('select user, server_id from birthdays where month(date) = ? and day(date) = ? and year_posted < ?', [date.getMonth() + 1, date.getDate(), date.getFullYear()]);
-  if (todays_birthdays.length > 0) {
+  if (todays_birthdays[0].length > 0) {
+    console.log(todays_birthdays[0]);
     birthdays_by_server = [];
     for (const birthday of todays_birthdays[0]) {
       if (!birthdays_by_server[birthday.server_id]) {
