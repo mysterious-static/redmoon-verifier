@@ -316,7 +316,7 @@ client.on('interactionCreate', async (interaction) => {
       var user = interaction.options.getUser('user');
       var month = interaction.options.getInteger('month');
       var day = interaction.options.getInteger('day');
-      var date = new Date().getFullYear(); + '-' + month + '-' + day;
+      var date = new Date().getFullYear() + '-' + month + '-' + day;
       var birthdays = await connection.promise().query('select * from birthdays where user = ? and server_id = ?', [user.id, interaction.guildId]);
       if (birthdays[0].length > 0) {
         await connection.promise().query('update birthdays set date = ? where user = ? and server_id = ?', [date, user.id, interaction.guildId]);
