@@ -120,12 +120,47 @@ client.on('ready', async () => {
         .setDescription('The date on which the non-recurring event should occur. Please enter as YYYY-MM-DD, e.g. 2023-01-30.'))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
+  var birthday = new SlashCommandBuilder().setName('birthday')
+    .setDescription('Set a birthday for a user.')
+    .addUserOption(option =>
+      option.setName('user')
+        .setDescription('The user whose birthday you\'re setting.')
+        .setRequired(true))
+    .addIntegerOption(option =>
+      option.setName('month')
+        .setDescription('The month of the user\'s birthday.')
+        .setRequired(true))
+    .addIntegerOption(option =>
+      option.setName('day')
+        .setDescription('The day of the user\'s birthday.')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+  //Append current year, make it a datetime so we can query later with month(date) = ? and day(date) = ?
+  //On the daily cron, check to see if the user is still in the server before posting.
+  var removebirthday = new SlashCommandBuilder().setName('removebirthday')
+    .setDescription('Remove a user\'s birthday.')
+    .addUserOption(option =>
+      option.setName('user')
+        .setDescription('The user whose birthday you wish to remove.')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
+  var birthdaychannel = new SlashCommandBuilder().setName('birthdaychannel')
+    .setDescription('Set a channel to announce monthly and daily birthdays in.')
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('The channel where you\'d like birthdays to be posted.')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Adminstrator);
+
+  //Monthly cron to post This Month's Birthdays.
+
   var deleteevent = new SlashCommandBuilder().setName('deleteevent')
     .setDescription('Delete an event.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON()]);
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -277,6 +312,31 @@ client.on('interactionCreate', async (interaction) => {
       } else {
         interaction.reply({ content: 'I can\'t find any events in this server...', ephemeral: true });
       }
+    } else if (interaction.commandName == 'birthday') {
+      var user = interaction.options.getUser('user');
+      var month = interaction.options.getInteger('month');
+      var day = interaction.options.getInteger('day');
+      var date = new Date().getFullYear(); + '-' + month + '-' + day;
+      var birthdays = await connection.promise().query('select * from birthdays where user = ? and server_id = ?', [user.id, interaction.guildId]);
+      if (birthdays[0].length > 0) {
+        await connection.promise().query('update birthdays set date = ? where user = ? and server_id = ?', [date, user.id, interaction.guildId]);
+      } else {
+        await connection.promise().query('insert into birthdays (user, date, server_id) values (?, ?, ?)', [user.id, date, interaction.guildId]);
+      }
+      await interaction.reply({ content: 'Birthday updated!', ephemeral: true });
+    } else if (interaction.commandName == 'removebirthday') {
+      var user = interaction.options.getUser('user');
+      await connection.promise().query('delete from birthdays where user = ?', [user.id]);
+      await interaction.reply({ content: 'Birthday deleted.', ephemeral: true });
+    } else if (interaction.commandName == 'birthdaychannel') {
+      var channel = interaction.options.getChannel('channel');
+      var existingsetting = await connection.promise().query('select * from server_settings where server_id = ? and option_name = "birthday_channel"', [interaction.guildId]);
+      if (existingsetting[0].length > 0) {
+        await connection.promise().query('update server_settings set value = ? where option_name = "birthday_channel" and server_id = ?', [channel.id, interaction.guildId]);
+      } else {
+        await connection.promise().query('insert into server_settings (server_id, option_name, value) values (?, ?, ?)', [interaction.guildId, "birthday_channel", channel.id]);
+      }
+      await interaction.reply({ content: 'Channel updated!', ephemeral: true });
     }
 
   } else if (interaction.isButton()) {
@@ -601,4 +661,63 @@ setInterval(async function () {
     }
   }
   // TODO: Clean up old events.
+  var date = new Date();
+  var summaries = await connection.promise().query('select * from birthdays_summaries where month = ? and year = ?', [date.getMonth() + 1, date.getFullYear()]);
+  if (summaries[0].length == 0) {
+    var birthdays = await connection.promise().query('select user, day(date) as day, server_id from birthdays where month(date) = ? and day(date) = ? order by server_id', [date.getMonth() + 1, date.getDate()]);
+    if (birthdays[0].length > 0) {
+      var birthdays_by_server = [];
+      for (const birthday of birthdays[0]) {
+        if (birthday.day == date.getDate()) {
+          if (!birthdays_by_server[birthday.server_id]) {
+            birthdays_by_server[birthday.server_id] = [{ user: birthday.user, day: birthday.day }];
+          } else {
+            birthdays_by_server[birthday.server_id].push({ user: birthday.user, day: birthday.day });
+          }
+        }
+      }
+      var channelMessages = [];
+      for (const [server_id, thisBirthday] of birthdays_by_server.entries()) {
+        // Get server setting per server to check channel
+        var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
+        if (birthday_channel[0].length > 0) {
+          if (channelMessages[birthday_channel[0][0].channel]) {
+            channelMessages[birthday_channel[0][0].channel] += '<@' + thisBirthday.user + '>\n';
+          } else {
+            channelMessages[birthday_channel[0][0].channel] = '**This Month\'s Birthdays:**\n\n<@' + thisBirthday.user + '>\n';
+          }
+        }
+      }
+      for (const [channel_id, thisMessage] of channelMessages.entries()) {
+        var channel = await client.channels.cache.get(channel_id);
+        channel.send(thisMessage);
+      }
+      await connection.promise().query('insert into birthdays_summaries (month, year) values (?, ?)', [date.getMonth() + 1, date.getFullYear()]);
+    }
+  }
+
+  var todays_birthdays = await connection.promise().query('select user, server_id from birthdays where month(date) = ? and day(date) = ? and year_posted < ?', [date.getMonth() + 1, date.getDate(), date.getFullYear()]);
+  if (todays_birthdays.length > 0) {
+    birthdays_by_server = [];
+    for (const birthday of todays_birthdays[0]) {
+      if (!birthdays_by_server[birthday.server_id]) {
+        birthdays_by_server[birthday.server_id = [{ user: birthday.user }]];
+      } else {
+        birthdays_by_server[birthday.server_id].push({ user: birthday.user });
+      }
+      // order by server id
+      for (const [server_id, thisBirthday] of birthdays_by_server.entries()) {
+        // get server setting per server to check channel
+        var birthday_channel = await connection.promise().query('select value as channel from server_settings where server_id = ? and option_name = ?', [server_id, "birthday_channel"]);
+        if (birthday_channel[0].length > 0) {
+          var channel = await client.channels.cache.get(birthday_channel[0][0].channel);
+          var guild = await client.guilds.cache.get(server_id);
+          if (guild.member.fetch(user)) {
+            await channel.send('<@' + thisBirthday.user + '> has a birthday today!');
+            await connection.promise().query('update birthdays set year_posted = ? where user = ? and server_id = ?', [date.getFullYear(), user, server_id]);
+          }
+        }
+      }
+    }
+  }
 }, 60000);
