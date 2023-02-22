@@ -753,7 +753,7 @@ setInterval(async function () {
   const result = await response.json();
   var jenova = result.find(item => item.name == "Jenova");
   console.log(jenova);
-  if (jenova.status != 'Congested') {
+  if (jenova.congestion != 'Congested') {
     var last_status = await connection.promise().query('select * from server_status');
     if (last_status[0][0].status == 'Congested') {
       var servers = await connection.promise().query('select * from server_settings where option_name = ?', ['server_open_channel']);
@@ -776,10 +776,10 @@ setInterval(async function () {
           channel.send(messageContent);
         }
       }
-      await connection.promise().query('update server_status set status = ?,  last_open = ?', [jenova.status, date.toISOString().split('T')[0]]);
+      await connection.promise().query('update server_status set status = ?,  last_open = ?', [jenova.congestion, date.toISOString().split('T')[0]]);
     }
   } else {
-    await connection.promise().query('update server_status set status = ?', [jenova.status]);
+    await connection.promise().query('update server_status set status = ?', [jenova.congestion]);
   }
 
 }, 60000);
