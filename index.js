@@ -4,7 +4,6 @@ const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayI
 var mysql = require('mysql2');
 var fetch = require('node-fetch');
 var crypto = require('node:crypto');
-const bent = require('bent');
 
 var connection = mysql.createConnection({
   host: process.env.db_host,
