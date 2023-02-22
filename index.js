@@ -4,6 +4,8 @@ const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayI
 var mysql = require('mysql2');
 var fetch = require('node-fetch');
 var crypto = require('node:crypto');
+const bent = require('bent');
+
 var connection = mysql.createConnection({
   host: process.env.db_host,
   user: process.env.db_user,
@@ -159,8 +161,18 @@ client.on('ready', async () => {
     .setDescription('Delete an event.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
+  var serveropenchannel = new SlashCommandBuilder().setName('serveropenchannel')
+    .setDescription('Set the channel to notify when Jenova is open for transfers.')
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('The channel to notify when Jenova opens for transfers.')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+  var serveropenroles = new SlashCommandBuilder().setName('serveropenroles')
+    .setDescription('Set the roles to notify when Jenova is open for transfers.');
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON()]);
+
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -337,6 +349,19 @@ client.on('interactionCreate', async (interaction) => {
         await connection.promise().query('insert into server_settings (server_id, option_name, value) values (?, ?, ?)', [interaction.guildId, "birthday_channel", channel.id]);
       }
       await interaction.reply({ content: 'Channel updated!', ephemeral: true });
+    } else if (interaction.commandName == 'serveropenchannel') {
+      var channel = interaction.options.getChannel('channel');
+      var existingsetting = await connection.promise().query('select * from server_settings where server_id = ? and option_name = "server_open_channel"', [interaction.guildId]);
+      if (existingsetting[0].length > 0) {
+        await connection.promise().query('update server_settings set value = ? where option_name = "server_open_channel" and server_id = ?', [channel.id, interaction.guildId]);
+      } else {
+        await connection.promise().query('insert into server_settings (server_id, option_name, value) values (?, ?, ?)', [interaction.guildId, "server_open_channel", channel.id]);
+      }
+      await interaction.reply({ content: 'Channel updated!', ephemeral: true });
+    } else if (interaction.commandName == 'serveropenroles') {
+      const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('ServerOpenRoleMentionMultiselector').setMinValues(1).setMaxValues(5);
+      var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
+      var message = await interaction.reply({ content: 'Please provide the roles to mention when Jenova opens (up to 5):', components: [roleSelectRow], ephemeral: true });
     }
 
   } else if (interaction.isButton()) {
@@ -419,6 +444,14 @@ client.on('interactionCreate', async (interaction) => {
       await interaction.reply({ content: 'Your RSVP was recorded!', ephemeral: true });
     } else if (interaction.customId == 'buttonDelete') {
       // If interaction.user is administrator or their id matches the event author, delete.
+    }
+  } else if (interaction.isRoleSelectMenu()) {
+    if (interaction.customId == 'ServerOpenRoleMentionMultiselector') {
+      await connection.promise().query('delete from server_open_announce_roles where server_id = ?', [interaction.guildId]);
+      for (const role_id of interaction.values) {
+        await connection.promise().query('insert into server_open_announce_roles (server_id, role_id) values (?, ?)', [interaction.guildId, role_id]);
+      }
+      await interaction.update({ content: 'Roles selected!', components: [] });
     }
   }
 });
@@ -716,4 +749,38 @@ setInterval(async function () {
       }
     }
   }
+
+  var response = await fetch('https://api.xivstatus.com/api/servers');
+  const result = await response.json();
+  var jenova = result.find(item => item.name == "Jenova");
+  console.log(jenova);
+  if (jenova.status != 'Congested') {
+    var last_status = await connection.promise().query('select * from server_status');
+    if (last_status[0][0].status == 'Congested') {
+      var servers = await connection.promise().query('select * from server_settings where option_name = ?', ['server_open_channel']);
+      if (servers[0].length > 0) {
+        for (const thisServer of servers[0]) {
+          var messageContent = '';
+          // Remember , var date is ALREADY today's date, we dont need to get it again rn.
+          var last_week = new Date();
+          last_week.setDate(date.getDate() - 7);
+          var last_open_date = new Date(last_status[0][0].last_open);
+          if (last_open_date < last_week) {
+            var roles = await connection.promise().query('select * from server_open_announce_roles where server_id = ?', [thisServer.id]);
+            for (const role of roles[0]) {
+              var roleMention = await client.roles.cache.get(role.role_id);
+              messageContent += `${roleMention} `;
+            }
+          }
+          messageContent += '\n **Jenova is now open for transfers!**';
+          var channel = client.channels.cache.get(thisServer.value);
+          channel.send(messageContent);
+        }
+      }
+      await connection.promise().query('update server_status set status = ?,  last_open = ?', [jenova.status, date.toISOString().split('T')[0]]);
+    }
+  } else {
+    await connection.promise().query('update server_status set status = ?', [jenova.status]);
+  }
+
 }, 60000);
