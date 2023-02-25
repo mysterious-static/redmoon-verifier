@@ -170,8 +170,15 @@ client.on('ready', async () => {
   var serveropenroles = new SlashCommandBuilder().setName('serveropenroles')
     .setDescription('Set the roles to notify when Jenova is open for transfers.');
 
+    var namechangechannel = new SlashCommandBuilder().setName('namechangechannel')
+    .setDescription('Set the channel to notify when users change their character name.')
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('The channel to notify when a user changes their character name.')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON()]);
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -361,6 +368,15 @@ client.on('interactionCreate', async (interaction) => {
       const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('ServerOpenRoleMentionMultiselector').setMinValues(1).setMaxValues(5);
       var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
       var message = await interaction.reply({ content: 'Please provide the roles to mention when Jenova opens (up to 5):', components: [roleSelectRow], ephemeral: true });
+    } else if (interaction.commandName == 'namechangechannel') {
+      var channel = interaction.options.getChannel('channel');
+      var existingsetting = await connection.promise().query('select * from server_settings where server_id = ? and option_name = "namechange_channel"', [interaction.guildId]);
+      if (existingsetting[0].length > 0) {
+        await connection.promise().query('update server_settings set value = ? where option_name = "namechange_channel" and server_id = ?', [channel.id, interaction.guildId]);
+      } else {
+        await connection.promise().query('insert into server_settings (server_id, option_name, value) values (?, ?, ?)', [interaction.guildId, "namechange_channel", channel.id]);
+      }
+      await interaction.reply({ content: 'Channel updated!', ephemeral: true });
     }
 
   } else if (interaction.isButton()) {
@@ -491,7 +507,12 @@ client.on('messageCreate', async function (message) {
                 await message.member.roles.add(verified_role);
                 roles_string += verified_role.toString();
                 //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
-                await connection.promise().query('delete from member_registrations where member_id = ?; insert into member_registrations (member_id, lodestone_id, guild_id) values (?, ?, ?)', [message.member.id, message.member.id, character_id, message.member.guild.id]);
+                var exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
+                if (exists[0].length > 0 && exists[1].length > 0) {
+                  var channel = await client.channels.cache.get(exists[1][0].value);
+                  await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
+                }
+                await connection.promise().query('delete from member_registrations where member_id = ? and guild_id = ?; insert into member_registrations (member_id, lodestone_id, guild_id) values (?, ?, ?)', [message.member.id, message.member.guild.id, message.member.id, character_id, message.member.guild.id]);
                 const embeddedMessage = new EmbedBuilder()
                   .setColor(0xFFD700)
                   .setAuthor({ name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id })
