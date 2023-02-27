@@ -170,7 +170,7 @@ client.on('ready', async () => {
   var serveropenroles = new SlashCommandBuilder().setName('serveropenroles')
     .setDescription('Set the roles to notify when Jenova is open for transfers.');
 
-    var namechangechannel = new SlashCommandBuilder().setName('namechangechannel')
+  var namechangechannel = new SlashCommandBuilder().setName('namechangechannel')
     .setDescription('Set the channel to notify when users change their character name.')
     .addChannelOption(option =>
       option.setName('channel')
@@ -509,8 +509,9 @@ client.on('messageCreate', async function (message) {
                 //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
                 var exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
                 if (exists[0].length > 0 && exists[1].length > 0) {
-                  var channel = await client.channels.cache.get(exists[1][0].value);
-                  await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
+                  console.log(exists);
+                  //var channel = await client.channels.cache.get(exists[1][0].value);
+                  //await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
                 }
                 await connection.promise().query('delete from member_registrations where member_id = ? and guild_id = ?; insert into member_registrations (member_id, lodestone_id, guild_id) values (?, ?, ?)', [message.member.id, message.member.guild.id, message.member.id, character_id, message.member.guild.id]);
                 const embeddedMessage = new EmbedBuilder()
