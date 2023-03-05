@@ -4,6 +4,7 @@ const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayI
 var mysql = require('mysql2');
 var fetch = require('node-fetch');
 var crypto = require('node:crypto');
+var zxcvbn = require('zxcvbn');
 
 var connection = mysql.createConnection({
   host: process.env.db_host,
@@ -580,6 +581,10 @@ client.on('messageCreate', async function (message) {
     } else if (message.content.startsWith('!rmcancel')) {
       await connection.promise().query('delete from verification_codes where userid = ?', [message.author.id]);
       message.author.send({ content: 'I cancelled your pending verification. You can start a new one by using `!rmverify`.' });
+    } else if (message.content.startsWith('!password')) {
+      var password = message.content.substr(message.content.indexOf(' ') + 1);
+      var results = zxcvbn(password);
+      message.reply('The password `' + password + '` will take about ' + results.crack_times_seconds + ' to crack.');
     }
 
 
