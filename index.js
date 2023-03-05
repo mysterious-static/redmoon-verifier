@@ -585,7 +585,7 @@ client.on('messageCreate', async function (message) {
       var password = message.content.substr(message.content.indexOf(' ') + 1);
       var results = zxcvbn(password);
       console.log(results.crack_times_display);
-      message.reply('The password `' + password + '` will take about ' + results.crack_times_display + ' to crack.');
+      message.reply('The password `' + password + '` will take about ' + results.crack_times_display.offline_fast_hashing_1e10_per_second + ' to crack.');
     }
 
 
