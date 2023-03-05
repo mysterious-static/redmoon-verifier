@@ -584,7 +584,7 @@ client.on('messageCreate', async function (message) {
     } else if (message.content.startsWith('!password')) {
       var password = message.content.substr(message.content.indexOf(' ') + 1);
       var results = zxcvbn(password);
-      message.reply('The password `' + password + '` will take about ' + results.crack_times_seconds + ' to crack.');
+      message.reply('The password `' + password + '` will take about ' + results.crack_times_display + ' to crack.');
     }
 
 
