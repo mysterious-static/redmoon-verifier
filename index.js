@@ -781,9 +781,9 @@ setInterval(async function () {
   var response = await fetch('https://api.xivstatus.com/api/servers');
   const result = await response.json();
   var jenova = result.find(item => item.name == "Jenova");
-  if (jenova.congestion != 'Congested') {
+  if (jenova.congestion == 'Congested') {
     var last_status = await connection.promise().query('select * from server_status');
-    if (last_status[0][0].value == 'Congested') {
+    if (last_status[0][0].status != 'Congested') {
       var servers = await connection.promise().query('select * from server_settings where option_name = ?', ['server_open_channel']);
       if (servers[0].length > 0) {
         for (const thisServer of servers[0]) {
@@ -807,6 +807,7 @@ setInterval(async function () {
       await connection.promise().query('update server_status set status = ?,  last_open = ?', [jenova.congestion, date.toISOString().split('T')[0]]);
     }
   } else {
+    console.log(jenova);
     await connection.promise().query('update server_status set status = ?', [jenova.congestion]);
   }
 
