@@ -783,7 +783,7 @@ setInterval(async function () {
   var jenova = result.find(item => item.name == "Jenova");
   if (jenova.congestion != 'Congested') {
     var last_status = await connection.promise().query('select * from server_status');
-    if (last_status[0][0].status == 'Congested') {
+    if (last_status[0][0].value == 'Congested') {
       var servers = await connection.promise().query('select * from server_settings where option_name = ?', ['server_open_channel']);
       if (servers[0].length > 0) {
         for (const thisServer of servers[0]) {
