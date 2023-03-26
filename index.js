@@ -19,6 +19,7 @@ var xivapi_private_key = process.env.apikey
 var verify_string = ''; //retrieve from database
 var bio = '';
 var stickymessages = ''
+var activeStickyDeletions = [];
 
 var servers = ["Adamantoise", "Aegis", "Alexander", "Anima", "Asura", "Atomos", "Bahamut", "Balmung", "Behemoth", "Belias", "Brynhildr", "Cactuar", "Carbuncle", "Cerberus", "Chocobo", "Coeurl", "Diabolos", "Durandal", "Excalibur", "Exodus", "Faerie", "Famfrit", "Fenrir", "Garuda", "Gilgamesh", "Goblin", "Gungnir", "Hades", "Hyperion", "Ifrit", "Ixion", "Jenova", "Kujata", "Lamia", "Leviathan", "Lich", "Louisoix", "Malboro", "Mandragora", "Masamune", "Mateus", "Midgardsormr", "Moogle", "Odin", "Omega", "Pandaemonium", "Phoenix", "Ragnarok", "Ramuh", "Ridill", "Sargatanas", "Shinryu", "Shiva", "Siren", "Tiamat", "Titan", "Tonberry", "Typhon", "Ultima", "Ultros", "Unicorn", "Valefor", "Yojimbo", "Zalera", "Zeromus", "Zodiark", "Spriggan", "Twintania", "Bismarck", "Ravana", "Sephirot", "Sophia", "Zurvan", "Halicarnassus", "Maduin", "Marilith", "Seraph", "Alpha", "Phantom", "Raiden", "Sagittarius"]
 
@@ -595,12 +596,14 @@ client.on('messageCreate', async function (message) {
       var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
       if (isStickyChannel) {
         var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
-        if (messageCount.size >= isStickyChannel.speed) {
+        if (messageCount.size >= isStickyChannel.speed && !activeStickyDeletions.includes(message.channel.id)) {
+          activeStickyDeletions.push(message.channel.id);
           await message.channel.messages.fetch(isStickyChannel.last_message_id).then(async (message) => {
             message.delete();
             var sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message
             await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
             stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
+            activeStickyDeletions.splice(activeStickyDeletions.indexOf(message.channel.id), 1);
           }).catch((error) => { console.error(error) }); // TODO check if message exists
 
 
