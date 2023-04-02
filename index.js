@@ -489,6 +489,9 @@ client.on('messageCreate', async function (message) {
         server = server.charAt(0).toUpperCase() + server.slice(1).toLowerCase();
 
         if (first_name.length > 0 && last_name.length > 0 && server.length > 0) {
+          if (server.toLowerCase === 'cactaur') {
+            server = 'Cactuar';
+          }
           if (servers.includes(server)) {
             var existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
             if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
