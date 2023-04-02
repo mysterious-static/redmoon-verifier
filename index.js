@@ -494,6 +494,7 @@ client.on('messageCreate', async function (message) {
             if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
               var response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
               const result = await response.json();
+              console.log(result);
               if (result.Results.length > 0) {
                 var character_id = result.Results[0].ID;
                 response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
