@@ -489,7 +489,7 @@ client.on('messageCreate', async function (message) {
         server = server.charAt(0).toUpperCase() + server.slice(1).toLowerCase();
 
         if (first_name.length > 0 && last_name.length > 0 && server.length > 0) {
-          if (server.toLowerCase === 'cactaur') {
+          if (server.toLowerCase() === 'cactaur') {
             server = 'Cactuar';
           }
           if (servers.includes(server)) {
