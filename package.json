@@ -15,7 +15,8 @@
     "discord.js": "latest",
     "mysql2": "latest",
     "node-fetch": "2.x",
-    "zxcvbn": "latest"
+    "zxcvbn": "latest",
+    "@xivapi/nodestone": "latest"
   },
   "repository": {
     "type": "git",
