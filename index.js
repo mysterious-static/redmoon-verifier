@@ -518,7 +518,11 @@ client.on('messageCreate', async function (message) {
             server = 'Cactuar';
           }
           if (servers.includes(server)) {
-            var messageReply = await message.reply({ content: "I\'m working on your verification right now! Hang tight..." });
+            var messageReply = await message.reply({
+              content: "I\'m working on your verification right now! Hang tight...", allowedMentions: {
+                repliedUser: false
+              }
+            });
             var existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
             if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
               var response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
