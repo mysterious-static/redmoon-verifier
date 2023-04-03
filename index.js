@@ -518,6 +518,7 @@ client.on('messageCreate', async function (message) {
             server = 'Cactuar';
           }
           if (servers.includes(server)) {
+            var messageReply = await message.reply({ content: "I\'m working on your verification right now! Hang tight..." });
             var existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
             if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
               var response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
@@ -558,12 +559,12 @@ client.on('messageCreate', async function (message) {
                   )
                   .setTimestamp()
                   .setFooter({ text: 'Welcome to Red Moon!' });
-                message.reply({ embeds: [embeddedMessage] });
+                messageReply.edit({ content: '', embeds: [embeddedMessage] });
               } else {
-                message.reply('I couldn\'t find this character on the Lodestone. Please try again, and ensure you entered your character name and server correctly.');
+                messageReply.edit({ content: 'I couldn\'t find this character on the Lodestone. Please try again, and ensure you entered your character name and server correctly.' });
               }
             } else {
-              message.reply('You\'ve attempted to register a character that another Discord account has already registered. Please try again, or contact Emma if this is your new discord account.');
+              messageReply.edit({ content: 'You\'ve attempted to register a character that another Discord account has already registered. Please try again, or contact Emma if this is your new discord account.' });
             }
           } else {
             message.reply({ content: 'I couldn\'t detect a valid server to search your character on. Please make sure you\'ve entered a real server and then try again.', ephemeral: true });
