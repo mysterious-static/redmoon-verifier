@@ -5,7 +5,6 @@ var mysql = require('mysql2');
 var fetch = require('node-fetch');
 var crypto = require('node:crypto');
 var zxcvbn = require('zxcvbn');
-var nodestone = require('@xivapi/nodestone');
 
 var connection = mysql.createConnection({
   host: process.env.db_host,
