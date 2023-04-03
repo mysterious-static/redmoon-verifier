@@ -180,7 +180,15 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON()]);
+  var minutes = new SlashCommandBuilder().setName('minutes')
+    .setDescription('Display the time in minutes until your entered time.')
+    .addStringOption(option =>
+      option.setName('time')
+        .setDescription('The time you\'d like to get minutes until, for example 12:45 am')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -379,6 +387,17 @@ client.on('interactionCreate', async (interaction) => {
         await connection.promise().query('insert into server_settings (server_id, option_name, value) values (?, ?, ?)', [interaction.guildId, "namechange_channel", channel.id]);
       }
       await interaction.reply({ content: 'Channel updated!', ephemeral: true });
+    } else if (interaction.commandName == 'minutes') {
+      var time = interaction.options.getString('time');
+      var minutes = time.substr(time.indexOf(':') + 1, time.indexOf(' '));
+      var hours = time.substr(0, time.indexOf(':'));
+      if (time.substr(time.indexOf(' ') + 1).toLowerCase() == 'pm') {
+        hours += 12;
+      }
+      var now = new Date();
+      var nextTime = new Date(now.getFullYear(), now.getMonth(), now.getHours() < 11 ? (now.getDay() == 0 ? now.getDate() + 1 : (now.getDay == 6 ? now.getDate() + 2 : now.getDate())) : now.getDate() + 1, hours, minutes, 0, 0);
+      interaction.reply({ content: Math.floor(Math.abs(nextTime - now) / 1000 / 60), ephemeral: true });
+
     }
 
   } else if (interaction.isButton()) {
