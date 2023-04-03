@@ -623,6 +623,86 @@ client.on('messageCreate', async function (message) {
       var results = zxcvbn(password);
       console.log(results.crack_times_display);
       message.reply('The password `' + password + '` will take ' + results.crack_times_display.offline_fast_hashing_1e10_per_second + ' to crack.');
+    } else if (message.content.startsWith('!noderm ')) {
+      console.log(message.channel.id);
+      if (message.guild.ownerId != message.author.id) {
+        var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
+        var server = lookup_string.substr(0, lookup_string.indexOf(' '));
+        var first_and_last_name = lookup_string.substr(lookup_string.indexOf(' ') + 1);
+        var first_name = first_and_last_name.substr(0, first_and_last_name.indexOf(' '));
+        var last_name = first_and_last_name.substr(first_and_last_name.indexOf(' ') + 1);
+        first_name = first_name.charAt(0).toUpperCase() + first_name.slice(1).toLowerCase();
+        last_name = last_name.charAt(0).toUpperCase() + last_name.slice(1).toLowerCase();
+        server = server.charAt(0).toUpperCase() + server.slice(1).toLowerCase();
+
+        if (first_name.length > 0 && last_name.length > 0 && server.length > 0) {
+          if (server.toLowerCase() === 'cactaur') {
+            server = 'Cactuar';
+          }
+          if (servers.includes(server)) {
+            var messageReply = await message.reply({
+              content: "I\'m working on your verification right now! Hang tight...", allowedMentions: {
+                repliedUser: false
+              }
+            });
+            var existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
+            if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
+              var response = await nodestone.characterSearch({params: {name: first_name + '%20' + last_name, server: server}});
+              //var response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
+              const result = await response.json();
+              console.log(result);
+              if (result.Results.length > 0) {
+                var character_id = result.Results[0].ID;
+                response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
+                api_character = await response.json();
+                await message.member.setNickname(first_name + ' ' + last_name);
+                var server_role = await message.member.guild.roles.cache.find(role => role.name === server);
+                var roles_string = '';
+                if (server_role) {
+                  await message.member.roles.add(server_role);
+                  var roles_string = server_role.toString() + ','
+                }
+                verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
+                var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
+                await message.member.roles.add(verified_role);
+                roles_string += verified_role.toString();
+                //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
+                var exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
+                if (exists[0][1].length > 0 && exists[1][1].length > 0) {
+                  console.log(exists[0][1]);
+                  console.log(exists[1][1]);
+                  //var channel = await client.channels.cache.get(exists[1][0].value);
+                  //await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
+                }
+                await connection.promise().query('delete from member_registrations where member_id = ? and guild_id = ?; insert into member_registrations (member_id, lodestone_id, guild_id) values (?, ?, ?)', [message.member.id, message.member.guild.id, message.member.id, character_id, message.member.guild.id]);
+                const embeddedMessage = new EmbedBuilder()
+                  .setColor(0xFFD700)
+                  .setAuthor({ name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id })
+                  .setThumbnail(api_character.Character.Portrait)
+                  .setDescription('Character saved.\n\nIn four hours, you may claim your character using Lodestone verification via the `!rmverify` command, should you wish to.')
+                  .addFields(
+                    { name: 'Nickname', value: 'Your Discord nickname was changed to **' + first_name + ' ' + last_name + '**.' },
+                    { name: 'Roles Added', value: roles_string }
+                  )
+                  .setTimestamp()
+                  .setFooter({ text: 'Welcome to Red Moon!' });
+                messageReply.edit({ content: '', embeds: [embeddedMessage] });
+              } else {
+                messageReply.edit({ content: 'I couldn\'t find this character on the Lodestone. Please try again, and ensure you entered your character name and server correctly.' });
+              }
+            } else {
+              messageReply.edit({ content: 'You\'ve attempted to register a character that another Discord account has already registered. Please try again, or contact Emma if this is your new discord account.' });
+            }
+          } else {
+            message.reply({ content: 'I couldn\'t detect a valid server to search your character on. Please make sure you\'ve entered a real server and then try again.', ephemeral: true });
+          }
+        } else {
+          message.reply({ content: 'I couldn\'t detect a first name, last name, *and* server. Please make sure you\'ve entered all of these and then try again.', ephemeral: true });
+        }
+      } else {
+        message.reply('Sorry, you\'re a server owner. I can\'t set anything for the owner.');
+      }
+
     }
 
 
