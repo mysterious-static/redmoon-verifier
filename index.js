@@ -395,7 +395,8 @@ client.on('interactionCreate', async (interaction) => {
         hours += 12;
       }
       var now = new Date();
-      var nextTime = new Date(now.getFullYear(), now.getMonth(), now.getHours() < 11 ? (now.getDay() == 0 ? now.getDate() + 1 : (now.getDay == 6 ? now.getDate() + 2 : now.getDate())) : now.getDate() + 1, hours, minutes, 0, 0);
+      var nextTime = new Date(now.getFullYear(), now.getMonth(), (x.getHours()<11?(x.getDay()==0?x.getDate()+1:(x.getDay==6?x.getDate()+2:x.getDate())):x.getDate()+1), hours, minutes, 0, 0);
+      console.log(nextTime);
       interaction.reply({ content: Math.floor(Math.abs(nextTime - now) / 1000 / 60).toString(), ephemeral: true });
 
     }
