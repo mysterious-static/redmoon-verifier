@@ -393,8 +393,11 @@ client.on('interactionCreate', async (interaction) => {
       var hours = time.substr(0, time.indexOf(':'));
       if (time.substr(time.indexOf(' ') + 1).toLowerCase() == 'pm') {
         hours += 12;
+      } else if (time.substr(time.indexOf(' ') + 1).toLowerCase() == 'am' && hours == 12) {
+        hours = 0;
       }
       var now = new Date();
+
       var nextTime = new Date(now.getFullYear(), now.getMonth(), (now.getHours() < 11 ? (now.getDay() == 0 ? now.getDate() + 1 : (now.getDay == 6 ? now.getDate() + 2 : now.getDate())) : now.getDate() + 1), hours, minutes, 0, 0);
       console.log(nextTime);
       interaction.reply({ content: Math.floor(Math.abs(nextTime - now) / 1000 / 60).toString(), ephemeral: true });
