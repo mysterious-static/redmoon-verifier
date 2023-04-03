@@ -396,6 +396,8 @@ client.on('interactionCreate', async (interaction) => {
       } else if (time.substr(time.indexOf(' ') + 1).toLowerCase() == 'am' && hours == 12) {
         hours = 0;
       }
+      console.log(minutes);
+      console.log(hours);
       var now = new Date();
 
       var nextTime = new Date(now.getFullYear(), now.getMonth(), (now.getHours() < 11 ? (now.getDay() == 0 ? now.getDate() + 1 : (now.getDay == 6 ? now.getDate() + 2 : now.getDate())) : now.getDate() + 1), hours, minutes, 0, 0);
