@@ -389,7 +389,7 @@ client.on('interactionCreate', async (interaction) => {
       await interaction.reply({ content: 'Channel updated!', ephemeral: true });
     } else if (interaction.commandName == 'minutes') {
       var time = interaction.options.getString('time');
-      var minutes = time.substr(time.indexOf(':') + 1, time.indexOf(' '));
+      var minutes = time.substr(time.indexOf(':') + 1, (time.indexOf(' ') - time.indexOf(':')));
       var hours = time.substr(0, time.indexOf(':'));
       if (time.substr(time.indexOf(' ') + 1).toLowerCase() == 'pm') {
         hours += 12;
