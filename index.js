@@ -634,7 +634,9 @@ client.on('messageCreate', async function (message) {
         if (messageCount.size >= isStickyChannel.speed && !activeStickyDeletions.includes(message.channel.id)) {
           activeStickyDeletions.push(message.channel.id);
           await message.channel.messages.fetch(isStickyChannel.last_message_id).then(async (message) => {
-            message.delete();
+            if (message) {
+              message.delete();
+            }
             var sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message
             await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
             stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
