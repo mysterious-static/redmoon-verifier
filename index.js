@@ -647,7 +647,7 @@ client.on('messageCreate', async function (message) {
             }); // TODO check if message exists
 
         } else {
-          echo('active deletions issue?');
+          console.log('active deletions issue?');
         }
       }
     } else {
