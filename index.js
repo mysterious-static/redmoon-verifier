@@ -628,6 +628,7 @@ client.on('messageCreate', async function (message) {
 
     //Process stickies AFTER all message stuff. TODO: Cron this.
     if (stickymessages[0]) {
+      console.log('has sticky');
       var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
       if (isStickyChannel) {
         var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
@@ -640,10 +641,13 @@ client.on('messageCreate', async function (message) {
             var sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message
             await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
             stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
-            activeStickyDeletions.splice(activeStickyDeletions.indexOf(message.channel.id), 1);
-          }).catch((error) => { console.error(error) }); // TODO check if message exists
+          }).catch((error) => { console.error(error) })
+            .then((message) => {
+              activeStickyDeletions.splice(activeStickyDeletions.indexOf(message.channel.id), 1);
+            }); // TODO check if message exists
 
-
+        } else {
+          echo('active deletions issue?');
         }
       }
     } else {
