@@ -642,7 +642,7 @@ client.on('messageCreate', async function (message) {
             await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
             stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
           }).catch((error) => { console.error(error) })
-            .then((message) => {
+            .then((sentMessage) => {
               activeStickyDeletions.splice(activeStickyDeletions.indexOf(sentMessage.channel.id), 1);
             }); // TODO check if message exists
 
