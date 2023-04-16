@@ -643,7 +643,7 @@ client.on('messageCreate', async function (message) {
             stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
           }).catch((error) => { console.error(error) })
             .then((message) => {
-              activeStickyDeletions.splice(activeStickyDeletions.indexOf(message.channel.id), 1);
+              activeStickyDeletions.splice(activeStickyDeletions.indexOf(sentMessage.channel.id), 1);
             }); // TODO check if message exists
 
         } else {
