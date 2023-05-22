@@ -234,7 +234,8 @@ client.on('interactionCreate', async (interaction) => {
         var params = {
           Body: blob,
           Bucket: bucket,
-          Key: "index.png"
+          Key: "index.png",
+          ContentType: "image/png"
         };
         command = new PutObjectCommand(params);
         await s3.send(command);
@@ -298,7 +299,8 @@ client.on('interactionCreate', async (interaction) => {
         var params = {
           Body: blob,
           Bucket: bucket,
-          Key: "index.png"
+          Key: "index.png",
+          ContentType: "image/png"
         };
         command = new PutObjectCommand(params);
         await s3.send(command);
