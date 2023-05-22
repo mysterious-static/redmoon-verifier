@@ -6,9 +6,9 @@ var fetch = require('node-fetch');
 var crypto = require('node:crypto');
 var zxcvbn = require('zxcvbn');
 var fs = require('fs').promises;
-import { S3Client, PutBucketWebsiteCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
-import { CloudFrontClient, CreateDistributionCommand } from '@aws-sdk/client-cloudfront';
-import { fromIni } from "@aws-sdk/credential-providers";
+const { S3Client, PutBucketWebsiteCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
+const { CloudFrontClient, CreateDistributionCommand } = require('@aws-sdk/client-cloudfront');
+const { fromIni } = require("@aws-sdk/credential-providers");
 
 var connection = mysql.createConnection({
   host: process.env.db_host,
@@ -337,7 +337,7 @@ client.on('interactionCreate', async (interaction) => {
           headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
-        interaction.reply({content: 'Your kinklist should be set up at https:/' + bucket + '.', ephemeral: true});
+        interaction.reply({ content: 'Your kinklist should be set up at https:/' + bucket + '.', ephemeral: true });
       }
       // If this user has a cloudfront distribution / S3 bucket set up already, upload the image and make no other changes.
       // If this user doesn't have one, create an S3 bucket, apply the static website hosting option, apply the JSON policy to allow access to any object in the bucket, and upload the image. Create the Cloudfront distribution.
