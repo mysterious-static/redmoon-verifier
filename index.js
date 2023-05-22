@@ -229,15 +229,17 @@ client.on('interactionCreate', async (interaction) => {
       const s3 = new S3Client({ credentials: fromIni({ profile: "redmoon" }) });
       var kinklist = await connection.promise().query('select * from kinklists where userid = ? and guildid = ?', [interaction.member.id, interaction.guild.id]);
       if (kinklist[0].length > 0 && kinklist[0][0].bucket) {
-        await fs.readFile(interaction.options.getAttachment('image'));
+        var file = await fetch(interaction.options.getAttachment('image').url);
+        var blob = await file.arrayBuffer();
         var params = {
-          ACL: "public-read",
-          Body: data,
-          Bucket: kinklist[0][0].bucket,
+          Body: blob,
+          Bucket: bucket,
           Key: "index.png"
         };
-        var command = new PutObjectCommand(params);
-        var res = await s3.send(command);
+        command = new PutObjectCommand(params);
+        await s3.send(command);
+        // Create CloudFront invalidation 
+        interaction.editReply('Kinklist image updated! This will be live for you within the next 24 hours.');
       } else {
         if (kinklist[0].length > 0 && kinklist[0][0].name) {
           var bucketname = kinklist[0][0].name;
@@ -375,10 +377,6 @@ client.on('interactionCreate', async (interaction) => {
         console.log(data);
         interaction.editReply({ content: 'Your kinklist should be set up at https://' + bucket + '.', ephemeral: true });
       }
-      // If this user has a cloudfront distribution / S3 bucket set up already, upload the image and make no other changes.
-      // If this user doesn't have one, create an S3 bucket, apply the static website hosting option, apply the JSON policy to allow access to any object in the bucket, and upload the image. Create the Cloudfront distribution.
-      // If the user has a custom kinklist name, create that porkbun dns record.
-      // Else, use message.member.name.toLower().replace(/\s+/g,'').
     } else if (interaction.commandName === 'customkinklistname') {
       //If the name isn't taken by anyone already,
       // If this user has an entry in the kinklists.subdomain, update the DNS entry in Porkbun and the subdomain in their Cloudfront distribution.
