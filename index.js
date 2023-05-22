@@ -291,7 +291,7 @@ client.on('interactionCreate', async (interaction) => {
         await s3.send(command);
         // UPLOAD THE FILE HERE
         var file = await fetch(interaction.options.getAttachment('image').url);
-        var blob = await file.blob();
+        var blob = await file.arrayBuffer();
         var params = {
           Body: blob,
           Bucket: bucket,
