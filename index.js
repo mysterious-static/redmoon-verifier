@@ -242,8 +242,8 @@ client.on('interactionCreate', async (interaction) => {
         // Create CloudFront invalidation 
         interaction.editReply('Kinklist image updated! This will be live for you within the next 24 hours.');
       } else {
-        if (kinklist[0].length > 0 && kinklist[0][0].name) {
-          var bucketname = kinklist[0][0].name;
+        if (kinklist[0].length > 0 && kinklist[0][0].subdomain) {
+          var bucketname = kinklist[0][0].subdomain;
         } else {
           var bucketname = interaction.member.displayName.toLowerCase().replace(/\s+/g, '');
         }
