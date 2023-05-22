@@ -5,6 +5,10 @@ var mysql = require('mysql2');
 var fetch = require('node-fetch');
 var crypto = require('node:crypto');
 var zxcvbn = require('zxcvbn');
+var fs = require('fs').promises;
+import { S3Client, PutBucketWebsiteCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
+import { CloudFrontClient, CreateDistributionCommand } from '@aws-sdk/client-cloudfront';
+import { fromIni } from "@aws-sdk/credential-providers";
 
 var connection = mysql.createConnection({
   host: process.env.db_host,
@@ -188,7 +192,24 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON()]);
+  var kinklist = new SlashCommandBuilder().setName('kinklist')
+    .setDescription('Create a court kinklist under your name.')
+    .addAttachmentOption(option =>
+      option.setName('image')
+        .setDescription('Your kinksheet image (as PNG).')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
+  var customkinklistname = new SlashCommandBuilder().setName('customkinklistname')
+    .setDescription('Use a custom subdomain (not your name) for your kinklist.')
+    .addStringOption(option =>
+      option.setName('name')
+        .setDescription('Custom name. Maximum 25 characters')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
+  // need to add kinklist and customkinklistname to available commands
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -203,6 +224,129 @@ client.on('interactionCreate', async (interaction) => {
         await connection.promise().query('insert into servers_roles (guildid, roleid) values (?, ?)', [interaction.guild.id, verifiedrole.id]);
       }
       interaction.reply({ content: 'Successfully set the \'verified\' role!', ephemeral: true });
+    } else if (interaction.commandName === 'kinklist') {
+      const s3 = new S3Client({ credentials: fromIni({ profile: "redmoon" }) });
+      var kinklist = await connection.promise().query('select * from kinklists where userid = ? and guildid = ?', [interaction.member.id, interaction.guild.id]);
+      if (kinklist[0].length > 0 && kinklist[0][0].bucket) {
+        await fs.readFile(interaction.options.getAttachment('image'));
+        var params = {
+          ACL: "public-read",
+          Body: data,
+          Bucket: kinklist[0][0].bucket,
+          Key: "index.png"
+        };
+        var command = new PutObjectCommand(params);
+        var res = await s3.send(command);
+      } else {
+        if (kinklist[0][0].name) {
+          var bucketname = kinklist[0][0].name;
+        } else {
+          var bucketname = interaction.member.name.toLower().replace(/\s+/g, '');
+        }
+        var params = {
+          Bucket: bucketname + ".rmxiv.com",
+          ACL: 'public-read'
+        };
+        var command = new CreateBucketCommand(params);
+        res = await s3.send(command);
+        var bucket = res.Location;
+        await connection.promise().query('replace into kinklists (userid, guildid, s3, subdomain) values (?, ?, ?)', [interaction.member.id, interaction.guild.id, bucket, bucketname]);
+        var webparams = {
+          Bucket: bucket,
+          WebsiteConfiguration: {
+            ErrorDocument: {
+              Key: 'index.png'
+            },
+            IndexDocument: {
+              Suffix: 'index.png'
+            }
+          }
+        }
+        var command = new PutBucketWebsiteCommand(webparams);
+        var res = await s3.send(command);
+
+        // UPLOAD THE FILE HERE
+        await fs.readFile(interaction.options.getAttachment('image'));
+        var params = {
+          ACL: "public-read",
+          Body: data,
+          Bucket: bucket,
+          Key: "index.png"
+        };
+        var command = new PutObjectCommand(params);
+        var res = await s3.send(command);
+
+        var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
+        var params = {
+          DistributionConfig: {
+            CallerReference: new Date('U'),
+            Origins: {
+              Items: [
+                {
+                  DomainName: bucket + '.s3.amazonaws.com',
+                  Id: bucket,
+                  CustomOriginConfig: {
+                    HTTPPort: 80,
+                    HTTPSPort: 443,
+                    OriginProtocolPolicy: 'match-viewer',
+                    OriginSslProtocols: { Items: ['SSLv3'], Quantity: 1 },
+                    OriginReadTimeout: 10000,
+                    OriginKeepaliveTimeout: 10000,
+
+                  },
+                  OriginPath: '',
+                  CustomHeaders: { Quantity: 0 }
+
+                },
+              ],
+              Quantity: 1
+            },
+            ViewerProtocolPolicy: "redirect-to-https",
+            Logging: {
+              Enabled: false
+            },
+            Enabled: true,
+            ViewerCertificate: {
+              ACMCertificateArn: "arn:aws:acm:us-east-1:014854788150:certificate/afe0764b-71d5-4610-a0f0-77ff845f171e", //*.rmxiv.com,
+              CertificateSource: "acm"
+            },
+            Aliases: {
+              Quantity: 1,
+              Items: [bucket]
+            }
+          }
+        };
+        var command = new CreateDistributionCommand(params);
+        var res = cf.send(command);
+        var cloudfront = res.Distribution.ARN;
+        var domain = res.Distribution.DomainName;
+        await connection.promise().query('update kinklists set cloudfront = ? where userid = ? and guildid = ?', [cloudfront, interaction.member.id, interaction.guild.id]);
+        // CONTINUE FROM HERE
+        // Create Porkbun DNS record from variable bucketname.
+        var pb_body = {
+          apikey: process.env.pb_apikey,
+          secretapikey: process.env.pb_secretkey,
+          name: bucketname,
+          type: "CNAME",
+          content: domain,
+          ttl: 600
+        };
+        const res = await fetch('https://porkbun.com/api/json/v3/dns/create/rmxiv.com', {
+          method: 'post',
+          body: JSON.stringify(pb_body),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        interaction.reply({content: 'Your kinklist should be set up at https:/' + bucket + '.', ephemeral: true});
+      }
+      // If this user has a cloudfront distribution / S3 bucket set up already, upload the image and make no other changes.
+      // If this user doesn't have one, create an S3 bucket, apply the static website hosting option, apply the JSON policy to allow access to any object in the bucket, and upload the image. Create the Cloudfront distribution.
+      // If the user has a custom kinklist name, create that porkbun dns record.
+      // Else, use message.member.name.toLower().replace(/\s+/g,'').
+    } else if (interaction.commandName === 'customkinklistname') {
+      //If the name isn't taken by anyone already,
+      // If this user has an entry in the kinklists.subdomain, update the DNS entry in Porkbun and the subdomain in their Cloudfront distribution.
+      // Else, create a record in the custom kinklist names table.
     } else if (interaction.commandName === 'stickymessage') {
       var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
       if (interaction.options.getInteger('speed') <= 50) {
