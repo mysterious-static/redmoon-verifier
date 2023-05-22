@@ -327,6 +327,7 @@ client.on('interactionCreate', async (interaction) => {
             },
             DefaultCacheBehavior: {
               TargetOriginId: bucket,
+              CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6", // CachingOptimized
               ViewerProtocolPolicy: "redirect-to-https",
               AllowedMethods: {
                 Quantity: 2,
