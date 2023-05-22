@@ -244,7 +244,13 @@ client.on('interactionCreate', async (interaction) => {
           var bucketname = interaction.member.displayName.toLowerCase().replace(/\s+/g, '');
         }
         var params = {
-          Bucket: bucketname + ".rmxiv.com"
+          Bucket: bucketname + ".rmxiv.com",
+          Properties: {
+            PublicAccessBlockConfiguration: {
+              BlockPublicPolicy: false,
+              RestrictPublicBuckets: false
+            }
+          }
         };
         var command = new CreateBucketCommand(params);
         var res = await s3.send(command);
