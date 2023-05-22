@@ -299,7 +299,7 @@ client.on('interactionCreate', async (interaction) => {
           Key: "index.png"
         };
         command = new PutObjectCommand(params);
-        s3.send(command);
+        await s3.send(command);
 
         var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
         var params = {
