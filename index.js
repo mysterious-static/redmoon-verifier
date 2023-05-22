@@ -225,7 +225,7 @@ client.on('interactionCreate', async (interaction) => {
       }
       interaction.reply({ content: 'Successfully set the \'verified\' role!', ephemeral: true });
     } else if (interaction.commandName === 'kinklist') {
-      interaction.deferUpdate();
+      interaction.deferReply();
       const s3 = new S3Client({ credentials: fromIni({ profile: "redmoon" }) });
       var kinklist = await connection.promise().query('select * from kinklists where userid = ? and guildid = ?', [interaction.member.id, interaction.guild.id]);
       if (kinklist[0].length > 0 && kinklist[0][0].bucket) {
