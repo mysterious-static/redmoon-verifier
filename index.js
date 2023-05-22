@@ -293,7 +293,6 @@ client.on('interactionCreate', async (interaction) => {
         var file = await fetch(interaction.options.getAttachment('image').url);
         var blob = await file.blob();
         var params = {
-          ACL: "public-read",
           Body: blob,
           Bucket: bucket,
           Key: "index.png"
