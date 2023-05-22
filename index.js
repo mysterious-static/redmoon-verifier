@@ -283,10 +283,10 @@ client.on('interactionCreate', async (interaction) => {
         command = new PutBucketPolicyCommand(params);
         await s3.send(command);
         // UPLOAD THE FILE HERE
-        await fs.readFile(interaction.options.getAttachment('image'));
+        var file = await fetch(interaction.options.getAttachment('image').url);
         var params = {
           ACL: "public-read",
-          Body: data,
+          Body: file.blob(),
           Bucket: bucket,
           Key: "index.png"
         };
