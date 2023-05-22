@@ -274,7 +274,7 @@ client.on('interactionCreate', async (interaction) => {
                     "Effect": "Allow",
                     "Principal": "*",
                     "Action": "s3:GetObject",
-                    "Resource": "arn:aws:s3:::lilithmarx.rmxiv.com/*"
+                    "Resource": "arn:aws:s3:::${bucket}/*"
                 }
             ]
         }`
