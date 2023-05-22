@@ -374,7 +374,7 @@ client.on('interactionCreate', async (interaction) => {
         });
         const data = await response.json();
         console.log(data);
-        interaction.editReply({ content: 'Your kinklist should be set up at https://' + bucket + '.', ephemeral: true });
+        interaction.editReply({ content: 'Your kinklist should be set up at https://' + bucket + ' in approximately five minutes.', ephemeral: true });
       }
     } else if (interaction.commandName === 'customkinklistname') {
       //If the name isn't taken by anyone already,
