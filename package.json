@@ -16,7 +16,7 @@
     "mysql2": "latest",
     "node-fetch": "2.x",
     "zxcvbn": "latest", 
-    "aws-sdk": "latest"
+    "@aws-sdk": "latest"
   },
   "repository": {
     "type": "git",
