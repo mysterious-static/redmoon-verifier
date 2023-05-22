@@ -238,7 +238,7 @@ client.on('interactionCreate', async (interaction) => {
         var command = new PutObjectCommand(params);
         var res = await s3.send(command);
       } else {
-        if (kinklist[0][0].name) {
+        if (kinklist[0].length > 0 && kinklist[0][0].name) {
           var bucketname = kinklist[0][0].name;
         } else {
           var bucketname = interaction.member.name.toLower().replace(/\s+/g, '');
