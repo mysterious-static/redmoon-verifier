@@ -371,6 +371,7 @@ client.on('interactionCreate', async (interaction) => {
           headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
+        console.log(data);
         interaction.update({ content: 'Your kinklist should be set up at https://' + bucket + '.', ephemeral: true });
       }
       // If this user has a cloudfront distribution / S3 bucket set up already, upload the image and make no other changes.
