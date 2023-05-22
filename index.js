@@ -342,7 +342,7 @@ client.on('interactionCreate', async (interaction) => {
           }
         };
         command = new CreateDistributionCommand(params);
-        res = cf.send(command);
+        res = await cf.send(command);
         var cloudfront = res.Distribution.ARN;
         var domain = res.Distribution.DomainName;
         await connection.promise().query('update kinklists set cloudfront = ? where userid = ? and guildid = ?', [cloudfront, interaction.member.id, interaction.guild.id]);
