@@ -312,6 +312,7 @@ client.on('interactionCreate', async (interaction) => {
                   Id: bucket,
                   CustomOriginConfig: {
                     HTTPPort: 80,
+                    HTTPSPort: 443,
                     OriginProtocolPolicy: 'http-only',
                     OriginReadTimeout: 30,
                     OriginKeepaliveTimeout: 5,
