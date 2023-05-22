@@ -7,7 +7,7 @@ var crypto = require('node:crypto');
 var zxcvbn = require('zxcvbn');
 var fs = require('fs').promises;
 const { S3Client, PutBucketWebsiteCommand, PutPublicAccessBlockCommand, PutBucketPolicyCommand, PutObjectCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
-const { CloudFrontClient, CreateDistributionCommand } = require('@aws-sdk/client-cloudfront');
+const { CloudFrontClient, CreateDistributionCommand, UpdateDistributionCommand } = require('@aws-sdk/client-cloudfront');
 const { fromIni } = require("@aws-sdk/credential-providers");
 
 var connection = mysql.createConnection({
@@ -225,7 +225,7 @@ client.on('interactionCreate', async (interaction) => {
       }
       interaction.reply({ content: 'Successfully set the \'verified\' role!', ephemeral: true });
     } else if (interaction.commandName === 'kinklist') {
-      interaction.deferReply({ephemeral: true});
+      interaction.deferReply({ ephemeral: true });
       const s3 = new S3Client({ credentials: fromIni({ profile: "redmoon" }) });
       var kinklist = await connection.promise().query('select * from kinklists where userid = ? and guildid = ?', [interaction.member.id, interaction.guild.id]);
       if (kinklist[0].length > 0 && kinklist[0][0].s3) {
@@ -375,13 +375,53 @@ client.on('interactionCreate', async (interaction) => {
           headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
-        console.log(data);
+        await connection.promise().query('update kinklists set porkbun_id = ? where userid = ? and guildid = ?', [data.id, interaction.member.id, interaction.guild.id]);
         interaction.editReply({ content: 'Your kinklist should be set up at https://' + bucket + ' in approximately five minutes.', ephemeral: true });
       }
     } else if (interaction.commandName === 'customkinklistname') {
-      //If the name isn't taken by anyone already,
-      // If this user has an entry in the kinklists.subdomain, update the DNS entry in Porkbun and the subdomain in their Cloudfront distribution.
-      // Else, create a record in the custom kinklist names table.
+      var name = interaction.options.getString('name');
+      var exists = await connection.promise().query('select * from kinklists where subdomain = ?', [name]);
+      if (exists[0].length <= 0) {
+        var thisKinklist = await connection.promise().query('select * from kinklists where userid = ? and guildid = ?', [interaction.member.id, interaction.guild.id]);
+        if (thisKinklist[0].length > 0 && thisKinklist[0][0].subdomain != '') {
+          var pb_body = {
+            apikey: process.env.pb_apikey,
+            secretapikey: process.env.pb_secretkey,
+            name: name,
+            type: "CNAME",
+            content: thisKinklist[0][0].cfdomain,
+            ttl: 600
+          };
+          const response = await fetch(`https://porkbun.com/api/json/v3/dns/edit/rmxiv.com/${thisKinklist[0][0].porkbun_id}`, {
+            method: 'post',
+            body: JSON.stringify(pb_body),
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const data = await response.json();
+          var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
+          var params = {
+            DistributionConfig: {
+              CallerReference: new Date('U'),
+              Aliases: {
+                Quantity: 1,
+                Items: [
+                  `${name}.rmxiv.com`
+                ]
+              }
+            }
+          };
+          command = new CreateDistributionCommand(params);
+          res = await cf.send(command);
+          await connection.promise().query('update kinklists set subdomain = ? where userid = ? and guildid = ?', [name, interaction.member.id, interaction.guild.id]);
+          await interaction.reply({ content: 'Your kinklist URL has been updated to https://' + name + '.rmxiv.com - this will likely be live for you within 10 to 15 minutes.', ephemeral: true })
+        } else {
+          await connection.promise().query('insert into kinklists (userid, guildid, subdomain) values (?, ?, ?)', [interaction.member.id, interaction.guild.id, name]);
+          await interaction.reply({ content: 'Your custom subdomain has been saved, please use `/kinklist` to upload your kinklist image.', ephemeral: true });
+        }
+      } else {
+        await interaction.reply({ content: 'Someone has already taken this custom subdomain, sorry', ephemeral: true });
+      }
+
     } else if (interaction.commandName === 'stickymessage') {
       var exists = await connection.promise().query('select * from stickymessages where channel_id = ?', [interaction.options.getChannel('channel').id]);
       if (interaction.options.getInteger('speed') <= 50) {
