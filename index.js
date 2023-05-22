@@ -335,8 +335,7 @@ client.on('interactionCreate', async (interaction) => {
                   "GET",
                   "HEAD"
                 ]
-              },
-              MinTTL: 86400
+              }
             },
             Comment: bucket,
             Enabled: true,
