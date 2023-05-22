@@ -291,9 +291,10 @@ client.on('interactionCreate', async (interaction) => {
         await s3.send(command);
         // UPLOAD THE FILE HERE
         var file = await fetch(interaction.options.getAttachment('image').url);
+        var blob = await file.blob();
         var params = {
           ACL: "public-read",
-          Body: file.blob(),
+          Body: blob,
           Bucket: bucket,
           Key: "index.png"
         };
