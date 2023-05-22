@@ -228,12 +228,12 @@ client.on('interactionCreate', async (interaction) => {
       interaction.deferReply({ephemeral: true});
       const s3 = new S3Client({ credentials: fromIni({ profile: "redmoon" }) });
       var kinklist = await connection.promise().query('select * from kinklists where userid = ? and guildid = ?', [interaction.member.id, interaction.guild.id]);
-      if (kinklist[0].length > 0 && kinklist[0][0].bucket) {
+      if (kinklist[0].length > 0 && kinklist[0][0].s3) {
         var file = await fetch(interaction.options.getAttachment('image').url);
         var blob = await file.arrayBuffer();
         var params = {
           Body: blob,
-          Bucket: bucket,
+          Bucket: kinklist[0][0].s3,
           Key: "index.png",
           ContentType: "image/png"
         };
