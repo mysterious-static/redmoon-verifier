@@ -6,7 +6,7 @@ var fetch = require('node-fetch');
 var crypto = require('node:crypto');
 var zxcvbn = require('zxcvbn');
 var fs = require('fs').promises;
-const { S3Client, PutBucketWebsiteCommand, PutBucketPolicyCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutBucketWebsiteCommand, PutPublicAccessBlockCommand, PutBucketPolicyCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
 const { CloudFrontClient, CreateDistributionCommand } = require('@aws-sdk/client-cloudfront');
 const { fromIni } = require("@aws-sdk/credential-providers");
 
@@ -245,12 +245,6 @@ client.on('interactionCreate', async (interaction) => {
         }
         var params = {
           Bucket: bucketname + ".rmxiv.com",
-          Properties: {
-            PublicAccessBlockConfiguration: {
-              BlockPublicPolicy: false,
-              RestrictPublicBuckets: false
-            }
-          }
         };
         var command = new CreateBucketCommand(params);
         var res = await s3.send(command);
@@ -269,7 +263,14 @@ client.on('interactionCreate', async (interaction) => {
         }
         command = new PutBucketWebsiteCommand(webparams);
         await s3.send(command);
-
+        params = {
+          Bucket: bucket,
+          PublicAccessBlockConfiguration: {
+            BlockPublicPolicy: false
+          }
+        }
+        command = new PutPublicAccessBlockCommand(params);
+        await s3.send(command);
         params = {
           Bucket: bucket,
           Policy: `{
