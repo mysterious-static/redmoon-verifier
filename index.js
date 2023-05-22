@@ -248,7 +248,7 @@ client.on('interactionCreate', async (interaction) => {
           ACL: 'public-read'
         };
         var command = new CreateBucketCommand(params);
-        res = await s3.send(command);
+        var res = await s3.send(command);
         var bucket = res.Location;
         await connection.promise().query('replace into kinklists (userid, guildid, s3, subdomain) values (?, ?, ?)', [interaction.member.id, interaction.guild.id, bucket, bucketname]);
         var webparams = {
@@ -262,8 +262,8 @@ client.on('interactionCreate', async (interaction) => {
             }
           }
         }
-        var command = new PutBucketWebsiteCommand(webparams);
-        var res = await s3.send(command);
+        command = new PutBucketWebsiteCommand(webparams);
+        await s3.send(command);
 
         // UPLOAD THE FILE HERE
         await fs.readFile(interaction.options.getAttachment('image'));
@@ -273,8 +273,8 @@ client.on('interactionCreate', async (interaction) => {
           Bucket: bucket,
           Key: "index.png"
         };
-        var command = new PutObjectCommand(params);
-        var res = await s3.send(command);
+        command = new PutObjectCommand(params);
+        s3.send(command);
 
         var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
         var params = {
@@ -316,8 +316,8 @@ client.on('interactionCreate', async (interaction) => {
             }
           }
         };
-        var command = new CreateDistributionCommand(params);
-        var res = cf.send(command);
+        command = new CreateDistributionCommand(params);
+        res = cf.send(command);
         var cloudfront = res.Distribution.ARN;
         var domain = res.Distribution.DomainName;
         await connection.promise().query('update kinklists set cloudfront = ? where userid = ? and guildid = ?', [cloudfront, interaction.member.id, interaction.guild.id]);
@@ -331,7 +331,7 @@ client.on('interactionCreate', async (interaction) => {
           content: domain,
           ttl: 600
         };
-        const res = await fetch('https://porkbun.com/api/json/v3/dns/create/rmxiv.com', {
+        const response = await fetch('https://porkbun.com/api/json/v3/dns/create/rmxiv.com', {
           method: 'post',
           body: JSON.stringify(pb_body),
           headers: { 'Content-Type': 'application/json' }
