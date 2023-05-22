@@ -308,15 +308,13 @@ client.on('interactionCreate', async (interaction) => {
             Origins: {
               Items: [
                 {
-                  DomainName: bucket + '.s3.amazonaws.com',
+                  DomainName: bucket + '.s3-website-us-east-1.amazonaws.com',
                   Id: bucket,
                   CustomOriginConfig: {
                     HTTPPort: 80,
-                    HTTPSPort: 443,
-                    OriginProtocolPolicy: 'match-viewer',
-                    OriginSslProtocols: { Items: ['SSLv3'], Quantity: 1 },
-                    OriginReadTimeout: 10000,
-                    OriginKeepaliveTimeout: 10000,
+                    OriginProtocolPolicy: 'http-only',
+                    OriginReadTimeout: 30,
+                    OriginKeepaliveTimeout: 5,
 
                   },
                   OriginPath: '',
@@ -348,8 +346,7 @@ client.on('interactionCreate', async (interaction) => {
                 Quantity: 1,
                 Items: [bucket]
               }
-            },
-
+            }
           }
         };
         command = new CreateDistributionCommand(params);
