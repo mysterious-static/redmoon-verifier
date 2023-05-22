@@ -373,7 +373,7 @@ client.on('interactionCreate', async (interaction) => {
         });
         const data = await response.json();
         console.log(data);
-        interaction.update({ content: 'Your kinklist should be set up at https://' + bucket + '.', ephemeral: true });
+        interaction.editReply({ content: 'Your kinklist should be set up at https://' + bucket + '.', ephemeral: true });
       }
       // If this user has a cloudfront distribution / S3 bucket set up already, upload the image and make no other changes.
       // If this user doesn't have one, create an S3 bucket, apply the static website hosting option, apply the JSON policy to allow access to any object in the bucket, and upload the image. Create the Cloudfront distribution.
