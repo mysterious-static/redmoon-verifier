@@ -6,7 +6,7 @@ var fetch = require('node-fetch');
 var crypto = require('node:crypto');
 var zxcvbn = require('zxcvbn');
 var fs = require('fs').promises;
-const { S3Client, PutBucketWebsiteCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutBucketWebsiteCommand, PutBucketPolicyCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
 const { CloudFrontClient, CreateDistributionCommand } = require('@aws-sdk/client-cloudfront');
 const { fromIni } = require("@aws-sdk/credential-providers");
 
@@ -244,8 +244,7 @@ client.on('interactionCreate', async (interaction) => {
           var bucketname = interaction.member.displayName.toLowerCase().replace(/\s+/g, '');
         }
         var params = {
-          Bucket: bucketname + ".rmxiv.com",
-          ACL: 'public-read'
+          Bucket: bucketname + ".rmxiv.com"
         };
         var command = new CreateBucketCommand(params);
         var res = await s3.send(command);
@@ -265,6 +264,24 @@ client.on('interactionCreate', async (interaction) => {
         command = new PutBucketWebsiteCommand(webparams);
         await s3.send(command);
 
+        params = {
+          Bucket: bucket,
+          Policy: `{
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "PublicReadGetObject",
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": "s3:GetObject",
+                    "Resource": "arn:aws:s3:::lilithmarx.rmxiv.com/*"
+                }
+            ]
+        }`
+
+        }
+        command = new PutBucketPolicyCommand(params);
+        await s3.send(command);
         // UPLOAD THE FILE HERE
         await fs.readFile(interaction.options.getAttachment('image'));
         var params = {
