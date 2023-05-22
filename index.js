@@ -248,8 +248,8 @@ client.on('interactionCreate', async (interaction) => {
         };
         var command = new CreateBucketCommand(params);
         var res = await s3.send(command);
-        var bucket = res.Location;
-        await connection.promise().query('replace into kinklists (userid, guildid, s3, subdomain) values (?, ?, ?)', [interaction.member.id, interaction.guild.id, bucket, bucketname]);
+        var bucket = res.Location.replace(/^\/+/, '');
+        await connection.promise().query('replace into kinklists (userid, guildid, s3, subdomain) values (?, ?, ?, ?)', [interaction.member.id, interaction.guild.id, bucket, bucketname]);
         var webparams = {
           Bucket: bucket,
           WebsiteConfiguration: {
