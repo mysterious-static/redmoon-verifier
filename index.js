@@ -241,7 +241,7 @@ client.on('interactionCreate', async (interaction) => {
         if (kinklist[0].length > 0 && kinklist[0][0].name) {
           var bucketname = kinklist[0][0].name;
         } else {
-          var bucketname = interaction.member.name.toLower().replace(/\s+/g, '');
+          var bucketname = interaction.member.displayName.toLowerCase().replace(/\s+/g, '');
         }
         var params = {
           Bucket: bucketname + ".rmxiv.com",
