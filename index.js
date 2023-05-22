@@ -325,10 +325,18 @@ client.on('interactionCreate', async (interaction) => {
               ],
               Quantity: 1
             },
-            ViewerProtocolPolicy: "redirect-to-https",
-            Logging: {
-              Enabled: false
+            DefaultCacheBehavior: {
+              TargetOriginId: bucket,
+              ViewerProtocolPolicy: "redirect-to-https",
+              AllowedMethods: {
+                Quantity: 2,
+                Items: [
+                  "GET",
+                  "HEAD"
+                ]
+              }
             },
+            Comment: bucket,
             Enabled: true,
             ViewerCertificate: {
               ACMCertificateArn: "arn:aws:acm:us-east-1:014854788150:certificate/afe0764b-71d5-4610-a0f0-77ff845f171e", //*.rmxiv.com,
