@@ -466,6 +466,10 @@ client.on('interactionCreate', async (interaction) => {
                 SmoothStreaming: false,
                 Compress: true,
                 FieldLevelEncryptionId: "",
+                LambdaFunctionAssociations: {
+                  Quantity: 0,
+                  Items: []
+                }
               },
               Comment: thisKinklist[0][0].s3,
               Enabled: true,
