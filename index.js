@@ -461,10 +461,7 @@ client.on('interactionCreate', async (interaction) => {
                 },
                 SmoothStreaming: false,
                 Compress: true,
-                FieldLevelEncryptionId: "",
-                RealtimeLogConfigArn: "",
-                OriginRequestPolicyId: "",
-                ResponseHeadersPolicyId: ""
+                FieldLevelEncryptionId: ""
               },
               Comment: thisKinklist[0][0].s3,
               Enabled: true,
