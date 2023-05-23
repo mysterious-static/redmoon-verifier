@@ -323,7 +323,7 @@ client.on('interactionCreate', async (interaction) => {
         var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
         var params = {
           DistributionConfig: {
-            CallerReference: new Date('U'),
+            CallerReference: new Date('U') + '-' + bucketname,
             Origins: {
               Items: [
                 {
