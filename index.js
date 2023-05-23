@@ -483,6 +483,10 @@ client.on('interactionCreate', async (interaction) => {
                 Items: [
                   `${name}.rmxiv.com`
                 ]
+              },
+              CacheBehaviors: {
+                Quantity: 0,
+                Items: []
               }
             }
           };
