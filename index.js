@@ -411,6 +411,7 @@ client.on('interactionCreate', async (interaction) => {
             IfMatch: res.ETag,
             DistributionConfig: {
               DefaultRootObject: "",
+              WebACLId: "",
               PriceClass: 'PriceClass_All',
               CallerReference: new Date('U'),
               Origins: {
