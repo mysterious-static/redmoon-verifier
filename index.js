@@ -457,11 +457,15 @@ client.on('interactionCreate', async (interaction) => {
                   Items: [
                     "GET",
                     "HEAD"
-                  ]
+                  ],
+                  CachedMethods: {
+                    Quantity: 2,
+                    Items: ["GET", "HEAD"]
+                  }
                 },
                 SmoothStreaming: false,
                 Compress: true,
-                FieldLevelEncryptionId: ""
+                FieldLevelEncryptionId: "",
               },
               Comment: thisKinklist[0][0].s3,
               Enabled: true,
