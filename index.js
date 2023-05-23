@@ -432,6 +432,9 @@ client.on('interactionCreate', async (interaction) => {
                 ],
                 Quantity: 1
               },
+              Logging: {
+                Enabled: false
+              },
               DefaultCacheBehavior: {
                 TargetOriginId: thisKinklist[0][0].s3,
                 CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6", // CachingOptimized
