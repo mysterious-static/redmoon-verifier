@@ -347,6 +347,7 @@ client.on('interactionCreate', async (interaction) => {
               ACMCertificateArn: "arn:aws:acm:us-east-1:014854788150:certificate/afe0764b-71d5-4610-a0f0-77ff845f171e", //*.rmxiv.com,
               CertificateSource: "acm",
               SSLSupportMethod: "sni-only",
+              MinimumProtocolVersion: "TLSv1.2_2021"
             },
             Aliases: {
               Quantity: 1,
@@ -477,6 +478,7 @@ client.on('interactionCreate', async (interaction) => {
                 ACMCertificateArn: "arn:aws:acm:us-east-1:014854788150:certificate/afe0764b-71d5-4610-a0f0-77ff845f171e", //*.rmxiv.com,
                 CertificateSource: "acm",
                 SSLSupportMethod: "sni-only",
+                MinimumProtocolVersion: "TLSv1.2_2021"
               },
               Aliases: {
                 Quantity: 1,
