@@ -412,6 +412,10 @@ client.on('interactionCreate', async (interaction) => {
             DistributionConfig: {
               DefaultRootObject: "",
               WebACLId: "",
+              HttpVersion: "http2", 
+              IsIPV6Enabled: true,
+              ContinuousDeploymentPolicyId: "",
+              Staging: false,
               PriceClass: 'PriceClass_All',
               CallerReference: new Date('U'),
               Origins: {
