@@ -458,7 +458,8 @@ client.on('interactionCreate', async (interaction) => {
                     "GET",
                     "HEAD"
                   ]
-                }
+                },
+                SmoothStreaming: false
               },
               Comment: thisKinklist[0][0].s3,
               Enabled: true,
