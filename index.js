@@ -410,6 +410,7 @@ client.on('interactionCreate', async (interaction) => {
             Id: thisKinklist[0][0].cf_id,
             IfMatch: res.ETag,
             DistributionConfig: {
+              PriceClass: 'PriceClass_All',
               CallerReference: new Date('U'),
               Origins: {
                 Items: [
