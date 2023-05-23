@@ -487,6 +487,10 @@ client.on('interactionCreate', async (interaction) => {
               CacheBehaviors: {
                 Quantity: 0,
                 Items: []
+              },
+              CustomErrorResponses: {
+                Quantity: 0,
+                Items: []
               }
             }
           };
