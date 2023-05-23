@@ -493,6 +493,13 @@ client.on('interactionCreate', async (interaction) => {
               CustomErrorResponses: {
                 Quantity: 0,
                 Items: []
+              },
+              Restrictions: {
+                GeoRestriction: {
+                  RestrictionType: "none",
+                  Quantity: 0,
+                  Items: []
+                }
               }
             }
           };
