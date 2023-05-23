@@ -7,7 +7,7 @@ var crypto = require('node:crypto');
 var zxcvbn = require('zxcvbn');
 var fs = require('fs').promises;
 const { S3Client, PutBucketWebsiteCommand, PutPublicAccessBlockCommand, PutBucketPolicyCommand, PutObjectCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
-const { CloudFrontClient, CreateDistributionCommand, UpdateDistributionCommand } = require('@aws-sdk/client-cloudfront');
+const { CloudFrontClient, CreateDistributionCommand, GetDistributionCommand, UpdateDistributionCommand } = require('@aws-sdk/client-cloudfront');
 const { fromIni } = require("@aws-sdk/credential-providers");
 
 var connection = mysql.createConnection({
