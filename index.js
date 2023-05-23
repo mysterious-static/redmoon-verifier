@@ -7,7 +7,7 @@ var crypto = require('node:crypto');
 var zxcvbn = require('zxcvbn');
 var fs = require('fs').promises;
 const { S3Client, PutBucketWebsiteCommand, PutPublicAccessBlockCommand, PutBucketPolicyCommand, PutObjectCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
-const { CloudFrontClient, CreateDistributionCommand, GetDistributionCommand, UpdateDistributionCommand } = require('@aws-sdk/client-cloudfront');
+const { CloudFrontClient, CreateDistributionCommand, CreateInvalidationCommand, GetDistributionCommand, UpdateDistributionCommand } = require('@aws-sdk/client-cloudfront');
 const { fromIni } = require("@aws-sdk/credential-providers");
 
 var connection = mysql.createConnection({
@@ -239,8 +239,23 @@ client.on('interactionCreate', async (interaction) => {
         };
         command = new PutObjectCommand(params);
         await s3.send(command);
-        // Create CloudFront invalidation 
-        interaction.editReply('Kinklist image updated! This will be live for you within the next 24 hours.');
+        params = {
+          DistributionId: kinklist[0][0].cf_id,
+          InvalidationBatch: {
+            Paths: {
+              Quantity: 1,
+              Items: [
+                '/index.png'
+              ]
+            }
+          },
+          CallerReference: new Date('U')
+        }
+        var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
+        command = new CreateInvalidationCommand(params);
+        await cf.send(command);
+
+        interaction.editReply('Kinklist image updated! This will be live for you within the next 30 minutes.');
       } else {
         if (kinklist[0].length > 0 && kinklist[0][0].subdomain) {
           var bucketname = kinklist[0][0].subdomain;
