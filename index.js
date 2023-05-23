@@ -354,7 +354,7 @@ client.on('interactionCreate', async (interaction) => {
             }
           }
         };
-        command = new UpdateDistributionCommand(params);
+        command = new CreateDistributionCommand(params);
         res = await cf.send(command);
         var cloudfront = res.Distribution.ARN;
         var domain = res.Distribution.DomainName;
@@ -411,7 +411,7 @@ client.on('interactionCreate', async (interaction) => {
               }
             }
           };
-          command = new CreateDistributionCommand(params);
+          command = new UpdateDistributionCommand(params);
           res = await cf.send(command);
           await connection.promise().query('update kinklists set subdomain = ? where userid = ? and guildid = ?', [name, interaction.member.id, interaction.guild.id]);
           await interaction.reply({ content: 'Your kinklist URL has been updated to https://' + name + '.rmxiv.com - this will likely be live for you within 10 to 15 minutes.', ephemeral: true })
