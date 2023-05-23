@@ -405,6 +405,45 @@ client.on('interactionCreate', async (interaction) => {
             Id: thisKinklist[0][0].cf_id,
             DistributionConfig: {
               CallerReference: new Date('U'),
+              Origins: {
+                Items: [
+                  {
+                    DomainName: `${thisKinklist[0][0].s3}.s3-website-us-east-1.amazonaws.com`,
+                    Id: `${thisKinklist[0][0].s3}`,
+                    CustomOriginConfig: {
+                      HTTPPort: 80,
+                      HTTPSPort: 443,
+                      OriginProtocolPolicy: 'http-only',
+                      OriginReadTimeout: 30,
+                      OriginKeepaliveTimeout: 5,
+
+                    },
+                    OriginPath: '',
+                    CustomHeaders: { Quantity: 0 }
+
+                  },
+                ],
+                Quantity: 1
+              },
+              DefaultCacheBehavior: {
+                TargetOriginId: bucket,
+                CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6", // CachingOptimized
+                ViewerProtocolPolicy: "redirect-to-https",
+                AllowedMethods: {
+                  Quantity: 2,
+                  Items: [
+                    "GET",
+                    "HEAD"
+                  ]
+                }
+              },
+              Comment: `${thisKinklist[0][0].s3}`,
+              Enabled: true,
+              ViewerCertificate: {
+                ACMCertificateArn: "arn:aws:acm:us-east-1:014854788150:certificate/afe0764b-71d5-4610-a0f0-77ff845f171e", //*.rmxiv.com,
+                CertificateSource: "acm",
+                SSLSupportMethod: "sni-only",
+              },
               Aliases: {
                 Quantity: 1,
                 Items: [
