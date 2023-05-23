@@ -460,7 +460,11 @@ client.on('interactionCreate', async (interaction) => {
                   ]
                 },
                 SmoothStreaming: false,
-                Compress: true
+                Compress: true,
+                FieldLevelEncryptionId: "",
+                RealtimeLogConfigArn: "",
+                OriginRequestPolicyId: "",
+                ResponseHeadersPolicyId: ""
               },
               Comment: thisKinklist[0][0].s3,
               Enabled: true,
