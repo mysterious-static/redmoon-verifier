@@ -428,7 +428,8 @@ client.on('interactionCreate', async (interaction) => {
                       HTTPSPort: 443,
                       OriginProtocolPolicy: 'http-only',
                       OriginSslProtocols: {
-                        Quantity: 0
+                        Quantity: 0,
+                        Items: []
                       },
                       OriginReadTimeout: 30,
                       OriginKeepaliveTimeout: 5,
