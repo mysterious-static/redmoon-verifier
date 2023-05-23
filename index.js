@@ -359,7 +359,7 @@ client.on('interactionCreate', async (interaction) => {
         var cloudfront = res.Distribution.ARN;
         var domain = res.Distribution.DomainName;
         var id = res.Distribution.Id;
-        await connection.promise().query('update kinklists set cloudfront = ?, cfdomain = ?, cfid = ? where userid = ? and guildid = ?', [cloudfront, domain, id, interaction.member.id, interaction.guild.id]);
+        await connection.promise().query('update kinklists set cloudfront = ?, cfdomain = ?, cf_id = ? where userid = ? and guildid = ?', [cloudfront, domain, id, interaction.member.id, interaction.guild.id]);
         // CONTINUE FROM HERE
         // Create Porkbun DNS record from variable bucketname.
         var pb_body = {
