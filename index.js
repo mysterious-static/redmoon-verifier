@@ -402,9 +402,9 @@ client.on('interactionCreate', async (interaction) => {
           const data = await response.json();
           var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
           var params = {
+            Id: thisKinklist[0][0].cf_id,
             DistributionConfig: {
               CallerReference: new Date('U'),
-              Id: thisKinklist[0][0].cf_id,
               Aliases: {
                 Quantity: 1,
                 Items: [
