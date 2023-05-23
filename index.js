@@ -409,7 +409,7 @@ client.on('interactionCreate', async (interaction) => {
                 Items: [
                   {
                     DomainName: `${thisKinklist[0][0].s3}.s3-website-us-east-1.amazonaws.com`,
-                    Id: `${thisKinklist[0][0].s3}`,
+                    Id: thisKinklist[0][0].s3,
                     CustomOriginConfig: {
                       HTTPPort: 80,
                       HTTPSPort: 443,
@@ -426,7 +426,7 @@ client.on('interactionCreate', async (interaction) => {
                 Quantity: 1
               },
               DefaultCacheBehavior: {
-                TargetOriginId: bucket,
+                TargetOriginId: thisKinklist[0][0].s3,
                 CachePolicyId: "658327ea-f89d-4fab-a63d-7e88639e58f6", // CachingOptimized
                 ViewerProtocolPolicy: "redirect-to-https",
                 AllowedMethods: {
@@ -437,7 +437,7 @@ client.on('interactionCreate', async (interaction) => {
                   ]
                 }
               },
-              Comment: `${thisKinklist[0][0].s3}`,
+              Comment: thisKinklist[0][0].s3,
               Enabled: true,
               ViewerCertificate: {
                 ACMCertificateArn: "arn:aws:acm:us-east-1:014854788150:certificate/afe0764b-71d5-4610-a0f0-77ff845f171e", //*.rmxiv.com,
