@@ -209,7 +209,7 @@ client.on('ready', async () => {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
   // need to add kinklist and customkinklistname to available commands
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON()]);
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON(), customkinklistname.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -381,7 +381,8 @@ client.on('interactionCreate', async (interaction) => {
     } else if (interaction.commandName === 'customkinklistname') {
       var name = interaction.options.getString('name');
       var exists = await connection.promise().query('select * from kinklists where subdomain = ?', [name]);
-      if (exists[0].length <= 0) {
+      var reserved_words = ['bounties', 'bounty-signup', 'chambers', 'handbook', 'kinklist', 'menu', 'sessionreport', 'tokentracker'];
+      if (exists[0].length <= 0 && !reserved_words.includes(name)) {
         var thisKinklist = await connection.promise().query('select * from kinklists where userid = ? and guildid = ?', [interaction.member.id, interaction.guild.id]);
         if (thisKinklist[0].length > 0 && thisKinklist[0][0].subdomain != '') {
           var pb_body = {
