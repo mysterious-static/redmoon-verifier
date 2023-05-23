@@ -402,7 +402,13 @@ client.on('interactionCreate', async (interaction) => {
           const data = await response.json();
           var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
           var params = {
+            Id: thisKinklist[0][0].cf_id
+          };
+          command = new GetDistributionCommand(params);
+          res = await cf.send(command);
+          var params = {
             Id: thisKinklist[0][0].cf_id,
+            IfMatch: res.ETag,
             DistributionConfig: {
               CallerReference: new Date('U'),
               Origins: {
