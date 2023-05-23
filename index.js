@@ -354,7 +354,7 @@ client.on('interactionCreate', async (interaction) => {
             }
           }
         };
-        command = new CreateDistributionCommand(params);
+        command = new UpdateDistributionCommand(params);
         res = await cf.send(command);
         var cloudfront = res.Distribution.ARN;
         var domain = res.Distribution.DomainName;
