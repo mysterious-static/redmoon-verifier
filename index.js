@@ -433,7 +433,10 @@ client.on('interactionCreate', async (interaction) => {
                 Quantity: 1
               },
               Logging: {
-                Enabled: false
+                Enabled: false,
+                IncludeCookies: false,
+                Bucket: "placeholder-s3-bucket-for-cf-logs",
+                Prefix: "a"
               },
               DefaultCacheBehavior: {
                 TargetOriginId: thisKinklist[0][0].s3,
