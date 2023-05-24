@@ -239,6 +239,7 @@ client.on('interactionCreate', async (interaction) => {
         };
         command = new PutObjectCommand(params);
         await s3.send(command);
+        console.log(new Date().valueOf());
         params = {
           DistributionId: kinklist[0][0].cf_id,
           InvalidationBatch: {
