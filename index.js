@@ -248,9 +248,9 @@ client.on('interactionCreate', async (interaction) => {
               Items: [
                 '/index.png'
               ]
-            }
+            },
+            CallerReference: new Date().valueOf()
           },
-          CallerReference: new Date().valueOf()
         }
         var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
         command = new CreateInvalidationCommand(params);
@@ -429,7 +429,7 @@ client.on('interactionCreate', async (interaction) => {
             DistributionConfig: {
               DefaultRootObject: "",
               WebACLId: "",
-              HttpVersion: "http2", 
+              HttpVersion: "http2",
               IsIPV6Enabled: true,
               ContinuousDeploymentPolicyId: "",
               Staging: false,
