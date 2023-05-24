@@ -320,11 +320,11 @@ client.on('interactionCreate', async (interaction) => {
         };
         command = new PutObjectCommand(params);
         await s3.send(command);
-
+        var now = new Date().valueOf();
         var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
         var params = {
           DistributionConfig: {
-            CallerReference: new Date().valueOf(),
+            CallerReference: now,
             Origins: {
               Items: [
                 {
@@ -376,7 +376,7 @@ client.on('interactionCreate', async (interaction) => {
         var cloudfront = res.Distribution.ARN;
         var domain = res.Distribution.DomainName;
         var id = res.Distribution.Id;
-        await connection.promise().query('update kinklists set cloudfront = ?, cfdomain = ?, cf_id = ? where userid = ? and guildid = ?', [cloudfront, domain, id, interaction.member.id, interaction.guild.id]);
+        await connection.promise().query('update kinklists set cloudfront = ?, cfdomain = ?, cf_id = ?, cf_caller = ? where userid = ? and guildid = ?', [cloudfront, domain, id, now, interaction.member.id, interaction.guild.id]);
         // CONTINUE FROM HERE
         // Create Porkbun DNS record from variable bucketname.
         var pb_body = {
@@ -434,7 +434,7 @@ client.on('interactionCreate', async (interaction) => {
               ContinuousDeploymentPolicyId: "",
               Staging: false,
               PriceClass: 'PriceClass_All',
-              CallerReference: new Date().valueOf(),
+              CallerReference: thisKinklist[0][0].cf_caller,
               Origins: {
                 Items: [
                   {
