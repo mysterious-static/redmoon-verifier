@@ -249,7 +249,7 @@ client.on('interactionCreate', async (interaction) => {
               ]
             }
           },
-          CallerReference: Date.now()
+          CallerReference: new Date.valueOf()
         }
         var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
         command = new CreateInvalidationCommand(params);
@@ -323,7 +323,7 @@ client.on('interactionCreate', async (interaction) => {
         var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
         var params = {
           DistributionConfig: {
-            CallerReference: Date.now(),
+            CallerReference: new Date.valueOf(),
             Origins: {
               Items: [
                 {
@@ -433,7 +433,7 @@ client.on('interactionCreate', async (interaction) => {
               ContinuousDeploymentPolicyId: "",
               Staging: false,
               PriceClass: 'PriceClass_All',
-              CallerReference: Date.now(),
+              CallerReference: new Date.valueOf(),
               Origins: {
                 Items: [
                   {
