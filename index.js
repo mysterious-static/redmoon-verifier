@@ -208,8 +208,16 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
+  var menu = new SlashCommandBuilder().setName('menu')
+  .setDescription('Upload a new menu image.')
+  .addAttachmentOption(option =>
+    option.setName('image')
+    .setDescription('New mneu image')
+    .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+
   // need to add kinklist and customkinklistname to available commands
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON(), customkinklistname.toJSON()]);
+  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON(), customkinklistname.toJSON(), menu.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
@@ -224,6 +232,36 @@ client.on('interactionCreate', async (interaction) => {
         await connection.promise().query('insert into servers_roles (guildid, roleid) values (?, ?)', [interaction.guild.id, verifiedrole.id]);
       }
       interaction.reply({ content: 'Successfully set the \'verified\' role!', ephemeral: true });
+    } else if (interaction.commandName === 'menu') {
+      interaction.deferReply({ ephemeral: true });
+      const s3 = new S3Client({ credentials: fromIni({ profile: "redmoon" }) });
+      var file = await fetch(interaction.options.getAttachment('image').url);
+      var blob = await file.arrayBuffer();
+      var params = {
+        Body: blob,
+        Bucket: "menu.rmxiv.com",
+        Key: "menu.png",
+        ContentType: "image/png"
+      };
+      command = new PutObjectCommand(params);
+      await s3.send(command);
+      params = {
+        DistributionId: 'E3PF1FS1HWQKU1',
+        InvalidationBatch: {
+          Paths: {
+            Quantity: 1,
+            Items: [
+              '/*'
+            ]
+          },
+          CallerReference: new Date().valueOf()
+        },
+      }
+      var cf = new CloudFrontClient({ credentials: fromIni({ profile: "redmoon" }) });
+      command = new CreateInvalidationCommand(params);
+      await cf.send(command);
+
+      interaction.editReply('Kinklist image updated! This will be live for you within the next 30 minutes.');
     } else if (interaction.commandName === 'kinklist') {
       interaction.deferReply({ ephemeral: true });
       const s3 = new S3Client({ credentials: fromIni({ profile: "redmoon" }) });
