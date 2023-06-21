@@ -461,7 +461,6 @@ client.on('interactionCreate', async (interaction) => {
           };
           command = new GetDistributionCommand(params);
           res = await cf.send(command);
-          console.log(res.Distribution);
           var params = {
             Id: thisKinklist[0][0].cf_id,
             IfMatch: res.ETag,
