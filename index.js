@@ -435,7 +435,7 @@ client.on('interactionCreate', async (interaction) => {
         interaction.editReply({ content: 'Your kinklist should be set up at https://' + bucket + ' in approximately five minutes.', ephemeral: true });
       }
     } else if (interaction.commandName === 'customkinklistname') {
-      var name = interaction.options.getString('name');
+      var name = interaction.options.getString('name').toLowerCase();
       var exists = await connection.promise().query('select * from kinklists where subdomain = ?', [name]);
       var reserved_words = ['bounties', 'bounty-signup', 'chambers', 'handbook', 'kinklist', 'menu', 'sessionreport', 'tokentracker'];
       if (exists[0].length <= 0 && !reserved_words.includes(name)) {
