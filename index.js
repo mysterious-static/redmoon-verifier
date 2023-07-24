@@ -1100,7 +1100,7 @@ client.on('interactionCreate', async (interaction) => {
 
         await thread.send(`**${title}**`);
         await thread.send(description);
-        await interaction.reply({content: 'Ticket created, check here: <#' + thread.id + '>', ephemeral: true});
+        await submitted.reply({content: 'Ticket created, check here: <#' + thread.id + '>', ephemeral: true});
         var settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [interaction.guild.id, 'audit_channel']);
         var audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
         var embed = new EmbedBuilder()
