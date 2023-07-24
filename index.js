@@ -360,9 +360,9 @@ client.on('interactionCreate', async (interaction) => {
       }
     } else if (interaction.commandName === 'closeticket') {
       if (interaction.channel.isThread()) {
-        var ticket = connection.promise().query('select * from tickets where thread_id = ?', [interaction.channel.id]);
+        var ticket = await connection.promise().query('select * from tickets where thread_id = ?', [interaction.channel.id]);
         if (ticket[0].length > 0) {
-          var ticketRole = connection.promise().query('select * from tickets_categories_roles where category_id = ?', [ticket[0][0].category_id]);
+          var ticketRole = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [ticket[0][0].category_id]);
           if (interaction.member.isAdmin() || interaction.member.roles.has(ticketRole[0][0].role_id));
           {
             await interaction.channel.members.remove(ticket[0][0].open_uid);
