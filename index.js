@@ -364,13 +364,13 @@ client.on('interactionCreate', async (interaction) => {
         if (ticket[0].length > 0) {
           var ticketRole = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [ticket[0][0].category_id]);
           if (interaction.member.permissionsIn(interaction.channel).has('ADMINISTRATOR') || interaction.member.roles.has(ticketRole[0][0].role_id)) {
-            var openuser = await interaction.guild.members.fetch(ticket[0][0].open_uid);
+            var openuser = await interaction.guild.members.fetch(ticket[0][0].uid_open);
             if (!openuser.permissionsIn(interaction.channel).has('ADMINISTRATOR')) {
               await interaction.channel.members.remove(openuser.id);
             }
             await interaction.channel.setArchived(true);
             // Archive thread
-            await connection.promise().query('update tickets set close_uid = ? where thread_id = ?', [interaction.member.id, interaction.channel.id]);
+            await connection.promise().query('update tickets set uid_close = ? where thread_id = ?', [interaction.member.id, interaction.channel.id]);
             // Create embed
             var settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [interaction.guild.id, 'audit_channel']);
             var audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
