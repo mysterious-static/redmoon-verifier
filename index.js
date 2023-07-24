@@ -245,9 +245,11 @@ client.on('ready', async () => {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
   // Dropdowns / multisleect
 
-  var closeticket = new SlashCommandBuilder().setName('closeticket');
+  var closeticket = new SlashCommandBuilder().setName('closeticket')
+    .setDescription('Closes the current ticket thread.');
 
   var removeticketcategory = new SlashCommandBuilder().setName('removeticketcategory')
+    .setDescription('Removes a ticket category (nyi)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
   // need to add kinklist and customkinklistname to available commands
