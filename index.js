@@ -363,7 +363,7 @@ client.on('interactionCreate', async (interaction) => {
         var ticket = await connection.promise().query('select * from tickets where thread_id = ?', [interaction.channel.id]);
         if (ticket[0].length > 0) {
           var ticketRole = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [ticket[0][0].category_id]);
-          if (interaction.member.hasPermission('ADMINISTRATOR') || interaction.member.roles.has(ticketRole[0][0].role_id)) {
+          if (interaction.member.permissionsIn(interaction.channel).has('ADMINISTRATOR') || interaction.member.roles.has(ticketRole[0][0].role_id)) {
             await interaction.channel.members.remove(ticket[0][0].open_uid);
             await interaction.channel.setArchived(true);
             // Archive thread
