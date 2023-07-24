@@ -1046,11 +1046,13 @@ client.on('interactionCreate', async (interaction) => {
         .setCustomId('TicketOpenModal')
         .setTitle('Open a Ticket')
 
-      var titleInput = new TextInputBuilder().setCustomId('TicketTitleInput').setLabel('Type a SHORT description of your issue').setStyle(TextInputStyle.Short);
-      var descriptionInput = new TextInputBuilder().setCustomId('TicketDescriptionInput').setLabel('A more detailed description, please!').setStyle(TextInputStyle.Paragraph);
+      var fields = {
+        title: new TextInputBuilder().setCustomId('TicketTitleInput').setLabel('Type a SHORT description of your issue').setStyle(TextInputStyle.Short),
+        description: new TextInputBuilder().setCustomId('TicketDescriptionInput').setLabel('A more detailed description, please!').setStyle(TextInputStyle.Paragraph)
+      };
 
-      var titleRow = new ActionRowBuilder().addComponents(titleInput);
-      var descRow = new ActionRowBuilder().addComponents(descriptionInput);
+      var titleRow = new ActionRowBuilder().addComponents(fields.title);
+      var descRow = new ActionRowBuilder().addComponents(fields.description);
 
       modal.addComponents(titleRow, descRow);
 
