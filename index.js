@@ -346,13 +346,13 @@ client.on('interactionCreate', async (interaction) => {
               categorySelected = interaction_select.values[0];
               const roleSelectComponent = new RoleSelectMenuBuilder().setCustomId('RoleSelector').setMinValues(1).setMaxValues(5);
               var roleSelectRow = new ActionRowBuilder().addComponents(roleSelectComponent);
-              interaction.update({ content: 'Select the roles you want to assign.', components: [roleSelectRow] });
+              await interaction.editReply({ content: 'Select the roles you want to assign.', components: [roleSelectRow] });
             } else if (interaction_select.customId == 'RoleSelector') {
               rolesSelected = interaction_select.values;
               for (const role of rolesSelected) {
                 await connection.promise().query('insert into tickets_categories_roles (category_id, role_id) values (?, ?)', [categorySelected, role]);
               }
-              await interaction.update({ content: 'Role assigned to category successfully.', components: [] });
+              await interaction.editReply({ content: 'Role assigned to category successfully.', components: [] });
               await collector.stop();
             }
           }
