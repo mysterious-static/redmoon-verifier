@@ -1075,9 +1075,9 @@ client.on('interactionCreate', async (interaction) => {
       // can use the ModalSubmitInteraction.fields helper property to get the value of an input field
       // from it's Custom ID. See https://old.discordjs.dev/#/docs/discord.js/stable/class/ModalSubmitFieldsResolver for more info.
       if (submitted) {
-        console.log(submitted.fields['title']);
-        title = submitted.fields['title'].value;
-        description = submitted.fields['description'].value;
+        console.log(submitted.fields);
+        title = submitted.fields.get('title').value;
+        description = submitted.fields.get('description').value;
         //const [title, description] = Object.keys(fields).map(key => submitted.fields.getTextInputValue(fields[key].customId))
         var newTicket = await connection.promise().query('insert into tickets (uid_open, title, description, category_id) values (?, ?, ?, ?)', [interaction.user.id, title, description, category_id]);
         var thread = await channel.threads.create({
