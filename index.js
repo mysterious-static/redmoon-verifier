@@ -315,7 +315,7 @@ client.on('interactionCreate', async (interaction) => {
           }
           const categorySelectComponent = new StringSelectMenuBuilder().setOptions(categoriesKeyValues).setCustomId('TicketCategorySelector').setMinValues(1).setMaxValues(1);
           var categorySelectRow = new ActionRowBuilder().addComponents(categorySelectComponent);
-          var message = await interaction.options.getChannel('channel').send({ embeds: embeddedMessage, components: [categorySelectRow] });
+          var message = await interaction.options.getChannel('channel').send({ embeds: [embeddedMessage], components: [categorySelectRow] });
           interaction.reply({ content: 'Assigned ticket channel and sent message.', ephemeral: true });
         } else {
           interaction.reply({ content: 'Please create at least one ticket category first, using `/addticketcategory`.', ephemeral: true })
