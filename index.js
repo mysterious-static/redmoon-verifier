@@ -1092,7 +1092,8 @@ client.on('interactionCreate', async (interaction) => {
         var category = await connection.promise().query('select * from tickets_categories where id = ?', [category_id]);
 
         // THIS PART DIDNT WORK
-        var users = await interaction.guild.roles.cache.get(role[0][0].role_id).members.map(m => m.user.id);
+        console.log(role[0][0].role_id);
+        var users = await interaction.guild.roles.cache.get(role[0][0].role_id).members;
         console.log(users);
         for (const user of users) {
           await thread.members.add(user);
@@ -1100,7 +1101,7 @@ client.on('interactionCreate', async (interaction) => {
 
         await thread.send(`**${title}**`);
         await thread.send(description);
-        await submitted.reply({content: 'Ticket created, check here: <#' + thread.id + '>', ephemeral: true});
+        await submitted.reply({ content: 'Ticket created, check here: <#' + thread.id + '>', ephemeral: true });
         var settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [interaction.guild.id, 'audit_channel']);
         var audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
         var embed = new EmbedBuilder()
