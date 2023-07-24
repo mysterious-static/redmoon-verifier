@@ -368,7 +368,6 @@ client.on('interactionCreate', async (interaction) => {
             await interaction.channel.setArchived(true);
             // Archive thread
             await connection.promise().query('update tickets set close_uid = ? where thread_id = ?', [interaction.member.id, interaction.channel.id]);
-            var ticket = await connection.promise().query('select * from tickets where thread_id = ?', [interaction.channel.id]);
             // Create embed
             var settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [interaction.guild.id, 'audit_channel']);
             var audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
@@ -393,6 +392,7 @@ client.on('interactionCreate', async (interaction) => {
             // Remove open_uid from thread
             // Send message to audit channel
             // ack the interaction silently
+            //TODO close reason
           }
         }
       }
