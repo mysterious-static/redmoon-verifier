@@ -1043,7 +1043,7 @@ client.on('interactionCreate', async (interaction) => {
       var category_id = interaction.values[0];
       /* Create Modal and accept input */
       var modal = new ModalBuilder()
-        .setcustomId('TicketOpenModal')
+        .setCustomId('TicketOpenModal')
         .setTitle('Open a Ticket')
 
       var titleInput = new TextInputBuilder().setCustomId('TicketTitleInput').setLabel('Type a SHORT description of your issue, one sentence max').setStyle(TextInputStyle.Short);
