@@ -394,6 +394,8 @@ client.on('interactionCreate', async (interaction) => {
             // ack the interaction silently
             //TODO close reason
           }
+        } else {
+          interaction.reply({content: 'couldn\'t find ticket with thread id', ephemeral: true});
         }
       }
     } else if (interaction.commandName === 'removeticketcategory') {
@@ -1085,6 +1087,7 @@ client.on('interactionCreate', async (interaction) => {
           type: ChannelType.PrivateThread,
           reason: 'Ticket thread'
         });
+        console.log(thread);
         await connection.promise().query('update tickets set thread_id = ? where id = ?', [thread.id, newTicket.id]);
         await thread.members.add(interaction.user.id);
         var role = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [category_id]);
