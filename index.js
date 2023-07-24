@@ -329,6 +329,7 @@ client.on('interactionCreate', async (interaction) => {
       interaction.reply({ content: 'Audit channel created or updated.', ephemeral: true });
     } else if (interaction.commandName === 'setcategorygroup') {
       var categories = await connection.promise().query('select * from tickets_categories where guildid = ?', [interaction.guild.id]);
+      var categoriesKeyValues = [];
       if (categories[0].length > 0) {
         for (const category of categories[0]) {
           categoriesKeyValues.push({ label: `${category.name}`, value: category.id.toString() });
