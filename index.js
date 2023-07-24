@@ -1075,6 +1075,7 @@ client.on('interactionCreate', async (interaction) => {
       // can use the ModalSubmitInteraction.fields helper property to get the value of an input field
       // from it's Custom ID. See https://old.discordjs.dev/#/docs/discord.js/stable/class/ModalSubmitFieldsResolver for more info.
       if (submitted) {
+        console.log(submitted.fields);
         title = submitted.fields[0];
         description = submitted.fields[1];
         //const [title, description] = Object.keys(fields).map(key => submitted.fields.getTextInputValue(fields[key].customId))
@@ -1095,28 +1096,29 @@ client.on('interactionCreate', async (interaction) => {
         }
         await thread.send(`**${title}**`);
         await thread.send(description);
+        var settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [interaction.guild.id, 'audit_channel']);
+        var audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
+        var embed = new EmbedBuilder()
+          .setTitle('Ticket created!')
+          .setDescription(title)
+          .setAuthor({ name: interaction.member.displayName })
+          .addFields(
+            {
+              name: 'Thread link',
+              value: thread.toString(),
+              inline: true
+            },
+            {
+              name: 'Category',
+              value: category[0][0].name,
+              inline: true
+            }
+          )
+          .setTimestamp();
+        audit_channel.send({ embeds: [embed] });
       }
 
-      var settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [interaction.guild.id, 'audit_channel']);
-      var audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
-      var embed = new EmbedBuilder()
-        .setTitle('Ticket created!')
-        .setDescription(title)
-        .setAuthor({ name: interaction.member.displayName })
-        .addFields(
-          {
-            name: 'Thread link',
-            value: thread.toString(),
-            inline: true
-          },
-          {
-            name: 'Category',
-            value: category[0][0].name,
-            inline: true
-          }
-        )
-        .setTimestamp();
-      audit_channel.send({ embeds: [embed] });
+
 
       /* Create embed for audit channel. */
     }
