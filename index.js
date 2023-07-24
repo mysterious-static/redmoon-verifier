@@ -1093,14 +1093,10 @@ client.on('interactionCreate', async (interaction) => {
 
         // THIS PART DIDNT WORK
         console.log(role[0][0].role_id);
-        var users = await interaction.guild.roles.get(role[0][0].role_id).members;
-        console.log(users);
-        for (const user of users) {
-          await thread.members.add(user);
-        }
 
         await thread.send(`**${title}**`);
         await thread.send(description);
+        await thread.send('<@&' + role[0][0].role_id + '>');
         await submitted.reply({ content: 'Ticket created, check here: <#' + thread.id + '>', ephemeral: true });
         var settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [interaction.guild.id, 'audit_channel']);
         var audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
