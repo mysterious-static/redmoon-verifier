@@ -309,6 +309,7 @@ client.on('interactionCreate', async (interaction) => {
             .setColor(0x770000)
             .setTitle('Ticket System')
             .setDescription('Please select a ticket type from the dropdown menu to begin opening a support ticket.');
+          var categoriesKeyValues = [];
           for (const category of categories[0]) {
             categoriesKeyValues.push({ label: `${category.name}`, value: category.id.toString() });
           }
