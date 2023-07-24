@@ -336,7 +336,7 @@ client.on('interactionCreate', async (interaction) => {
         }
         const categorySelectComponent = new StringSelectMenuBuilder().setOptions(categoriesKeyValues).setCustomId('CategorySelector').setMinValues(1).setMaxValues(1);
         var categorySelectRow = new ActionRowBuilder().addComponents(categorySelectComponent);
-        var message = await interaction.reply({ content: 'Select a category to assign a role to.', components: [categorySelectRow] });
+        var message = await interaction.reply({ content: 'Select a category to assign a role to.', components: [categorySelectRow], ephemeral: true });
         const collector = message.createMessageComponentCollector();
         var categorySelected;
         var rolesSelected;
