@@ -396,6 +396,8 @@ client.on('interactionCreate', async (interaction) => {
             // Send message to audit channel
             // ack the interaction silently
             //TODO close reason
+          } else {
+            interaction.reply({ content: 'no admin or appropriate role', ephemeral: true });
           }
         } else {
           interaction.reply({ content: 'couldn\'t find ticket with thread id', ephemeral: true });
