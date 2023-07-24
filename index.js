@@ -376,7 +376,7 @@ client.on('interactionCreate', async (interaction) => {
             var audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
             var embed = new EmbedBuilder()
               .setTitle('Ticket closed!')
-              .setDescription(title)
+              .setDescription(ticket[0][0].title)
               .setAuthor({ name: interaction.member.displayName })
               .addFields(
                 {
