@@ -1081,7 +1081,7 @@ client.on('interactionCreate', async (interaction) => {
         //const [title, description] = Object.keys(fields).map(key => submitted.fields.getTextInputValue(fields[key].customId))
         var newTicket = await connection.promise().query('insert into tickets (uid_open, title, description, category_id) values (?, ?, ?, ?)', [interaction.user.id, title, description, category_id]);
         var thread = await interaction.channel.threads.create({
-          name: newTicket.id + ' - ' + title,
+          name: newTicket[0].id + ' - ' + title,
           autoArchiveDuration: 4320, // Three days.
           type: ChannelType.PrivateThread,
           reason: 'Ticket thread'
