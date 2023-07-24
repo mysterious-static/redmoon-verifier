@@ -1090,16 +1090,6 @@ client.on('interactionCreate', async (interaction) => {
         await thread.members.add(interaction.user.id);
         var role = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [category_id]);
         var category = await connection.promise().query('select * from tickets_categories where id = ?', [category_id]);
-
-        // THIS PART DIDNT WORK
-        console.log(role[0][0].role_id);
-        var users = await interaction.guild.roles.cache.get(role[0][0].role_id);
-        var user_members = users.members.map(m => m.user.id);
-        console.log(user_members);
-        for (const user of user_members) {
-          await thread.members.add(user);
-        }
-
         await thread.send(`**${title}**`);
         await thread.send(description);
         await thread.send('<@&' + role[0][0].role_id + '>');
