@@ -323,7 +323,7 @@ client.on('interactionCreate', async (interaction) => {
         interaction.reply({ content: 'Please create an audit channel first, using `/auditchannel`.', ephemeral: true });
       }
     } else if (interaction.commandName === 'auditchannel') {
-      await connection.promise().query('replace into server_settings (value) values (?) where option_name = "audit_channel" and server_id = ?', [interaction.options.getChannel('channel').id]);
+      await connection.promise().query('replace into server_settings (server_id, option_name, value) values (?, ?, ?)', [interaction.guild.id, "audit_channel", interaction.options.getChannel('channel').id]);
       interaction.reply({ content: 'Audit channel created or updated.', ephemeral: true });
     } else if (interaction.commandName === 'setcategorygroup') {
       var categories = await connection.promise().query('select * from tickets_categories where guildid = ?', [interaction.guild.id]);
