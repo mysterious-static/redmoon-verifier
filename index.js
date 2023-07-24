@@ -363,6 +363,7 @@ client.on('interactionCreate', async (interaction) => {
         var ticket = await connection.promise().query('select * from tickets where thread_id = ?', [interaction.channel.id]);
         if (ticket[0].length > 0) {
           var ticketRole = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [ticket[0][0].category_id]);
+          var category = await connection.promise().query('select * from tickets_categories where id = ?', ticket[0][0].category);
           if (interaction.member.permissionsIn(interaction.channel).has('ADMINISTRATOR') || interaction.member.roles.has(ticketRole[0][0].role_id)) {
             var openuser = await interaction.guild.members.fetch(ticket[0][0].uid_open);
             if (!openuser.permissionsIn(interaction.channel).has('ADMINISTRATOR')) {
