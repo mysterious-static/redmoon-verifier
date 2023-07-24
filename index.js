@@ -1094,7 +1094,7 @@ client.on('interactionCreate', async (interaction) => {
         // THIS PART DIDNT WORK
         console.log(role[0][0].role_id);
         var users = await interaction.guild.roles.cache.get(role[0][0].role_id);
-        console.log(users);
+        console.log(users.members);
         for (const user of users.members) {
           await thread.members.add(user.id);
         }
