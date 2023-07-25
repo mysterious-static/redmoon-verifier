@@ -246,7 +246,11 @@ client.on('ready', async () => {
   // Dropdowns / multisleect
 
   var closeticket = new SlashCommandBuilder().setName('closeticket')
-    .setDescription('Closes the current ticket thread.');
+    .setDescription('Closes the current ticket thread.')
+    .addStringOption(option =>
+      option.setName('reason')
+        .setDescription('Quick summary of ticket closure notes')
+        .setRequired(true));
 
   var removeticketcategory = new SlashCommandBuilder().setName('removeticketcategory')
     .setDescription('Removes a ticket category (nyi)')
@@ -365,6 +369,7 @@ client.on('interactionCreate', async (interaction) => {
           var ticketRole = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [ticket[0][0].category_id]);
           var category = await connection.promise().query('select * from tickets_categories where id = ?', [ticket[0][0].category_id]);
           if (interaction.member.permissionsIn(interaction.channel).has('ADMINISTRATOR') || interaction.member.roles.has(ticketRole[0][0].role_id)) {
+            var reason = interaction.options.getString('reason');
             var openuser = await interaction.guild.members.fetch(ticket[0][0].uid_open);
             if (!openuser.permissionsIn(interaction.channel).has('ADMINISTRATOR')) {
               await interaction.channel.members.remove(openuser.id);
@@ -389,6 +394,11 @@ client.on('interactionCreate', async (interaction) => {
                   name: 'Category',
                   value: category[0][0].name,
                   inline: true
+                },
+                {
+                  name: 'Closure notes',
+                  value: reason,
+                  inline: false
                 }
               )
               .setTimestamp();
