@@ -1104,7 +1104,7 @@ client.on('interactionCreate', async (interaction) => {
           reason: 'Ticket thread'
         });
         console.log(thread);
-        await connection.promise().query('update tickets set thread_id = ? where id = ?', [thread.id, newTicket.id]);
+        await connection.promise().query('update tickets set thread_id = ? where id = ?', [thread.id, newTicket[0].insertId]);
         await thread.members.add(interaction.user.id);
         var role = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [category_id]);
         var category = await connection.promise().query('select * from tickets_categories where id = ?', [category_id]);
