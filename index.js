@@ -1308,10 +1308,10 @@ client.on('messageReactionAdd', async function (reaction, user) {
     }
     //todo cache reactions
     var message = await reaction.message.fetch();
-    var hofData = await connection.promise().query('select * from hof where guild_id = ? and emoji_id = ?', message.guildId, reaction.emoji.id);
+    var hofData = await connection.promise().query('select * from hof where guild_id = ? and emoji_id = ?', [message.guildId, reaction.emoji.id]);
     var member = await message.guild.members.cache.get(user.id);
     if (hofData[0].length > 0 && reaction.emoji.id == hofData[0][0].emoji_id && (reaction.count >= hofData[0][0].threshold || (hofData[0][0].admin_override == true && member.permissions.has(PermissionsBitField.Flags.Administrator)))) {
-      var is_hof = await connection.promise().query('select * from hof_msg where message_id = ? and hof_id = ?', message.id, hofData[0][0].id);
+      var is_hof = await connection.promise().query('select * from hof_msg where message_id = ? and hof_id = ?', [message.id, hofData[0][0].id]);
       if (is_hof[0].length <= 0) {
         //create pin (message embed / rich formatting)
         const embeddedMessage = new EmbedBuilder()
