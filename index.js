@@ -279,6 +279,7 @@ client.on('interactionCreate', async (interaction) => {
             interaction.reply({ content: 'You have more than 25 ticket categories. Please delete some and try adding this again.', ephemeral: true });
           } else {
             var channel = await client.channels.cache.get(channel[0][0].value);
+            var categoriesKeyValues = [];
             const embeddedMessage = new EmbedBuilder()
               .setColor(0x770000)
               .setTitle('Ticket System')
