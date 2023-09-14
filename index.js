@@ -307,19 +307,6 @@ client.on('interactionCreate', async (interaction) => {
             var existing_message = await connection.promise().query('select * from server_settings where option_name = "ticket_message" and server_id = ?', [interaction.guild.id]);
             if (existing_message[0].length > 0) {
               var message = await channel.messages.fetch(existing_message[0][0].value).then(msg => msg.delete());
-            } else {
-              const embeddedMessage = new EmbedBuilder()
-                .setColor(0x770000)
-                .setTitle('Ticket System')
-                .setDescription('Please select a ticket type from the dropdown menu to begin opening a support ticket.');
-              var categoriesKeyValues = [];
-              for (const category of categories[0]) {
-                categoriesKeyValues.push({ label: `${category.name}`, value: category.id.toString() });
-              }
-              const categorySelectComponent = new StringSelectMenuBuilder().setOptions(categoriesKeyValues).setCustomId('TicketCategorySelector').setMinValues(1).setMaxValues(1);
-              var categorySelectRow = new ActionRowBuilder().addComponents(categorySelectComponent);
-              var message = await channel.send({ embeds: [embeddedMessage], components: [categorySelectRow] });
-              await connection.promise().query('replace into server_settings (option_name, server_id, value) values (?, ?, ?)', ["ticket_message", interaction.guild.id, message.id]);
             }
             await connection.promise().query('update server_settings set value = ? where option_name = "ticket_channel" and server_id = ?', [interaction.options.getChannel('channel').id, interaction.guild.id]);
           } else {
