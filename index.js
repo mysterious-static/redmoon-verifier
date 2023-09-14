@@ -1099,9 +1099,10 @@ client.on('interactionCreate', async (interaction) => {
         var title = submitted.fields.getTextInputValue('title');
         var description = submitted.fields.getTextInputValue('description');
         //const [title, description] = Object.keys(fields).map(key => submitted.fields.getTextInputValue(fields[key].customId))
+        let iso_8601 = new Date().toISOString().split('T')[0];
         var newTicket = await connection.promise().query('insert into tickets (uid_open, title, description, category_id) values (?, ?, ?, ?)', [interaction.user.id, title, description, category_id]);
         var thread = await interaction.channel.threads.create({
-          name: newTicket[0].insertId + ' - ' + title,
+          name: iso_8601 + ' - ' + title,
           autoArchiveDuration: 4320, // Three days.
           type: ChannelType.PrivateThread,
           reason: 'Ticket thread'
