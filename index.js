@@ -1062,8 +1062,9 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.customId == 'TicketCategorySelector') {
       var category_id = interaction.values[0];
       /* Create Modal and accept input */
+      var now = Date.now();
       var modal = new ModalBuilder()
-        .setCustomId('TicketOpenModal')
+        .setCustomId('TicketOpenModal-' + now)
         .setTitle('Open a Ticket')
 
       var fields = {
@@ -1083,7 +1084,7 @@ client.on('interactionCreate', async (interaction) => {
         // Timeout after 5 minute of not receiving any valid Modals
         time: 300000,
         // Make sure we only accept Modals from the User who sent the original Interaction we're responding to
-        filter: i => i.user.id === interaction.user.id,
+        filter: i => i.customId === "TicketOpenModal-" + now && i.user.id === interaction.user.id,
       }).catch(error => {
         // Catch any Errors that are thrown (e.g. if the awaitModalSubmit times out after 60000 ms)
         console.error(error)
