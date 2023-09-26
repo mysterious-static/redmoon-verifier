@@ -1277,7 +1277,6 @@ client.on('messageCreate', async function (message) {
 
     //Process stickies AFTER all message stuff. TODO: Cron this.
     if (stickymessages[0]) {
-      console.log('has sticky');
       var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
       if (isStickyChannel) {
         var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
@@ -1296,8 +1295,6 @@ client.on('messageCreate', async function (message) {
               activeStickyDeletions.splice(activeStickyDeletions.indexOf(channel.id), 1);
             }); // TODO check if message exists
 
-        } else {
-          console.log('active deletions issue?');
         }
       }
     } else {
