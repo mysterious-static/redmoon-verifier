@@ -974,6 +974,7 @@ client.on('interactionCreate', async (interaction) => {
     if (buttonMessage.partial) {
       await buttonMessage.fetch();
     }
+    interaction.deferReply({ ephemeral: true });
     if (interaction.customId == 'buttonAccept' || interaction.customId == 'buttonTentative' || interaction.customId == 'buttonDecline') {
       if (interaction.customId == 'buttonAccept') {
         var newStatus = 'Accepted';
@@ -1011,7 +1012,6 @@ client.on('interactionCreate', async (interaction) => {
       var tentative = '';
       var declined = '';
       for (const thisResponse of eventResponses[0]) {
-        console.log(thisResponse);
         var member = await interaction.guild.members.fetch(thisResponse.user_id);
         var nickname = member.nickname;
         if (!nickname) {
@@ -1045,8 +1045,8 @@ client.on('interactionCreate', async (interaction) => {
           { name: 'Tentative', value: tentative, inline: true },
           { name: 'Declined', value: declined, inline: true },
         );
-      await interaction.message.edit({ embeds: [embeddedMessage] });
-      await interaction.reply({ content: 'Your RSVP was recorded!', ephemeral: true });
+      await buttonMessage.edit({ embeds: [embeddedMessage] });
+      await interaction.editReply({ content: 'Your RSVP was recorded!', ephemeral: true });
     } else if (interaction.customId == 'buttonDelete') {
       // If interaction.user is administrator or their id matches the event author, delete.
     }
