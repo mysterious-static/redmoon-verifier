@@ -1218,38 +1218,42 @@ client.on('messageCreate', async function (message) {
                 var character_id = result.Results[0].ID;
                 response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
                 api_character = await response.json();
-                await message.member.setNickname(first_name + ' ' + last_name);
-                var server_role = await message.member.guild.roles.cache.find(role => role.name === server);
-                var roles_string = '';
-                if (server_role) {
-                  await message.member.roles.add(server_role);
-                  var roles_string = server_role.toString() + ','
+                if (api_character.Character) {
+                  await message.member.setNickname(first_name + ' ' + last_name);
+                  var server_role = await message.member.guild.roles.cache.find(role => role.name === server);
+                  var roles_string = '';
+                  if (server_role) {
+                    await message.member.roles.add(server_role);
+                    var roles_string = server_role.toString() + ','
+                  }
+                  verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
+                  var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
+                  await message.member.roles.add(verified_role);
+                  roles_string += verified_role.toString();
+                  //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
+                  var exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
+                  if (exists[0][1].length > 0 && exists[1][1].length > 0) {
+                    console.log(exists[0][1]);
+                    console.log(exists[1][1]);
+                    //var channel = await client.channels.cache.get(exists[1][0].value);
+                    //await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
+                  }
+                  await connection.promise().query('delete from member_registrations where member_id = ? and guild_id = ?; insert into member_registrations (member_id, lodestone_id, guild_id) values (?, ?, ?)', [message.member.id, message.member.guild.id, message.member.id, character_id, message.member.guild.id]);
+                  const embeddedMessage = new EmbedBuilder()
+                    .setColor(0xFFD700)
+                    .setAuthor({ name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id })
+                    .setThumbnail(api_character.Character.Portrait)
+                    .setDescription('Character saved.\n\nIn four hours, you may claim your character using Lodestone verification via the `!rmverify` command, should you wish to.')
+                    .addFields(
+                      { name: 'Nickname', value: 'Your Discord nickname was changed to **' + first_name + ' ' + last_name + '**.' },
+                      { name: 'Roles Added', value: roles_string }
+                    )
+                    .setTimestamp()
+                    .setFooter({ text: 'Welcome to Red Moon!' });
+                  messageReply.edit({ content: '', embeds: [embeddedMessage] });
+                } else {
+                  messageReply.edit({ content: 'I\'m sorry, the Lodestone stopped responding to me halfway through getting your character details. You can try again, or if this isn\'t the first time this has happened, go ahead and give the Leads a ping!\n\nFor the Leads, if necessary, the character page should be at <https://na.finalfantasyxiv.com/lodestone/character/' + character_id + '>.' });
                 }
-                verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
-                var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
-                await message.member.roles.add(verified_role);
-                roles_string += verified_role.toString();
-                //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
-                var exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
-                if (exists[0][1].length > 0 && exists[1][1].length > 0) {
-                  console.log(exists[0][1]);
-                  console.log(exists[1][1]);
-                  //var channel = await client.channels.cache.get(exists[1][0].value);
-                  //await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
-                }
-                await connection.promise().query('delete from member_registrations where member_id = ? and guild_id = ?; insert into member_registrations (member_id, lodestone_id, guild_id) values (?, ?, ?)', [message.member.id, message.member.guild.id, message.member.id, character_id, message.member.guild.id]);
-                const embeddedMessage = new EmbedBuilder()
-                  .setColor(0xFFD700)
-                  .setAuthor({ name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id })
-                  .setThumbnail(api_character.Character.Portrait)
-                  .setDescription('Character saved.\n\nIn four hours, you may claim your character using Lodestone verification via the `!rmverify` command, should you wish to.')
-                  .addFields(
-                    { name: 'Nickname', value: 'Your Discord nickname was changed to **' + first_name + ' ' + last_name + '**.' },
-                    { name: 'Roles Added', value: roles_string }
-                  )
-                  .setTimestamp()
-                  .setFooter({ text: 'Welcome to Red Moon!' });
-                messageReply.edit({ content: '', embeds: [embeddedMessage] });
               } else {
                 messageReply.edit({ content: 'I couldn\'t find this character on the Lodestone. Please try again, and ensure you entered your character name and server correctly.' });
               }
