@@ -1539,7 +1539,6 @@ setInterval(async function () {
       await connection.promise().query('update server_status set status = ?,  last_open = ?', [jenova.congestion, date.toISOString().split('T')[0]]);
     }
   } else {
-    console.log(jenova);
     if (jenova.congestion) {
       await connection.promise().query('update server_status set status = ?', [jenova.congestion]);
     }
