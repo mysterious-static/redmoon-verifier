@@ -1082,7 +1082,11 @@ client.on('interactionCreate', async (interaction) => {
           { name: 'Declined', value: declined, inline: true },
         );
       await buttonMessage.edit({ embeds: [embeddedMessage] });
-      await interaction.reply({ content: 'Your RSVP was recorded!', ephemeral: true });
+      if (interaction.replied) {
+        await interaction.followUp({ content: 'Your RSVP was recorded!', ephemeral: true });
+      } else {
+        await interaction.reply({ content: 'Your RSVP was recorded!', ephemeral: true });
+      }
     } else if (interaction.customId == 'buttonDelete') {
       // If interaction.user is administrator or their id matches the event author, delete.
     }
