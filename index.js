@@ -1326,8 +1326,8 @@ client.on('messageCreate', async function (message) {
         var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
         if (messageCount.size >= isStickyChannel.speed && !activeStickyDeletions.includes(message.channel.id)) {
           activeStickyDeletions.push(message.channel.id);
-          var channel = message.channel;
-          await message.channel.messages.fetch(isStickyChannel.last_message_id).then(async (message) => {
+          let channel = message.channel;
+          await channel.messages.fetch(isStickyChannel.last_message_id).then(async (message) => {
             if (message) {
               message.delete();
             }
