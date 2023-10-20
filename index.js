@@ -1222,7 +1222,7 @@ client.on('messageCreate', async function (message) {
               if (result.Results.length > 0) {
                 var character_id = result.Results[0].ID;
                 response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
-                api_character = await response.json();
+                let api_character = await response.json();
                 if (api_character.Character) {
                   await message.member.setNickname(first_name + ' ' + last_name);
                   var server_role = await message.member.guild.roles.cache.find(role => role.name === server);
@@ -1251,7 +1251,7 @@ client.on('messageCreate', async function (message) {
                   if (exists[0][1]) {
                     embeddedAudit.setDescription(`${old_name} changed their name!`)
                       .addFields(
-                        { name: 'Old Lodestone ID', value: exists[0][0].lodestone_id, inline: true },
+                        { name: 'Old Lodestone ID', value: exists[0][0].lodestone_id.toString(), inline: true },
                         { name: 'New Lodestone ID', value: character_id.toString(), inline: true },
                         { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
                       );
