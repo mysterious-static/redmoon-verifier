@@ -1231,15 +1231,15 @@ client.on('messageCreate', async function (message) {
                     await message.member.roles.add(server_role);
                     var roles_string = server_role.toString() + ','
                   }
-                  verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
+                  let verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
                   var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
                   await message.member.roles.add(verified_role);
                   roles_string += verified_role.toString();
                   //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
                   var exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
-                  if (exists[0][1].length > 0 && exists[1][1].length > 0) {
-                    console.log(exists[0][1]);
-                    console.log(exists[1][1]);
+                  if (exists[0][0].length > 0 && exists[1][0].length > 0) {
+                    console.log(exists[0][0]);
+                    console.log(exists[1][0]);
                     //var channel = await client.channels.cache.get(exists[1][0].value);
                     //await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
                   }
@@ -1251,7 +1251,7 @@ client.on('messageCreate', async function (message) {
                   if (exists[0][1]) {
                     embeddedAudit.setDescription(`${old_name} changed their name!`)
                       .addFields(
-                        { name: 'Old Lodestone ID', value: exists[0][1].lodestone_id.toString(), inline: true },
+                        { name: 'Old Lodestone ID', value: exists[0][0].lodestone_id, inline: true },
                         { name: 'New Lodestone ID', value: character_id.toString(), inline: true },
                         { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
                       );
