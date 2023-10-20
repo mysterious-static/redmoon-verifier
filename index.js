@@ -1194,6 +1194,7 @@ client.on('messageCreate', async function (message) {
     if (message.content.startsWith('!rm ')) {
       console.log(message.channel.id);
       if (message.guild.ownerId != message.author.id) {
+        let old_name = (message.member.displayName ? message.member.displayName : message.author.username);
         var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
         var server = lookup_string.substr(0, lookup_string.indexOf(' '));
         var first_and_last_name = lookup_string.substr(lookup_string.indexOf(' ') + 1);
@@ -1243,6 +1244,27 @@ client.on('messageCreate', async function (message) {
                     //await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
                   }
                   await connection.promise().query('delete from member_registrations where member_id = ? and guild_id = ?; insert into member_registrations (member_id, lodestone_id, guild_id) values (?, ?, ?)', [message.member.id, message.member.guild.id, message.member.id, character_id, message.member.guild.id]);
+                  const embeddedAudit = new EmbedBuilder()
+                    .setColor(0xFFD700)
+                    .setTitle('Character Registration Log')
+                    .setThumbnail(api_character.Character.Portrait);
+                  if (exists[0][1]) {
+                    embeddedAudit.setDescription(`${old_name} changed their name!`)
+                      .addFields(
+                        { name: 'Old Lodestone ID', value: exists[0][1].lodestone_id, inline: true },
+                        { name: 'New Lodestone ID', value: character_id, inline: true },
+                        { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
+                      );
+                  } else {
+                    embeddedAudit.setDescription(`${old_name} registered!`)
+                      .addFields(
+                        { name: 'New Lodestone ID', value: character_id, inline: true },
+                        { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
+                      );
+                  }
+                  let settingvalue = await connection.promise().query('select * from server_settings where option_name = ? and server_id = ?', ['audit_channel', message.member.guild.id]);
+                  let audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
+                  audit_channel.send({ content: '', embeds: [embeddedAudit] });
                   const embeddedMessage = new EmbedBuilder()
                     .setColor(0xFFD700)
                     .setAuthor({ name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id })
