@@ -1251,14 +1251,14 @@ client.on('messageCreate', async function (message) {
                   if (exists[0][1]) {
                     embeddedAudit.setDescription(`${old_name} changed their name!`)
                       .addFields(
-                        { name: 'Old Lodestone ID', value: exists[0][1].lodestone_id, inline: true },
-                        { name: 'New Lodestone ID', value: character_id, inline: true },
+                        { name: 'Old Lodestone ID', value: exists[0][1].lodestone_id.toString(), inline: true },
+                        { name: 'New Lodestone ID', value: character_id.toString(), inline: true },
                         { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
                       );
                   } else {
                     embeddedAudit.setDescription(`${old_name} registered!`)
                       .addFields(
-                        { name: 'New Lodestone ID', value: character_id, inline: true },
+                        { name: 'New Lodestone ID', value: character_id.toString(), inline: true },
                         { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
                       );
                   }
