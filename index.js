@@ -1248,10 +1248,10 @@ client.on('messageCreate', async function (message) {
                     .setColor(0xFFD700)
                     .setTitle('Character Registration Log')
                     .setThumbnail(api_character.Character.Portrait);
-                  if (exists[0][1]) {
+                  if (exists[0][0][0]) {
                     embeddedAudit.setDescription(`${old_name} changed their name!`)
                       .addFields(
-                        { name: 'Old Lodestone ID', value: exists[0][0].lodestone_id.toString(), inline: true },
+                        { name: 'Old Lodestone ID', value: exists[0][0][0].lodestone_id.toString(), inline: true },
                         { name: 'New Lodestone ID', value: character_id.toString(), inline: true },
                         { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
                       );
