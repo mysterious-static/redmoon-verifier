@@ -1189,7 +1189,6 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 client.on('guildMemberRemove', async function (member) {
-  console.log(member);
   let settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [member.guild.id, 'audit_channel']);
   if (settingvalue[0].length > 0) {
     console.log(settingvalue[0][0]);
