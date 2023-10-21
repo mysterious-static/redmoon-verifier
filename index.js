@@ -1189,6 +1189,7 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 client.on('guildMemberRemove', async function (member) {
+  console.log('guildMemberRemove');
   let settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [interaction.guild.id, 'audit_channel']);
   if (settingvalue[0].length > 0) {
     let audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
@@ -1205,7 +1206,7 @@ client.on('guildMemberRemove', async function (member) {
     } else {
       embed.addFields({ name: 'Discord ID', value: member.id.toString(), inline: true }, { name: 'Discord Account Name', value: member.user.username, inline: true });
     }
-    audit_channel.send({ embeds: [embed] });
+    await audit_channel.send({ embeds: [embed] });
   }
 });
 
