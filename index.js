@@ -1192,6 +1192,7 @@ client.on('guildMemberRemove', async function (member) {
   console.log(member);
   let settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [member.guild.id, 'audit_channel']);
   if (settingvalue[0].length > 0) {
+    console.log(settingvalue[0][0]);
     let audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
     let registration_info = await connection.promise().query('select * from member_registrations where guild_id = ? and member_id = ?', [member.guild.id, member.id]);
     let embed = new EmbedBuilder()
