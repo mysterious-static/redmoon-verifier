@@ -1366,9 +1366,9 @@ client.on('messageCreate', async function (message) {
 
     //Process stickies AFTER all message stuff. TODO: Cron this.
     if (stickymessages[0]) {
-      var isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
+      let isStickyChannel = stickymessages[0].find(e => e.channel_id === message.channel.id);
       if (isStickyChannel) {
-        var messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
+        let messageCount = await message.channel.messages.fetch({ after: isStickyChannel.last_message_id });
         if (messageCount.size >= isStickyChannel.speed && !activeStickyDeletions.includes(message.channel.id)) {
           activeStickyDeletions.push(message.channel.id);
           let channel = message.channel;
@@ -1376,10 +1376,15 @@ client.on('messageCreate', async function (message) {
             if (message) {
               message.delete();
             }
-            var sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message - or go grab from DB maybe
+            let sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message - or go grab from DB maybe
             await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
             stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
-          }).catch((error) => { console.error(error) })
+          }).catch(async (error) => {
+            console.log('could not find previous sticky message, creating new sticky message');
+            let sentMessage = await message.channel.send({ content: isStickyChannel.message }); // Post sticky message - or go grab from DB maybe
+            await connection.promise().query('update stickymessages set last_message_id = ? where channel_id = ?', [sentMessage.id, isStickyChannel.channel_id]);
+            stickymessages = await connection.promise().query('select * from stickymessages'); // Refresh the live cache
+          })
             .then(() => {
               activeStickyDeletions.splice(activeStickyDeletions.indexOf(channel.id), 1);
             }); // TODO check if message exists
