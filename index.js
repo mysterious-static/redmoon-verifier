@@ -1281,7 +1281,8 @@ client.on('messageCreate', async function (message) {
                     embeddedAudit.setDescription(`${old_name} registered!`)
                       .addFields(
                         { name: 'New Lodestone ID', value: character_id.toString(), inline: true },
-                        { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
+                        { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true },
+                        { name: 'Discord ID', value: message.member.id.toString(), inline: true }
                       );
                   }
                   let settingvalue = await connection.promise().query('select * from server_settings where option_name = ? and server_id = ?', ['audit_channel', message.member.guild.id]);
