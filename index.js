@@ -1201,10 +1201,10 @@ client.on('guildMemberRemove', async function (member) {
       embed.addFields(
         { name: 'Lodestone ID', value: registration_info[0][0].lodestone_id.toString(), inline: true },
         { name: 'Discord ID', value: member.id.toString(), inline: true },
-        { name: 'Discord Account Name', value: member.user.username, inline: true }
+        { name: 'Discord Account Name', value: member.user.username + (member.user.discriminator ? `#${member.user.discriminator}` : ''), inline: true }
       )
     } else {
-      embed.addFields({ name: 'Discord ID', value: member.id.toString(), inline: true }, { name: 'Discord Account Name', value: member.user.username, inline: true });
+      embed.addFields({ name: 'Discord ID', value: member.id.toString(), inline: true }, { name: 'Discord Account Name', value: member.user.username + (member.user.discriminator ? `#${member.user.discriminator}` : ''), inline: true });
     }
     await audit_channel.send({ embeds: [embed] });
   }
