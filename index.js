@@ -1148,7 +1148,6 @@ client.on('interactionCreate', async (interaction) => {
           type: ChannelType.PrivateThread,
           reason: 'Ticket thread'
         });
-        console.log(thread);
         await connection.promise().query('update tickets set thread_id = ? where id = ?', [thread.id, newTicket[0].insertId]);
         await thread.members.add(interaction.user.id);
         var role = await connection.promise().query('select * from tickets_categories_roles where category_id = ?', [category_id]);
@@ -1268,8 +1267,6 @@ client.on('messageCreate', async function (message) {
                   //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
                   var exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
                   if (exists[0][0].length > 0 && exists[0][1].length > 0) {
-                    console.log(exists[0][0]);
-                    console.log(exists[0][1]);
                     //var channel = await client.channels.cache.get(exists[1][0].value);
                     //await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
                   }
