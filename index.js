@@ -1189,23 +1189,31 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 client.on('guildMemberRemove', async function (member) {
+  if (member.partial) {
+    await member.fetch();
+  }
   let settingvalue = await connection.promise().query('select * from server_settings where server_id = ? and option_name = ?', [member.guild.id, 'audit_channel']);
   if (settingvalue[0].length > 0) {
-    console.log(settingvalue[0][0]);
     let audit_channel = await client.channels.cache.get(settingvalue[0][0].value);
     let registration_info = await connection.promise().query('select * from member_registrations where guild_id = ? and member_id = ?', [member.guild.id, member.id]);
+    console.log(`user ${(member.nickname ? member.nickname : member.user.username)} leaving, audit channel exists`);
     let embed = new EmbedBuilder()
       .setTitle('Member left!')
       .setDescription((member.nickname ? member.nickname : member.user.username));
     if (registration_info[0].length > 0) {
+      console.log('user was registered');
       embed.addFields(
         { name: 'Lodestone ID', value: registration_info[0][0].lodestone_id.toString(), inline: true },
         { name: 'Discord ID', value: member.id.toString(), inline: true },
-        { name: 'Discord Account Name', value: member.user.username + (member.user.discriminator ? `#${member.user.discriminator}` : ''), inline: true }
+        { name: 'Discord Account Name', value: member.user.username + (member.user.discriminator > 0 ? `#${member.user.discriminator}` : ''), inline: true }
       )
     } else {
-      embed.addFields({ name: 'Discord ID', value: member.id.toString(), inline: true }, { name: 'Discord Account Name', value: member.user.username + (member.user.discriminator ? `#${member.user.discriminator}` : ''), inline: true });
+      console.log('user not registered');
+      embed.addFields(
+        { name: 'Discord ID', value: member.id.toString(), inline: true },
+        { name: 'Discord Account Name', value: member.user.username + (member.user.discriminator > 0 ? `#${member.user.discriminator}` : ''), inline: true });
     }
+    console.log('sending embed');
     await audit_channel.send({ embeds: [embed] });
   }
 });
