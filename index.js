@@ -1312,7 +1312,7 @@ client.on('messageCreate', async function (message) {
                   } else {
                     embeddedAudit.setDescription(`${old_name} registered!`)
                       .addFields(
-                        { name: 'Lodestone ID', value: `[${character_id}](https://na.finalfantasyxiv.com/lodestone/character/${character_id}`, inline: true },
+                        { name: 'Lodestone ID', value: `[${character_id}](https://na.finalfantasyxiv.com/lodestone/character/${character_id})`, inline: true },
                         { name: 'Character Name', value: first_name + ' ' + last_name, inline: true },
                         { name: 'Discord ID', value: message.member.id.toString(), inline: true }
                       );
