@@ -1208,7 +1208,7 @@ client.on('guildMemberRemove', async function (member) {
       if (registration_info[0].length > 0) {
         console.log('User registered!');
         embed.addFields(
-          { name: 'Lodestone Profile', value: `[Link!](https://na.finalfantasyxiv.com/lodestone/character/${registration_info[0][0].lodestone_id})`, inline: true },
+          { name: 'Lodestone Profile', value: `[${registration_info[0][0].lodestone_id}](https://na.finalfantasyxiv.com/lodestone/character/${registration_info[0][0].lodestone_id})`, inline: true },
           { name: 'Discord ID', value: member.id.toString(), inline: true },
           { name: 'Discord Account Name', value: user.username + (user.discriminator > 0 ? `#${user.discriminator}` : ''), inline: true }
         );
@@ -1228,7 +1228,7 @@ client.on('guildMemberRemove', async function (member) {
       if (registration_info[0].length > 0) {
         console.log('user was registered');
         embed.addFields(
-          { name: 'Lodestone Profile', value: `[Link!](https://na.finalfantasyxiv.com/lodestone/character/${registration_info[0][0].lodestone_id})`, inline: true },
+          { name: 'Lodestone Profile', value: `[${registration_info[0][0].lodestone_id}](https://na.finalfantasyxiv.com/lodestone/character/${registration_info[0][0].lodestone_id})`, inline: true },
           { name: 'Discord ID', value: member.id.toString(), inline: true },
           { name: 'Discord Account Name', value: member.user.username + (member.user.discriminator > 0 ? `#${member.user.discriminator}` : ''), inline: true }
         )
@@ -1305,14 +1305,14 @@ client.on('messageCreate', async function (message) {
                   if (exists[0][0][0]) {
                     embeddedAudit.setDescription(`${old_name} changed their name!`)
                       .addFields(
-                        { name: 'Old Lodestone ID', value: `[Link!](https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0][0].lodestone_id})`, inline: true },
-                        { name: 'New Lodestone Profile', value: `[Link!](https://na.finalfantasyxiv.com/lodestone/character/${character_id})`, inline: true },
+                        { name: 'Old Lodestone ID', value: `[${exists[0][0][0].lodestone_id}](https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0][0].lodestone_id})`, inline: true },
+                        { name: 'New Lodestone Profile', value: `[${character_id}](https://na.finalfantasyxiv.com/lodestone/character/${character_id})`, inline: true },
                         { name: 'New Character Name', value: first_name + ' ' + last_name, inline: true }
                       );
                   } else {
                     embeddedAudit.setDescription(`${old_name} registered!`)
                       .addFields(
-                        { name: 'Lodestone ID', value: `[Link!](https://na.finalfantasyxiv.com/lodestone/character/${character_id}`, inline: true },
+                        { name: 'Lodestone ID', value: `[${character_id}](https://na.finalfantasyxiv.com/lodestone/character/${character_id}`, inline: true },
                         { name: 'Character Name', value: first_name + ' ' + last_name, inline: true },
                         { name: 'Discord ID', value: message.member.id.toString(), inline: true }
                       );
