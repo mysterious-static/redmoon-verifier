@@ -1,16 +1,14 @@
 const Discord = require('discord.js');
 const { EmbedBuilder, SlashCommandBuilder, GatewayIntentBits, Partials, PermissionsBitField, PermissionFlagsBits, StringSelectMenuBuilder, RoleSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType } = require('discord.js');
 const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildMembers], partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.GuildMember], });
-var mysql = require('mysql2');
-var fetch = require('node-fetch');
-var crypto = require('node:crypto');
-var zxcvbn = require('zxcvbn');
-var fs = require('fs').promises;
+let mysql = require('mysql2');
+let fetch = require('node-fetch');
+let crypto = require('node:crypto');
 const { S3Client, PutBucketWebsiteCommand, PutPublicAccessBlockCommand, PutBucketPolicyCommand, PutObjectCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
 const { CloudFrontClient, CreateDistributionCommand, CreateInvalidationCommand, GetDistributionCommand, UpdateDistributionCommand } = require('@aws-sdk/client-cloudfront');
 const { fromIni } = require("@aws-sdk/credential-providers");
 
-var connection = mysql.createConnection({
+let connection = mysql.createConnection({
   host: process.env.db_host,
   user: process.env.db_user,
   password: process.env.db_pass,
@@ -19,13 +17,13 @@ var connection = mysql.createConnection({
   bigNumberStrings: true,
   multipleStatements: true
 });
-var xivapi_private_key = process.env.apikey
-var verify_string = ''; //retrieve from database
-var bio = '';
-var stickymessages = ''
-var activeStickyDeletions = [];
+let xivapi_private_key = process.env.apikey
+let verify_string = ''; //retrieve from database
+let bio = '';
+let stickymessages = ''
+let activeStickyDeletions = [];
 
-var servers = ["Adamantoise", "Aegis", "Alexander", "Anima", "Asura", "Atomos", "Bahamut", "Balmung", "Behemoth", "Belias", "Brynhildr", "Cactuar", "Carbuncle", "Cerberus", "Chocobo", "Coeurl", "Diabolos", "Durandal", "Excalibur", "Exodus", "Faerie", "Famfrit", "Fenrir", "Garuda", "Gilgamesh", "Goblin", "Gungnir", "Hades", "Hyperion", "Ifrit", "Ixion", "Jenova", "Kujata", "Lamia", "Leviathan", "Lich", "Louisoix", "Malboro", "Mandragora", "Masamune", "Mateus", "Midgardsormr", "Moogle", "Odin", "Omega", "Pandaemonium", "Phoenix", "Ragnarok", "Ramuh", "Ridill", "Sargatanas", "Shinryu", "Shiva", "Siren", "Tiamat", "Titan", "Tonberry", "Typhon", "Ultima", "Ultros", "Unicorn", "Valefor", "Yojimbo", "Zalera", "Zeromus", "Zodiark", "Spriggan", "Twintania", "Bismarck", "Ravana", "Sephirot", "Sophia", "Zurvan", "Halicarnassus", "Maduin", "Marilith", "Seraph", "Alpha", "Phantom", "Raiden", "Sagittarius"]
+let servers = ["Adamantoise", "Aegis", "Alexander", "Anima", "Asura", "Atomos", "Bahamut", "Balmung", "Behemoth", "Belias", "Brynhildr", "Cactuar", "Carbuncle", "Cerberus", "Chocobo", "Coeurl", "Diabolos", "Durandal", "Excalibur", "Exodus", "Faerie", "Famfrit", "Fenrir", "Garuda", "Gilgamesh", "Goblin", "Gungnir", "Hades", "Hyperion", "Ifrit", "Ixion", "Jenova", "Kujata", "Lamia", "Leviathan", "Lich", "Louisoix", "Malboro", "Mandragora", "Masamune", "Mateus", "Midgardsormr", "Moogle", "Odin", "Omega", "Pandaemonium", "Phoenix", "Ragnarok", "Ramuh", "Ridill", "Sargatanas", "Shinryu", "Shiva", "Siren", "Tiamat", "Titan", "Tonberry", "Typhon", "Ultima", "Ultros", "Unicorn", "Valefor", "Yojimbo", "Zalera", "Zeromus", "Zodiark", "Spriggan", "Twintania", "Bismarck", "Ravana", "Sephirot", "Sophia", "Zurvan", "Halicarnassus", "Maduin", "Marilith", "Seraph", "Alpha", "Phantom", "Raiden", "Sagittarius"]
 
 connection.connect();
 client.login(process.env.app_token);
@@ -33,7 +31,7 @@ client.login(process.env.app_token);
 //slash commands for setup
 client.on('ready', async () => {
   //if (!client.application?.commands.cache) {
-  var verifiedrole = new SlashCommandBuilder().setName('verifiedrole')
+  let verifiedrole = new SlashCommandBuilder().setName('verifiedrole')
     .setDescription('Set the role to add for verification.')
     .addRoleOption(option =>
       option.setName('role')
@@ -41,7 +39,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var stickymessage = new SlashCommandBuilder().setName('stickymessage')
+  let stickymessage = new SlashCommandBuilder().setName('stickymessage')
     .setDescription('Set up a message to stick to the bottom of a channel.')
     .addChannelOption(option =>
       option.setName('channel')
@@ -57,7 +55,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var unsticky = new SlashCommandBuilder().setName('unsticky')
+  let unsticky = new SlashCommandBuilder().setName('unsticky')
     .setDescription('Remove sticky message functionality from a channel.')
     .addChannelOption(option =>
       option.setName('channel')
@@ -65,7 +63,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var hof = new SlashCommandBuilder().setName('hof')
+  let hof = new SlashCommandBuilder().setName('hof')
     .setDescription('Set up Hall of Fame functionality.')
     .addStringOption(option =>
       option.setName('emoji_id')
@@ -85,7 +83,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var event = new SlashCommandBuilder().setName('event')
+  let event = new SlashCommandBuilder().setName('event')
     .setDescription('Set up an event.')
     .addStringOption(option =>
       option.setName('name')
@@ -127,7 +125,7 @@ client.on('ready', async () => {
         .setDescription('The date on which the non-recurring event should occur. Please enter as YYYY-MM-DD, e.g. 2023-01-30.'))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var birthday = new SlashCommandBuilder().setName('birthday')
+  let birthday = new SlashCommandBuilder().setName('birthday')
     .setDescription('Set a birthday for a user.')
     .addUserOption(option =>
       option.setName('user')
@@ -144,7 +142,7 @@ client.on('ready', async () => {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
   //Append current year, make it a datetime so we can query later with month(date) = ? and day(date) = ?
   //On the daily cron, check to see if the user is still in the server before posting.
-  var removebirthday = new SlashCommandBuilder().setName('removebirthday')
+  let removebirthday = new SlashCommandBuilder().setName('removebirthday')
     .setDescription('Remove a user\'s birthday.')
     .addUserOption(option =>
       option.setName('user')
@@ -152,7 +150,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var birthdaychannel = new SlashCommandBuilder().setName('birthdaychannel')
+  let birthdaychannel = new SlashCommandBuilder().setName('birthdaychannel')
     .setDescription('Set a channel to announce monthly and daily birthdays in.')
     .addChannelOption(option =>
       option.setName('channel')
@@ -162,21 +160,21 @@ client.on('ready', async () => {
 
   //Monthly cron to post This Month's Birthdays.
 
-  var deleteevent = new SlashCommandBuilder().setName('deleteevent')
+  let deleteevent = new SlashCommandBuilder().setName('deleteevent')
     .setDescription('Delete an event.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var serveropenchannel = new SlashCommandBuilder().setName('serveropenchannel')
+  let serveropenchannel = new SlashCommandBuilder().setName('serveropenchannel')
     .setDescription('Set the channel to notify when Jenova is open for transfers.')
     .addChannelOption(option =>
       option.setName('channel')
         .setDescription('The channel to notify when Jenova opens for transfers.')
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
-  var serveropenroles = new SlashCommandBuilder().setName('serveropenroles')
+  let serveropenroles = new SlashCommandBuilder().setName('serveropenroles')
     .setDescription('Set the roles to notify when Jenova is open for transfers.');
 
-  var namechangechannel = new SlashCommandBuilder().setName('namechangechannel')
+  let namechangechannel = new SlashCommandBuilder().setName('namechangechannel')
     .setDescription('Set the channel to notify when users change their character name.')
     .addChannelOption(option =>
       option.setName('channel')
@@ -184,7 +182,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var minutes = new SlashCommandBuilder().setName('minutes')
+  let minutes = new SlashCommandBuilder().setName('minutes')
     .setDescription('Display the time in minutes until your entered time.')
     .addStringOption(option =>
       option.setName('time')
@@ -192,7 +190,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var kinklist = new SlashCommandBuilder().setName('kinklist')
+  let kinklist = new SlashCommandBuilder().setName('kinklist')
     .setDescription('Create a court kinklist under your name.')
     .addAttachmentOption(option =>
       option.setName('image')
@@ -200,7 +198,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var customkinklistname = new SlashCommandBuilder().setName('customkinklistname')
+  let customkinklistname = new SlashCommandBuilder().setName('customkinklistname')
     .setDescription('Use a custom subdomain (not your name) for your kinklist.')
     .addStringOption(option =>
       option.setName('name')
@@ -208,7 +206,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var menu = new SlashCommandBuilder().setName('menu')
+  let menu = new SlashCommandBuilder().setName('menu')
     .setDescription('Upload a new menu image.')
     .addAttachmentOption(option =>
       option.setName('image')
@@ -216,7 +214,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 
-  var addticketcategory = new SlashCommandBuilder().setName('addticketcategory')
+  let addticketcategory = new SlashCommandBuilder().setName('addticketcategory')
     .setDescription('Add a ticket category to the dropdown menu.')
     .addStringOption(option =>
       option.setName('name')
@@ -224,7 +222,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
-  var ticketchannel = new SlashCommandBuilder().setName('ticketchannel')
+  let ticketchannel = new SlashCommandBuilder().setName('ticketchannel')
     .setDescription('Where the dropdown for selecting a ticket category / opening tickets will be.')
     .addChannelOption(option =>
       option.setName('channel')
@@ -232,7 +230,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator); // server_settings
 
-  var auditchannel = new SlashCommandBuilder().setName('auditchannel')
+  let auditchannel = new SlashCommandBuilder().setName('auditchannel')
     .setDescription('Where the audit messages / notifications for opening and closing tickets will be.')
     .addChannelOption(option =>
       option.setName('channel')
@@ -240,19 +238,19 @@ client.on('ready', async () => {
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator); // server_settings
 
-  var setcategorygroup = new SlashCommandBuilder().setName('setcategorygroup')
+  let setcategorygroup = new SlashCommandBuilder().setName('setcategorygroup')
     .setDescription('What role or roles should be notified when a  ticket category')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
   // Dropdowns / multisleect
 
-  var closeticket = new SlashCommandBuilder().setName('closeticket')
+  let closeticket = new SlashCommandBuilder().setName('closeticket')
     .setDescription('Closes the current ticket thread.')
     .addStringOption(option =>
       option.setName('reason')
         .setDescription('Quick summary of ticket closure notes')
         .setRequired(true));
 
-  var removeticketcategory = new SlashCommandBuilder().setName('removeticketcategory')
+  let removeticketcategory = new SlashCommandBuilder().setName('removeticketcategory')
     .setDescription('Removes a ticket category (nyi)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
@@ -264,8 +262,8 @@ client.on('ready', async () => {
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
     if (interaction.commandName === 'addticketcategory') {
-      var name = interaction.options.getString('name');
-      var categories = await connection.promise().query('select * from tickets_categories where guildid = ? and name = ?', [interaction.guild.id, name]);
+      let name = interaction.options.getString('name');
+      let categories = await connection.promise().query('select * from tickets_categories where guildid = ? and name = ?', [interaction.guild.id, name]);
       if (categories[0].length > 0) {
         interaction.reply({ content: 'You already have a category with that name.', ephemeral: true });
       } else {
@@ -273,7 +271,7 @@ client.on('interactionCreate', async (interaction) => {
         var channel = await connection.promise().query('select * from server_settings where option_name = "ticket_channel" and server_id = ?', [interaction.guild.id]);
         if (channel[0].length > 0) {
           var message = await connection.promise().query('select * from server_settings where option_name = "ticket_message" and server_id = ?', [interaction.guild.id]);
-          var categories = await connection.promise().query('select * from tickets_categories where guildid = ?', [interaction.guild.id, name]);
+          categories = await connection.promise().query('select * from tickets_categories where guildid = ?', [interaction.guild.id, name]);
           if (categories[0].length > 25) {
             await connection.promise().query('delete from tickets_categories where guildid = ? and name = ?', [interaction.guild.id, name]);
             interaction.reply({ content: 'You have more than 25 ticket categories. Please delete some and try adding this again.', ephemeral: true });
@@ -1251,11 +1249,11 @@ client.on('messageCreate', async function (message) {
       console.log(message.channel.id);
       if (message.guild.ownerId != message.author.id) {
         let old_name = (message.member.displayName ? message.member.displayName : message.author.username);
-        var lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
-        var server = lookup_string.substr(0, lookup_string.indexOf(' '));
-        var first_and_last_name = lookup_string.substr(lookup_string.indexOf(' ') + 1);
-        var first_name = first_and_last_name.substr(0, first_and_last_name.indexOf(' '));
-        var last_name = first_and_last_name.substr(first_and_last_name.indexOf(' ') + 1);
+        let lookup_string = message.content.substr(message.content.indexOf(' ') + 1);
+        let server = lookup_string.substr(0, lookup_string.indexOf(' '));
+        let first_and_last_name = lookup_string.substr(lookup_string.indexOf(' ') + 1);
+        let first_name = first_and_last_name.substr(0, first_and_last_name.indexOf(' '));
+        let last_name = first_and_last_name.substr(first_and_last_name.indexOf(' ') + 1);
         first_name = first_name.charAt(0).toUpperCase() + first_name.slice(1).toLowerCase();
         last_name = last_name.charAt(0).toUpperCase() + last_name.slice(1).toLowerCase();
         server = server.charAt(0).toUpperCase() + server.slice(1).toLowerCase();
@@ -1265,34 +1263,34 @@ client.on('messageCreate', async function (message) {
             server = 'Cactuar';
           }
           if (servers.includes(server)) {
-            var messageReply = await message.reply({
+            let messageReply = await message.reply({
               content: "I\'m working on your verification right now! Hang tight...", allowedMentions: {
                 repliedUser: false
               }
             });
-            var existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
+            let existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
             if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
-              var response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
+              let response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
               const result = await response.json();
               console.log(result);
               if (result.Results.length > 0) {
-                var character_id = result.Results[0].ID;
+                let character_id = result.Results[0].ID;
                 response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
                 let api_character = await response.json();
                 if (api_character.Character) {
                   await message.member.setNickname(first_name + ' ' + last_name);
-                  var server_role = await message.member.guild.roles.cache.find(role => role.name === server);
-                  var roles_string = '';
+                  let server_role = await message.member.guild.roles.cache.find(role => role.name === server);
+                  let roles_string = '';
                   if (server_role) {
                     await message.member.roles.add(server_role);
-                    var roles_string = server_role.toString() + ','
+                    roles_string = server_role.toString() + ','
                   }
                   let verifiedrole = await connection.promise().query('select * from servers_roles where guildid = ?', [message.member.guild.id]);
-                  var verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
+                  let verified_role = await message.member.guild.roles.cache.get(verifiedrole[0][0].roleid);
                   await message.member.roles.add(verified_role);
                   roles_string += verified_role.toString();
                   //TODO: add character ID URL to the database, tied to the MEMBER ID, for a !rmwhoami in this server.
-                  var exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
+                  let exists = await connection.promise().query('select * from member_registrations where member_id = ? and guild_id = ?; select * from server_settings where option_name = ? and server_id = ?', [message.member.id, message.member.guild.id, "namechange_channel", message.member.guild.id]);
                   if (exists[0][0].length > 0 && exists[0][1].length > 0) {
                     //var channel = await client.channels.cache.get(exists[1][0].value);
                     //await channel.send({content: `The user ${message.user} has changed their name to ${first_name} ${last_name}. Their previous character can be found at <https://na.finalfantasyxiv.com/lodestone/character/${exists[0][0].lodestone_id}>.`});
@@ -1352,8 +1350,8 @@ client.on('messageCreate', async function (message) {
       }
 
     } else if (message.content.startsWith('!rmverify')) {
-      var verification_string = crypto.randomBytes(16).toString("hex");
-      var existing_code = await connection.promise().query('select * from verification_codes where userid = ' + message.author.id);
+      let verification_string = crypto.randomBytes(16).toString("hex");
+      let existing_code = await connection.promise().query('select * from verification_codes where userid = ' + message.author.id);
       if (existing_code[0].length == 0) {
         await connection.promise().query('insert into verification_codes (userid, fname, lname, server, code) values (?, ?, ?, ?, ?)', [message.author.id, first_name, last_name, server, verification_string]);
         message.author.send('Please enter the following code into the Character Profile section of your Lodestone page: `' + verification_string + '`. ONLY when you\'re done with this step, please type `!rmcomplete` in the server verification channel to verify yourself.');
@@ -1361,13 +1359,14 @@ client.on('messageCreate', async function (message) {
         message.reply({ content: 'You\'ve already got an active verification session under ' + existing_code[0][0].fname + ' ' + existing_code[0][0].lname + ' @ ' + existing_code[0][0].server + '. Please finish that session by using `!rmcomplete` or `!rmcancel` before starting a new verification session.', ephemeral: true });
       }
     } else if (message.content.startsWith('!rmcomplete')) {
-      var userid = message.author.id;
-      var bio = '';
-      var character = await connection.promise().query('select * from verification_codes where userid = ?', [userid]);
+      let api_character;
+      let userid = message.author.id;
+      let bio = '';
+      let character = await connection.promise().query('select * from verification_codes where userid = ?', [userid]);
       if (character[0].length > 0) {
-        var response = await fetch('https://xivapi.com/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server + '&private_key=' + xivapi_private_key);
+        let response = await fetch('https://xivapi.com/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server + '&private_key=' + xivapi_private_key);
         const result = await response.json();
-        var character_id = result.Results[0].ID;
+        let character_id = result.Results[0].ID;
         if (character_id) {
           response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
           api_character = await response.json();
@@ -1388,11 +1387,6 @@ client.on('messageCreate', async function (message) {
     } else if (message.content.startsWith('!rmcancel')) {
       await connection.promise().query('delete from verification_codes where userid = ?', [message.author.id]);
       message.author.send({ content: 'I cancelled your pending verification. You can start a new one by using `!rmverify`.' });
-    } else if (message.content.startsWith('!password')) {
-      var password = message.content.substr(message.content.indexOf(' ') + 1);
-      var results = zxcvbn(password);
-      console.log(results.crack_times_display);
-      message.reply('The password `' + password + '` will take ' + results.crack_times_display.offline_fast_hashing_1e10_per_second + ' to crack.');
     }
 
 
