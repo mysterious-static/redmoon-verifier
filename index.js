@@ -1273,7 +1273,9 @@ client.on('messageCreate', async function (message) {
               let response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
               const result = await response.json();
               console.log(result);
-              if (result.Results.length > 0) {
+              if (result.Error) {
+                await message.reply('Encountered an XIVAPI error: `' + result.Error.Message + '` You may need to set your character profile to public.');
+              } else if (result.Results.length > 0) {
                 let character_id = result.Results[0].ID;
                 response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
                 let api_character = await response.json();
