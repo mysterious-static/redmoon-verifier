@@ -1270,14 +1270,14 @@ client.on('messageCreate', async function (message) {
             });
             let existing_verify = await connection.promise().query('select * from successful_verifications where name = ? and server = ?', [first_name + ' ' + last_name, server]);
             if (!(existing_verify[0].length > 0 && existing_verify[0][0].userid != message.user.id)) {
-              let response = await fetch('https://xivapi.com/character/search?name=' + first_name + '%20' + last_name + '&server=' + server + '&private_key=' + xivapi_private_key);
+              let response = await fetch('http://localhost:8150/character/search?name=' + first_name + '%20' + last_name + '&server=' + server);
               const result = await response.json();
               console.log(result);
               if (result.Error) {
-                await message.reply('Encountered an XIVAPI error: `' + result.Message + '` XIVAPI may be down.');
+                await message.reply('Encountered an Nodestone error: `' + result.Message + '` Nodestone service may be down.');
               } else if (result.Results.length > 0) {
                 let character_id = result.Results[0].ID;
-                response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
+                response = await fetch('http://localhost:8150/character/' + character_id + '?extended=1');
                 let api_character = await response.json();
                 if (api_character.Character) {
                   await message.member.setNickname(first_name + ' ' + last_name);
@@ -1324,7 +1324,7 @@ client.on('messageCreate', async function (message) {
                     .setColor(0xFFD700)
                     .setAuthor({ name: first_name + ' ' + last_name + ' @ ' + server, url: 'https://na.finalfantasyxiv.com/lodestone/character/' + character_id })
                     .setThumbnail(api_character.Character.Portrait)
-                    .setDescription('Character saved.\n\nIn four hours, you may claim your character using Lodestone verification via the `!rmverify` command, should you wish to.')
+                    .setDescription('Character saved.\n\nYou may claim your character using Lodestone verification via the `!rmverify` command, should you wish to.')
                     .addFields(
                       { name: 'Nickname', value: 'Your Discord nickname was changed to **' + first_name + ' ' + last_name + '**.' },
                       { name: 'Roles Added', value: roles_string }
@@ -1366,11 +1366,11 @@ client.on('messageCreate', async function (message) {
       let bio = '';
       let character = await connection.promise().query('select * from verification_codes where userid = ?', [userid]);
       if (character[0].length > 0) {
-        let response = await fetch('https://xivapi.com/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server + '&private_key=' + xivapi_private_key);
+        let response = await fetch('http://localhost:8150/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server);
         const result = await response.json();
         let character_id = result.Results[0].ID;
         if (character_id) {
-          response = await fetch('https://xivapi.com/character/' + character_id + '?extended=1&private_key=' + xivapi_private_key);
+          response = await fetch('http:/localhost:8150/character/' + character_id + '?extended=1');
           api_character = await response.json();
           bio = api_character.Character.Bio;
           if (bio.includes(character[0][0].code)) {
