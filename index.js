@@ -1275,8 +1275,8 @@ client.on('messageCreate', async function (message) {
               console.log(result);
               if (result.Error) {
                 await message.reply('Encountered an Nodestone error: `' + result.Message + '` Nodestone service may be down.');
-              } else if (result.Results.length > 0) {
-                let character_id = result.Results[0].ID;
+              } else if (result.List.length > 0) {
+                let character_id = result.List[0].ID;
                 response = await fetch('http://localhost:8150/character/' + character_id + '?extended=1');
                 let api_character = await response.json();
                 if (api_character.Character) {
