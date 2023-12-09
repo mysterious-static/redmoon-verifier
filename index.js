@@ -1368,7 +1368,7 @@ client.on('messageCreate', async function (message) {
       if (character[0].length > 0) {
         let response = await fetch('http://localhost:8150/character/search?name=' + character[0][0].fname + '%20' + character[0][0].lname + '&server=' + character[0][0].server);
         const result = await response.json();
-        let character_id = result.Results[0].ID;
+        let character_id = result.List[0].ID;
         if (character_id) {
           response = await fetch('http:/localhost:8150/character/' + character_id + '?extended=1');
           api_character = await response.json();
