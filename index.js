@@ -45,7 +45,8 @@ client.on('ready', async () => {
         .setRequired(true))
     .addIntegerOption(option =>
       option.setName('minutes')
-        .setDescription('How many minutes should pass before message remove. minimum 1 minutes'))
+        .setDescription('How many minutes should pass before message remove. minimum 1 minutes')
+        .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
   let verifiedrole = new SlashCommandBuilder().setName('verifiedrole')
