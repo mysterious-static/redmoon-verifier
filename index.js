@@ -30,7 +30,24 @@ client.login(process.env.app_token);
 
 //slash commands for setup
 client.on('ready', async () => {
-  //if (!client.application?.commands.cache) {
+  //if (!client.application?.commands.cache) {\{
+
+
+  let autodelete = new SlashCommandBuilder().setName('autodelete')
+    .setDescription('Set autodelete for a channel')
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('The channel in question')
+        .setRequired(true))
+    .addBooleanOption(option =>
+      option.setName('enabled')
+        .setDescription('Turn off or on for this channel')
+        .setRequired(true))
+    .addIntegerOption(option =>
+      option.setName('minutes')
+        .setDescription('How many minutes should pass before message remove. minimum 10 minutes'))
+    .setDefaultMemberPermissions(PermissionsFlagsBits.Administrator);
+
   let verifiedrole = new SlashCommandBuilder().setName('verifiedrole')
     .setDescription('Set the role to add for verification.')
     .addRoleOption(option =>
@@ -255,13 +272,30 @@ client.on('ready', async () => {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
   // need to add kinklist and customkinklistname to available commands
-  await client.application.commands.set([verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON(), customkinklistname.toJSON(), menu.toJSON(), addticketcategory.toJSON(), ticketchannel.toJSON(), auditchannel.toJSON(), setcategorygroup.toJSON(), closeticket.toJSON(), removeticketcategory.toJSON()]);
+  await client.application.commands.set([autodelete.toJSON(), verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON(), customkinklistname.toJSON(), menu.toJSON(), addticketcategory.toJSON(), ticketchannel.toJSON(), auditchannel.toJSON(), setcategorygroup.toJSON(), closeticket.toJSON(), removeticketcategory.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
-    if (interaction.commandName === 'addticketcategory') {
+    if (interaction.commandName === 'autodelete') {
+      var channel = interaction.options.getChannel('channel');
+      var enabled = interaction.options.getBoolean('enabled');
+      var minutes = interaction.options.getInteger('minutes');
+      var isChannel = await connection.promise().query('select * from channels where id = ?', channel.id);
+      if (isChannel[0].length > 0) {
+        if (enabled == true) {
+          var queryData = [enabled, minutes, channel.id];
+          await connection.promise().query('update channels set enabled = ?, minutes = ? where id = ?', queryData);
+        } else {
+          var queryData = [enabled, channel.id];
+          await connection.promise().query('update channels set enabled = ? where id = ?', queryData);
+        }
+      } else {
+        await connection.promise().query('insert into channels (id, enabled, minutes) values (' + channel.id + ',' + enabled + ',' + minutes + ')');
+      }
+      await interaction.reply({ content: 'This probably processed okay!', ephemeral: true });
+    } else if (interaction.commandName === 'addticketcategory') {
       let name = interaction.options.getString('name');
       let categories = await connection.promise().query('select * from tickets_categories where guildid = ? and name = ?', [interaction.guild.id, name]);
       if (categories[0].length > 0) {
@@ -1467,6 +1501,40 @@ client.on('messageReactionAdd', async function (reaction, user) {
     console.error(e);
   }
 });
+
+function messageDelete(message, channel, channelObj) {
+  if (message.createdTimestamp < (Date.now() - (channel.minutes * 60 * 1000)) && message.pinned == false) { // milliseconds elapsed
+    channelObj.messages.delete(message.id);
+  }
+}
+setInterval(async function () {
+  var channels = await connection.promise().query('select * from channels where enabled = 1');
+  if (channels[0].length > 0) {
+    for (const channel of channels[0]) {
+      let channelObj = await client.channels.cache.get(channel.id);
+      if (channelObj) {
+        let message = await channelObj.messages.fetch({ limit: 1 });
+        if (message) {
+          var messages = await channelObj.messages.fetch({ limit: 100, before: message.id });
+        }
+        while (message) {
+          if (messages.size > 0) {
+            message = messages.at(message.size - 1);
+            let newMessages = await channelObj.messages.fetch({ limit: 100, before: message.id });
+            let thisDeleteBatch = messages.map(message => messageDelete(message, channel, channelObj));
+            await Promise.all(thisDeleteBatch);
+            messages = newMessages;
+            if (messages.size > 0) {
+              message = null;
+            }
+          } else {
+            message = null;
+          }
+        }
+      }
+    }
+  }
+}, 600000);
 
 setInterval(async function () {
   var today = new Date();
