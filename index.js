@@ -37,7 +37,7 @@ client.on('ready', async () => {
     .setDescription('Set autodelete for a channel')
     .addChannelOption(option =>
       option.setName('channel')
-        .setDescription('The channel in question')
+        .setDescription('The channel in question. Channel MUST have full slow mode turned on.')
         .setRequired(true))
     .addBooleanOption(option =>
       option.setName('enabled')
@@ -45,7 +45,7 @@ client.on('ready', async () => {
         .setRequired(true))
     .addIntegerOption(option =>
       option.setName('minutes')
-        .setDescription('How many minutes should pass before message remove. minimum 10 minutes'))
+        .setDescription('How many minutes should pass before message remove. minimum 1 minutes'))
     .setDefaultMemberPermissions(PermissionsFlagsBits.Administrator);
 
   let verifiedrole = new SlashCommandBuilder().setName('verifiedrole')
@@ -1534,7 +1534,7 @@ setInterval(async function () {
       }
     }
   }
-}, 600000);
+}, 60000);
 
 setInterval(async function () {
   var today = new Date();
