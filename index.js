@@ -408,7 +408,11 @@ client.on('interactionCreate', async (interaction) => {
             var reason = interaction.options.getString('reason');
             var openuser = await interaction.guild.members.fetch(ticket[0][0].uid_open);
             if (!openuser.permissions.has(PermissionsBitField.Flags.Administrator)) {
-              await interaction.channel.members.remove(openuser.id);
+              try {
+                await interaction.channel.members.remove(openuser.id);
+              } catch (e) {
+                await interaction.channel.send('Could not remove member as they are no longer found.');
+              }
             }
             await interaction.channel.setArchived(true);
             // Archive thread
