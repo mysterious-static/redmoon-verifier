@@ -406,13 +406,14 @@ client.on('interactionCreate', async (interaction) => {
           var category = await connection.promise().query('select * from tickets_categories where id = ?', [ticket[0][0].category_id]);
           if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) || interaction.member.roles.cache.has(ticketRole[0][0].role_id)) {
             var reason = interaction.options.getString('reason');
-            var openuser = await interaction.guild.members.fetch(ticket[0][0].uid_open);
-            if (!openuser.permissions.has(PermissionsBitField.Flags.Administrator)) {
-              try {
+            try {
+              var openuser = await interaction.guild.members.fetch(ticket[0][0].uid_open);
+              if (!openuser.permissions.has(PermissionsBitField.Flags.Administrator)) {
                 await interaction.channel.members.remove(openuser.id);
-              } catch (e) {
-                await interaction.channel.send('Could not remove member as they are no longer found.');
+
               }
+            } catch (e) {
+              await interaction.channel.send('Could not remove member as they are no longer found.');
             }
             await interaction.channel.setArchived(true);
             // Archive thread
