@@ -554,6 +554,8 @@ client.on('interactionCreate', async (interaction) => {
             Paths: {
               Quantity: 1,
               Items: [
+                '/*',
+                '/',
                 '/index.png'
               ]
             },
