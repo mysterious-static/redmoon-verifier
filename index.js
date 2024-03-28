@@ -456,7 +456,7 @@ client.on('interactionCreate', async (interaction) => {
         }
       }
     } else if (interaction.commandName === 'removeticketcategory') {
-      let categories = await connection.promise().query('select * from tickets_categories where guildid = ?', [interaction.guild.id, name]);
+      let categories = await connection.promise().query('select * from tickets_categories where guildid = ?', [interaction.guild.id]);
       if (categories[0].length > 0) {
         let categoriesKeyValues = [];
         for (const category of categories[0]) {
@@ -473,7 +473,7 @@ client.on('interactionCreate', async (interaction) => {
           let channel = await connection.promise().query('select * from server_settings where option_name = "ticket_channel" and server_id = ?', [interaction.guild.id]);
           if (channel[0].length > 0) {
             ticketMessage = await connection.promise().query('select * from server_settings where option_name = "ticket_message" and server_id = ?', [interaction.guild.id]);
-            categories = await connection.promise().query('select * from tickets_categories where guildid = ?', [interaction.guild.id, name]);
+            categories = await connection.promise().query('select * from tickets_categories where guildid = ?', [interaction.guild.id]);
             channel = await client.channels.cache.get(channel[0][0].value);
             var categoriesKeyValues = [];
             const embeddedMessage = new EmbedBuilder()
