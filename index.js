@@ -552,7 +552,7 @@ client.on('interactionCreate', async (interaction) => {
           DistributionId: kinklist[0][0].cf_id,
           InvalidationBatch: {
             Paths: {
-              Quantity: 1,
+              Quantity: 3,
               Items: [
                 '/*',
                 '/',
