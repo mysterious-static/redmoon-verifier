@@ -1597,7 +1597,7 @@ setInterval(async function () {
       var channel = await client.channels.cache.get(event.channel_id);
       var messageContent = '';
       var mentions = await connection.promise().query('select * from events_responses where event_id = ? and status = ?', [event.id, 'Accepted']);
-      for (const mention of mentions) {
+      for (const mention of mentions[0]) {
         messageContent += '<@' + mention.user_id + '> ';
       }
       messageContent += 'The event: **' + event.name + '** will begin in ' + event.remindertime + ' minutes!';
