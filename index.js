@@ -431,7 +431,7 @@ client.on('interactionCreate', async (interaction) => {
           apikey: process.env.pb_apikey,
           secretapikey: process.env.pb_secretkey
         }
-        const response = await fetch(`https://porkbun.com/api/json/v3/dns/deleteByNameType/${domain}/TXT/_atproto.${handles[0][0].handle}`, {
+        const response = await fetch(`https://porkbun.com/api/json/v3/dns/deleteByNameType/${domain}/TXT/_atproto.${handle[0][0].handle}`, {
           method: 'post',
           body: JSON.stringify(pb_body),
           headers: { 'Content-Type': 'application/json' }
