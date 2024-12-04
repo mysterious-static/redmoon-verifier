@@ -15,6 +15,7 @@
     "discord.js": "latest",
     "mysql2": "latest",
     "node-fetch": "2.x",
+    "@atproto/api": "latest",
     "zxcvbn": "latest",
     "@aws-sdk/client-cloudfront": "latest",
     "@aws-sdk/client-s3": "latest",

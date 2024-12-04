@@ -7,7 +7,7 @@ let crypto = require('node:crypto');
 const { S3Client, PutBucketWebsiteCommand, PutPublicAccessBlockCommand, PutBucketPolicyCommand, PutObjectCommand, CreateBucketCommand } = require('@aws-sdk/client-s3');
 const { CloudFrontClient, CreateDistributionCommand, CreateInvalidationCommand, GetDistributionCommand, UpdateDistributionCommand } = require('@aws-sdk/client-cloudfront');
 const { fromIni } = require("@aws-sdk/credential-providers");
-
+let { BskyAgent } = require('@atproto/api')
 let connection = mysql.createConnection({
   host: process.env.db_host,
   user: process.env.db_user,
@@ -23,6 +23,14 @@ let bio = '';
 let stickymessages = ''
 let activeStickyDeletions = [];
 let domain = process.env.domain;
+
+let agent = new BskyAgent({
+  service: 'https://bsky.social'
+});
+agent.login({
+  identifier: process.env.bsky_user,
+  password: process.env.bsky_pw
+})
 
 let servers = ["Adamantoise", "Aegis", "Alexander", "Anima", "Asura", "Atomos", "Bahamut", "Balmung", "Behemoth", "Belias", "Brynhildr", "Cactuar", "Carbuncle", "Cerberus", "Chocobo", "Coeurl", "Diabolos", "Durandal", "Excalibur", "Exodus", "Faerie", "Famfrit", "Fenrir", "Garuda", "Gilgamesh", "Goblin", "Gungnir", "Hades", "Hyperion", "Ifrit", "Ixion", "Jenova", "Kujata", "Lamia", "Leviathan", "Lich", "Louisoix", "Malboro", "Mandragora", "Masamune", "Mateus", "Midgardsormr", "Moogle", "Odin", "Omega", "Pandaemonium", "Phoenix", "Ragnarok", "Ramuh", "Ridill", "Sargatanas", "Shinryu", "Shiva", "Siren", "Tiamat", "Titan", "Tonberry", "Typhon", "Ultima", "Ultros", "Unicorn", "Valefor", "Yojimbo", "Zalera", "Zeromus", "Zodiark", "Spriggan", "Twintania", "Bismarck", "Ravana", "Sephirot", "Sophia", "Zurvan", "Halicarnassus", "Maduin", "Marilith", "Seraph", "Alpha", "Phantom", "Raiden", "Sagittarius", "Kraken", "Golem", "Cuchulainn", "Rafflesia"]
 
