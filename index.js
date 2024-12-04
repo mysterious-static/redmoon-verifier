@@ -22,6 +22,7 @@ let verify_string = ''; //retrieve from database
 let bio = '';
 let stickymessages = ''
 let activeStickyDeletions = [];
+let locks = [];
 let domain = process.env.domain;
 
 let agent = new BskyAgent({
