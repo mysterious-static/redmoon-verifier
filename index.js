@@ -292,6 +292,7 @@ client.on('ready', async () => {
         .setDescription(`Custom handle, e.g. "sample" if you want @sample.${domain}`)
         .setRequired(true));
   let removebluesky = new SlashCommandBuilder().setName('removebluesky')
+    .setDescription('remove handle from old user')
     .addUserOption(option =>
       option.setName('user')
         .setDescription('The user to remove the Bluesky handle from.')
