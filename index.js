@@ -17,11 +17,12 @@ let connection = mysql.createConnection({
   bigNumberStrings: true,
   multipleStatements: true
 });
-let xivapi_private_key = process.env.apikey
+let xivapi_private_key = process.env.apikey;
 let verify_string = ''; //retrieve from database
 let bio = '';
 let stickymessages = ''
 let activeStickyDeletions = [];
+let domain = process.env.domain;
 
 let servers = ["Adamantoise", "Aegis", "Alexander", "Anima", "Asura", "Atomos", "Bahamut", "Balmung", "Behemoth", "Belias", "Brynhildr", "Cactuar", "Carbuncle", "Cerberus", "Chocobo", "Coeurl", "Diabolos", "Durandal", "Excalibur", "Exodus", "Faerie", "Famfrit", "Fenrir", "Garuda", "Gilgamesh", "Goblin", "Gungnir", "Hades", "Hyperion", "Ifrit", "Ixion", "Jenova", "Kujata", "Lamia", "Leviathan", "Lich", "Louisoix", "Malboro", "Mandragora", "Masamune", "Mateus", "Midgardsormr", "Moogle", "Odin", "Omega", "Pandaemonium", "Phoenix", "Ragnarok", "Ramuh", "Ridill", "Sargatanas", "Shinryu", "Shiva", "Siren", "Tiamat", "Titan", "Tonberry", "Typhon", "Ultima", "Ultros", "Unicorn", "Valefor", "Yojimbo", "Zalera", "Zeromus", "Zodiark", "Spriggan", "Twintania", "Bismarck", "Ravana", "Sephirot", "Sophia", "Zurvan", "Halicarnassus", "Maduin", "Marilith", "Seraph", "Alpha", "Phantom", "Raiden", "Sagittarius", "Kraken", "Golem", "Cuchulainn", "Rafflesia"]
 
@@ -272,14 +273,164 @@ client.on('ready', async () => {
     .setDescription('Removes a ticket category (nyi)')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
+  let bluesky = new SlashCommandBuilder().setName('bluesky')
+    .setDescription('Use a custom subdomain (not your name) for your Bluesky handle.')
+    .addStringOption(option =>
+      option.setName('did')
+        .setDescription('Custom value from your Change Handle page, e.g. did=did:plc:xxxxxxxxxxxx')
+        .setRequired(true))
+    .addStringOption(option =>
+      option.setName('handle')
+        .setDescription(`Custom handle, e.g. "sample" if you want @sample.${domain}`)
+        .setRequired(true));
+  let removebluesky = new SlashCommandBuilder().setName('removebluesky')
+    .addUserOption(option =>
+      option.setName('user')
+        .setDescription('The user to remove the Bluesky handle from.')
+        .setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
   // need to add kinklist and customkinklistname to available commands
-  await client.application.commands.set([autodelete.toJSON(), verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON(), customkinklistname.toJSON(), menu.toJSON(), addticketcategory.toJSON(), ticketchannel.toJSON(), auditchannel.toJSON(), setcategorygroup.toJSON(), closeticket.toJSON(), removeticketcategory.toJSON()]);
+  await client.application.commands.set([autodelete.toJSON(), verifiedrole.toJSON(), stickymessage.toJSON(), unsticky.toJSON(), hof.toJSON(), event.toJSON(), deleteevent.toJSON(), birthday.toJSON(), birthdaychannel.toJSON(), removebirthday.toJSON(), serveropenchannel.toJSON(), serveropenroles.toJSON(), namechangechannel.toJSON(), minutes.toJSON(), kinklist.toJSON(), customkinklistname.toJSON(), menu.toJSON(), addticketcategory.toJSON(), ticketchannel.toJSON(), auditchannel.toJSON(), setcategorygroup.toJSON(), closeticket.toJSON(), removeticketcategory.toJSON(), bluesky.toJSON(), removebluesky.toJSON()]);
   stickymessages = await connection.promise().query('select * from stickymessages');// Get sticky messages from database and cache them in an array.
 });
 
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
-    if (interaction.commandName === 'autodelete') {
+
+    if (interaction.commandName === 'bluesky') {
+      let did = interaction.options.getString('did');
+      let handle = interaction.options.getString('handle').toLowerCase();
+      let lockExists = locks.find(l => handle === l.handle && l.lock > Date.now());
+      try {
+        let thisHandleExists = await agent.getProfile({ actor: `${handle}.${domain}` }); // check if handle exists in Bluesky
+        if (!thisHandleExists) { //handle does not exist in bluesky
+          if (!lockExists) {
+            let pb_body = {
+              apikey: process.env.pb_apikey,
+              secretapikey: process.env.pb_secretkey
+            }
+            const response = await fetch(`https://porkbun.com/api/json/v3/dns/retrieveByNameType/${domain}/TXT/_atproto.${handle}`, { // check if subdomain exists
+              method: 'post',
+              body: JSON.stringify(pb_body),
+              headers: { 'Content-Type': 'application/json' }
+            });
+            let exists = response.json();
+            if (exists.records.length > 0) { // if subdomain exists, edit, because handle isn't valid right now in Bluesky. potential issue here where someone request a handle, doesn't verify, then someone else requests the same handle
+              let pb_body = {
+                apikey: process.env.pb_apikey,
+                secretapikey: process.env.pb_secretkey,
+                name: `_atproto.${handle}`,
+                type: "TXT",
+                content: did,
+                ttl: 600
+              };
+              const response = await fetch(`https://porkbun.com/api/json/v3/dns/edit/${domain}/${exists.records[0].id}`, {
+                method: 'post',
+                body: JSON.stringify(pb_body),
+                headers: { 'Content-Type': 'application/json' }
+              });
+              const data = await response.json();
+              await interaction.reply('New handle is set up.');
+            } else {
+              let pb_body = {
+                apikey: process.env.pb_apikey,
+                secretapikey: process.env.pb_secretkey,
+                name: `_atproto.${handle}`,
+                type: "TXT",
+                content: did,
+                ttl: 600
+              };
+              const response = await fetch(`https://porkbun.com/api/json/v3/dns/create/${domain}`, {
+                method: 'post',
+                body: JSON.stringify(pb_body),
+                headers: { 'Content-Type': 'application/json' }
+              });
+              const data = await response.json();
+              interaction.reply({ content: 'Your handle should be set up at ' + handle + '.' + domain + ' in approximately five minutes. Please make sure you set up the handle within 30 minutes or it will be released for free registration.', ephemeral: true });
+              connection.promise().query('replace into handles (handle, userid) values (?, ?)', [handle, interaction.user.id]);
+              locks.push({ handle: handle, lock: Date.now() + 1800000 });
+            }
+          } else {
+            interaction.reply({ content: 'This handle is currently locked for registration. If the user who has locked it does not register it on Bluesky within 30 minutes of their claiming the handle via this bot, it will be released again for registration.', ephemeral: true });
+          }
+        } else { // handle exists in Bluesky
+          interaction.reply({ content: 'Someone has already taken this handle on Bluesky, sorry.', ephemeral: true });
+        }
+      } catch (e) {
+        console.log(e);
+        if (e.message == 'Profile not found') { // handle does not exist
+          if (!lockExists) {
+            let pb_body = {
+              apikey: process.env.pb_apikey,
+              secretapikey: process.env.pb_secretkey
+            }
+            const response = await fetch(`https://porkbun.com/api/json/v3/dns/retrieveByNameType/${domain}/TXT/_atproto.${handle}`, { // check if subdomain exists
+              method: 'post',
+              body: JSON.stringify(pb_body),
+              headers: { 'Content-Type': 'application/json' }
+            });
+            let exists = await response.json();
+            console.log(exists);
+            if (exists.records.length > 0) { // if subdomain exists, edit, because handle isn't valid right now in Bluesky. potential issue here where someone request a handle, doesn't verify, then someone else requests the same handle
+              let pb_body = {
+                apikey: process.env.pb_apikey,
+                secretapikey: process.env.pb_secretkey,
+                name: `_atproto.${handle}`,
+                type: "TXT",
+                content: did,
+                ttl: 600
+              };
+              const response = await fetch(`https://porkbun.com/api/json/v3/dns/edit/${domain}/${exists.records[0].id}`, {
+                method: 'post',
+                body: JSON.stringify(pb_body),
+                headers: { 'Content-Type': 'application/json' }
+              });
+              const data = await response.json();
+              await interaction.reply({ content: 'Your handle should be set up at ' + handle + '.' + domain + ' in approximately five minutes. Please make sure you set up the handle within 30 minutes or it will be released for free registration.', ephemeral: true });
+              connection.promise().query('replace into handles (handle, userid) values (?, ?)', [handle, interaction.user.id]);
+              locks.push({ handle: handle, lock: Date.now() + 1800000 });
+            } else {
+              let pb_body = {
+                apikey: process.env.pb_apikey,
+                secretapikey: process.env.pb_secretkey,
+                name: `_atproto.${handle}`,
+                type: "TXT",
+                content: did,
+                ttl: 600
+              };
+              const response = await fetch(`https://porkbun.com/api/json/v3/dns/create/${domain}`, {
+                method: 'post',
+                body: JSON.stringify(pb_body),
+                headers: { 'Content-Type': 'application/json' }
+              });
+              const data = await response.json();
+              interaction.reply({ content: 'Your handle should be set up at ' + handle + '.' + domain + ' in approximately five minutes. Please make sure you set up the handle within 30 minutes or it will be released for free registration.', ephemeral: true });
+              locks.push({ handle: handle, lock: Date.now() + 1800000 });
+            }
+          } else {
+            interaction.reply({ content: 'This handle is currently locked for registration. If the user who has locked it does not register it on Bluesky within 30 minutes of their claiming the handle via this bot, it will be released again for registration.', ephemeral: true });
+            connection.promise().query('replace into handles (handle, userid) values (?, ?)', [handle, interaction.user.id]);
+          }
+        }
+      }
+    } else if (interaction.commandName === 'removebluesky') {
+      let user = interaction.options.getUser('user');
+      let handle = connection.promise().query('select * from handles where userid = ?', [user.id]);
+      if (handle[0].length > 0) {
+        let pb_body = {
+          apikey: process.env.pb_apikey,
+          secretapikey: process.env.pb_secretkey
+        }
+        const response = await fetch(`https://porkbun.com/api/json/v3/dns/deleteByNameType/${domain}/TXT/_atproto.${handles[0][0].handle}`, {
+          method: 'post',
+          body: JSON.stringify(pb_body),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        interaction.reply({ content: 'Handle record deleted. Bluesky should invalidate the handle within the next few days as it validates the record periodically.', ephemeral: true });
+      }
+    } else if (interaction.commandName === 'autodelete') {
       var channel = interaction.options.getChannel('channel');
       var enabled = interaction.options.getBoolean('enabled');
       var minutes = interaction.options.getInteger('minutes');
