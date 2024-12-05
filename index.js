@@ -24,6 +24,7 @@ let stickymessages = ''
 let activeStickyDeletions = [];
 let locks = [];
 let domain = process.env.domain;
+console.log(domain);
 
 let agent = new BskyAgent({
   service: 'https://bsky.social'
