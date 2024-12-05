@@ -845,18 +845,18 @@ client.on('interactionCreate', async (interaction) => {
         };
         command = new CreateDistributionCommand(params);
         res = await cf.send(command);
-        var cloudfront = res.Distribution.ARN;
-        var domain = res.Distribution.DomainName;
-        var id = res.Distribution.Id;
-        await connection.promise().query('update kinklists set cloudfront = ?, cfdomain = ?, cf_id = ? where userid = ? and guildid = ?', [cloudfront, domain, id, interaction.member.id, interaction.guild.id]);
+        let cloudfront = res.Distribution.ARN;
+        let cfdomain = res.Distribution.DomainName;
+        let id = res.Distribution.Id;
+        await connection.promise().query('update kinklists set cloudfront = ?, cfdomain = ?, cf_id = ? where userid = ? and guildid = ?', [cloudfront, cfdomain, id, interaction.member.id, interaction.guild.id]);
         // CONTINUE FROM HERE
         // Create Porkbun DNS record from variable bucketname.
-        var pb_body = {
+        let pb_body = {
           apikey: process.env.pb_apikey,
           secretapikey: process.env.pb_secretkey,
           name: bucketname,
           type: "CNAME",
-          content: domain,
+          content: cfdomain,
           ttl: 600
         };
         const response = await fetch('https://porkbun.com/api/json/v3/dns/create/rmxiv.com', {
@@ -869,9 +869,9 @@ client.on('interactionCreate', async (interaction) => {
         interaction.editReply({ content: 'Your kinklist should be set up at https://' + bucket + ' in approximately five minutes.', ephemeral: true });
       }
     } else if (interaction.commandName === 'customkinklistname') {
-      var name = interaction.options.getString('name').toLowerCase();
-      var exists = await connection.promise().query('select * from kinklists where subdomain = ?', [name]);
-      var reserved_words = ['bounties', 'bounty-signup', 'chambers', 'handbook', 'kinklist', 'menu', 'sessionreport', 'tokentracker'];
+      let name = interaction.options.getString('name').toLowerCase();
+      let exists = await connection.promise().query('select * from kinklists where subdomain = ?', [name]);
+      let reserved_words = ['bounties', 'bounty-signup', 'chambers', 'handbook', 'kinklist', 'menu', 'sessionreport', 'tokentracker'];
       if (exists[0].length <= 0 && !reserved_words.includes(name)) {
         var thisKinklist = await connection.promise().query('select * from kinklists where userid = ? and guildid = ?', [interaction.member.id, interaction.guild.id]);
         if (thisKinklist[0].length > 0 && thisKinklist[0][0].subdomain != '') {
