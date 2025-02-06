@@ -36,6 +36,11 @@ agent.login({
 
 let servers = ["Adamantoise", "Aegis", "Alexander", "Anima", "Asura", "Atomos", "Bahamut", "Balmung", "Behemoth", "Belias", "Brynhildr", "Cactuar", "Carbuncle", "Cerberus", "Chocobo", "Coeurl", "Diabolos", "Durandal", "Excalibur", "Exodus", "Faerie", "Famfrit", "Fenrir", "Garuda", "Gilgamesh", "Goblin", "Gungnir", "Hades", "Hyperion", "Ifrit", "Ixion", "Jenova", "Kujata", "Lamia", "Leviathan", "Lich", "Louisoix", "Malboro", "Mandragora", "Masamune", "Mateus", "Midgardsormr", "Moogle", "Odin", "Omega", "Pandaemonium", "Phoenix", "Ragnarok", "Ramuh", "Ridill", "Sargatanas", "Shinryu", "Shiva", "Siren", "Tiamat", "Titan", "Tonberry", "Typhon", "Ultima", "Ultros", "Unicorn", "Valefor", "Yojimbo", "Zalera", "Zeromus", "Zodiark", "Spriggan", "Twintania", "Bismarck", "Ravana", "Sephirot", "Sophia", "Zurvan", "Halicarnassus", "Maduin", "Marilith", "Seraph", "Alpha", "Phantom", "Raiden", "Sagittarius", "Kraken", "Golem", "Cuchulainn", "Rafflesia"]
 
+let aether = ["Adamantoise", "Cactuar", "Faerie", "Gilgamesh", "Jenova", "Midgardsormr", "Sargatanas", "Siren"];
+let crystal = ["Balmung", "Brynhildr", "Coeurl", "Diabolos", "Goblin", "Malboro", "Mateus", "Zalera"];
+let dynamis = ["Cuchulainn", "Golem", "Halicarnassus", "Kraken", "Maduin", "Marilith", "Rafflesia", "Seraph"];
+let primal = ["Behemoth", "Excalibur", "Exodus", "Famfrit", "Hyperion", "Lamia", "Leviathan", "Ultros"];
+
 connection.connect();
 client.login(process.env.app_token);
 
@@ -1485,9 +1490,18 @@ client.on('messageCreate', async function (message) {
                 let api_character = await response.json();
                 if (api_character.Character) {
                   await message.member.setNickname(first_name + ' ' + last_name);
-                  let server_role = await message.member.guild.roles.cache.find(role => role.name === server);
+                  let server_role;
+                  if (aether.includes(server)) {
+                    server_role = await message.member.guild.roles.cache.find(role => role.name === 'Aether');
+                  } else if (crystal.includes(server)) {
+                    server_role = await message.member.guild.roles.cache.find(role => role.name === 'Crystal');
+                  } else if (dynamis.includes(server)) {
+                    server_role = await message.member.guild.roles.cache.find(role => role.name === 'Dynamis');
+                  } else if (primal.includes(server)){
+                    server_role = await message.member.guild.roles.cache.find(role => role.name === 'Primal');
+                  }
                   let roles_string = '';
-                  if (server_role) {
+                  if (server_role !== null) {
                     await message.member.roles.add(server_role);
                     roles_string = server_role.toString() + ','
                   }
