@@ -42,6 +42,7 @@ let dynamis = ["Cuchulainn", "Golem", "Halicarnassus", "Kraken", "Maduin", "Mari
 let primal = ["Behemoth", "Excalibur", "Exodus", "Famfrit", "Hyperion", "Lamia", "Leviathan", "Ultros"];
 let chaos = ["Cerberus", "Louisoix", "Moogle", "Omega", "Phantom", "Ragnarok", "Sagittarius", "Spriggan"];
 let light = ["Alpha", "Lich", "Odin", "Phoenix", "Raiden", "Shiva", "Twintania", "Zodiark"];
+let materia = ["Bismarck", "Ravana", "Sephirot", "Sophia", "Zurvan"];
 
 connection.connect();
 client.login(process.env.app_token);
@@ -1505,6 +1506,8 @@ client.on('messageCreate', async function (message) {
                     server_role = await message.member.guild.roles.cache.find(role => role.name === 'Chaos');
                   }  else if (light.includes(server)){
                     server_role = await message.member.guild.roles.cache.find(role => role.name === 'Light');
+                  } else if (materia.includes(server)){
+                    server_role = await message.member.guild.roles.cache.find(role => role.name === 'Materia');
                   } 
                   let roles_string = '';
                   if (server_role !== null) {
