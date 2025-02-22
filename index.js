@@ -40,6 +40,8 @@ let aether = ["Adamantoise", "Cactuar", "Faerie", "Gilgamesh", "Jenova", "Midgar
 let crystal = ["Balmung", "Brynhildr", "Coeurl", "Diabolos", "Goblin", "Malboro", "Mateus", "Zalera"];
 let dynamis = ["Cuchulainn", "Golem", "Halicarnassus", "Kraken", "Maduin", "Marilith", "Rafflesia", "Seraph"];
 let primal = ["Behemoth", "Excalibur", "Exodus", "Famfrit", "Hyperion", "Lamia", "Leviathan", "Ultros"];
+let chaos = ["Cerberus", "Louisoix", "Moogle", "Omega", "Phantom", "Ragnarok", "Sagittarius", "Spriggan"];
+let light = ["Alpha", "Lich", "Odin", "Phoenix", "Raiden", "Shiva", "Twintania", "Zodiark"];
 
 connection.connect();
 client.login(process.env.app_token);
@@ -1499,7 +1501,11 @@ client.on('messageCreate', async function (message) {
                     server_role = await message.member.guild.roles.cache.find(role => role.name === 'Dynamis');
                   } else if (primal.includes(server)){
                     server_role = await message.member.guild.roles.cache.find(role => role.name === 'Primal');
-                  }
+                  }  else if (chaos.includes(server)){
+                    server_role = await message.member.guild.roles.cache.find(role => role.name === 'Chaos');
+                  }  else if (light.includes(server)){
+                    server_role = await message.member.guild.roles.cache.find(role => role.name === 'Light');
+                  } 
                   let roles_string = '';
                   if (server_role !== null) {
                     await message.member.roles.add(server_role);
