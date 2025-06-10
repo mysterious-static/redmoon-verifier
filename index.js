@@ -560,7 +560,7 @@ client.on('interactionCreate', async (interaction) => {
             } else if (interaction_select.customId == 'RoleSelector') {
               rolesSelected = interaction_select.values;
               for (const role of rolesSelected) {
-                await connection.promise().query('insert into tickets_categories_roles (category_id, role_id) values (?, ?)', [categorySelected, role]);
+                await connection.promise().query('replace into tickets_categories_roles (category_id, role_id) values (?, ?)', [categorySelected, role]);
               }
               await interaction.editReply({ content: 'Role assigned to category successfully.', components: [] });
               await collector.stop();
