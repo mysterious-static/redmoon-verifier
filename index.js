@@ -329,7 +329,7 @@ client.on('interactionCreate', async (interaction) => {
               apikey: process.env.pb_apikey,
               secretapikey: process.env.pb_secretkey
             }
-            const response = await fetch(`https://porkbun.com/api/json/v3/dns/retrieveByNameType/${domain}/TXT/_atproto.${handle}`, { // check if subdomain exists
+            const response = await fetch(`https://api.porkbun.com/api/json/v3/dns/retrieveByNameType/${domain}/TXT/_atproto.${handle}`, { // check if subdomain exists
               method: 'post',
               body: JSON.stringify(pb_body),
               headers: { 'Content-Type': 'application/json' }
@@ -344,7 +344,7 @@ client.on('interactionCreate', async (interaction) => {
                 content: did,
                 ttl: 600
               };
-              const response = await fetch(`https://porkbun.com/api/json/v3/dns/edit/${domain}/${exists.records[0].id}`, {
+              const response = await fetch(`https://api.porkbun.com/api/json/v3/dns/edit/${domain}/${exists.records[0].id}`, {
                 method: 'post',
                 body: JSON.stringify(pb_body),
                 headers: { 'Content-Type': 'application/json' }
@@ -360,7 +360,7 @@ client.on('interactionCreate', async (interaction) => {
                 content: did,
                 ttl: 600
               };
-              const response = await fetch(`https://porkbun.com/api/json/v3/dns/create/${domain}`, {
+              const response = await fetch(`https://api.porkbun.com/api/json/v3/dns/create/${domain}`, {
                 method: 'post',
                 body: JSON.stringify(pb_body),
                 headers: { 'Content-Type': 'application/json' }
@@ -384,7 +384,7 @@ client.on('interactionCreate', async (interaction) => {
               apikey: process.env.pb_apikey,
               secretapikey: process.env.pb_secretkey
             }
-            const response = await fetch(`https://porkbun.com/api/json/v3/dns/retrieveByNameType/${domain}/TXT/_atproto.${handle}`, { // check if subdomain exists
+            const response = await fetch(`https://api.porkbun.com/api/json/v3/dns/retrieveByNameType/${domain}/TXT/_atproto.${handle}`, { // check if subdomain exists
               method: 'post',
               body: JSON.stringify(pb_body),
               headers: { 'Content-Type': 'application/json' }
@@ -400,7 +400,7 @@ client.on('interactionCreate', async (interaction) => {
                 content: did,
                 ttl: 600
               };
-              const response = await fetch(`https://porkbun.com/api/json/v3/dns/edit/${domain}/${exists.records[0].id}`, {
+              const response = await fetch(`https://api.porkbun.com/api/json/v3/dns/edit/${domain}/${exists.records[0].id}`, {
                 method: 'post',
                 body: JSON.stringify(pb_body),
                 headers: { 'Content-Type': 'application/json' }
@@ -418,7 +418,7 @@ client.on('interactionCreate', async (interaction) => {
                 content: did,
                 ttl: 600
               };
-              const response = await fetch(`https://porkbun.com/api/json/v3/dns/create/${domain}`, {
+              const response = await fetch(`https://api.porkbun.com/api/json/v3/dns/create/${domain}`, {
                 method: 'post',
                 body: JSON.stringify(pb_body),
                 headers: { 'Content-Type': 'application/json' }
@@ -441,7 +441,7 @@ client.on('interactionCreate', async (interaction) => {
           apikey: process.env.pb_apikey,
           secretapikey: process.env.pb_secretkey
         }
-        const response = await fetch(`https://porkbun.com/api/json/v3/dns/deleteByNameType/${domain}/TXT/_atproto.${handle[0][0].handle}`, {
+        const response = await fetch(`https://api.porkbun.com/api/json/v3/dns/deleteByNameType/${domain}/TXT/_atproto.${handle[0][0].handle}`, {
           method: 'post',
           body: JSON.stringify(pb_body),
           headers: { 'Content-Type': 'application/json' }
@@ -867,7 +867,7 @@ client.on('interactionCreate', async (interaction) => {
           content: cfdomain,
           ttl: 600
         };
-        const response = await fetch('https://porkbun.com/api/json/v3/dns/create/rmxiv.com', {
+        const response = await fetch('https://api.porkbun.com/api/json/v3/dns/create/rmxiv.com', {
           method: 'post',
           body: JSON.stringify(pb_body),
           headers: { 'Content-Type': 'application/json' }
@@ -891,7 +891,7 @@ client.on('interactionCreate', async (interaction) => {
             content: thisKinklist[0][0].cfdomain,
             ttl: 600
           };
-          const response = await fetch(`https://porkbun.com/api/json/v3/dns/edit/rmxiv.com/${thisKinklist[0][0].porkbun_id}`, {
+          const response = await fetch(`https://api.porkbun.com/api/json/v3/dns/edit/rmxiv.com/${thisKinklist[0][0].porkbun_id}`, {
             method: 'post',
             body: JSON.stringify(pb_body),
             headers: { 'Content-Type': 'application/json' }
